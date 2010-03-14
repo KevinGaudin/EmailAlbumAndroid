@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="javadoc">
+    <target name="javadoc">
+        <javadoc access="public" author="true" classpath="." destdir="doc" doctitle="EmailAlbum (Android)" nodeprecated="false" nodeprecatedlist="false" noindex="false" nonavbar="false" notree="false" packagenames="com.kg.emailalbum.mobile,com.kg.oifilemanager.util,com.kg.emailalbum.mobile.viewer,com.kg.emailalbum.mobile.animation,com.kg.emailalbum.mobile.util,com.kg.oifilemanager.filemanager,com.kg.emailalbum.mobile.creator.model,com.kg.oifilemanager.filemanager.util,com.kg.emailalbum.mobile.creator,com.kg.oifilemanager.intents" source="1.5" sourcepath="gen;src" splitindex="true" use="true" version="true"/>
+    </target>
+</project>

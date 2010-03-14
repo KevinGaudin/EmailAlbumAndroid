@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+	Copyright 2009, 2010 Kevin Gaudin
+
+	This file is part of EmailAlbum.
+
+	EmailAlbum is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	EmailAlbum is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with EmailAlbum.  If not, see <http://www.gnu.org/licenses/>.
+ -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent" android:layout_height="fill_parent"
+	android:id="@+id/dialog_root">
+
+	<include layout="@layout/image_preview" />
+	<EditText android:id="@+id/dialog_textfield"
+		android:layout_height="wrap_content" android:layout_width="fill_parent"
+		android:layout_marginLeft="5dip" android:layout_marginRight="5dip"
+		android:scrollHorizontally="true" android:gravity="fill_horizontal"
+		android:inputType="text" android:textAppearance="?android:attr/textAppearanceMedium"
+		android:layout_gravity="bottom" />
+
+	<ImageButton android:id="@+id/btn_rotate_cw"
+		android:layout_width="wrap_content" android:layout_height="wrap_content"
+		android:src="@drawable/ic_rotate_cw" android:background="@android:color/transparent"
+		android:adjustViewBounds="true" android:maxWidth="40dip"
+		android:scaleType="fitCenter"></ImageButton>
+	<ImageButton android:id="@+id/btn_rotate_ccw"
+		android:layout_width="wrap_content" android:layout_height="wrap_content"
+		android:src="@drawable/ic_rotate_ccw" android:layout_gravity="top|right"
+		android:background="@android:color/transparent"
+		android:adjustViewBounds="true" android:maxWidth="40dip"
+		android:scaleType="fitCenter"></ImageButton>
+	<ImageButton android:layout_width="wrap_content"
+		android:layout_height="wrap_content" android:id="@+id/btn_edit"
+		android:background="@android:color/transparent" android:src="@drawable/paintbrush"
+		android:layout_gravity="top|center_horizontal"
+		android:adjustViewBounds="true" android:maxWidth="40dip"
+		android:scaleType="fitCenter"></ImageButton>
+</FrameLayout>

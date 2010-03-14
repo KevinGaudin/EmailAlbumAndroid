@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+	Copyright 2009, 2010 Kevin Gaudin
+
+	This file is part of EmailAlbum.
+
+	EmailAlbum is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	EmailAlbum is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with EmailAlbum.  If not, see <http://www.gnu.org/licenses/>.
+ -->
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+	android:title="@string/app_name">
+
+	<PreferenceCategory android:title="@string/prefcat_animation">
+		
+		
+		<ListPreference android:key="animationtype"
+			android:summary="@string/pref_animation_summary"
+			android:entries="@array/animations"
+			android:entryValues="@array/animationsvalues" 
+			android:title="@string/pref_animation_title"
+			android:dialogTitle="@string/pref_animation_title" android:defaultValue="@string/pref_def_anim"/>
+		
+	</PreferenceCategory>
+	<PreferenceCategory android:title="@string/prefcat_slideshow">
+		<EditTextPreference android:title="@string/pref_slideshow_period_title"
+			android:key="slideshow_period"
+			android:defaultValue="5"
+			android:summary="@string/pref_slideshow_period_summary"
+			android:numeric="integer"
+			android:maxLength="3" />
+	<CheckBoxPreference android:title="@string/pref_slideshow_loop_title" android:summaryOn="@string/pref_slideshow_loop_sum_on" android:summaryOff="@string/pref_slideshow_loop_sum_off" android:key="slideshow_loop" android:defaultValue="false"></CheckBoxPreference>
+<CheckBoxPreference android:title="@string/pref_slideshow_random_animation_title" android:summaryOn="@string/pref_slideshow_random_animation_title_sum_on" android:summaryOff="@string/pref_slideshow_random_animation_title_sum_off" android:key="slideshow_random_animation" android:defaultValue="false"></CheckBoxPreference>
+</PreferenceCategory>
+</PreferenceScreen>

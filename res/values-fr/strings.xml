@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+	Copyright 2009, 2010 Kevin Gaudin
+
+	This file is part of EmailAlbum.
+
+	EmailAlbum is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	EmailAlbum is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with EmailAlbum.  If not, see <http://www.gnu.org/licenses/>.
+ -->
+<resources>
+	<string name="app_name">EmailAlbum</string>
+	<string name="open_archive_error">Une erreur est survenue à l\'ouverture du
+		fichier :</string>
+	<string name="first_pic">Ceci est la première image.</string>
+	<string name="last_pic">Ceci est la dernière image.</string>
+	<string name="title_prog_retrieve_archive">En cours...</string>
+	<string name="msg_prog_retrieve_archive">Veuillez patienter pendant la récupération
+		de votre album.</string>
+	<string name="select_file">Choisissez votre album...</string>
+	<string name="btn_select_file">Celui-ci !</string>
+	<string name="select_directory">Choisissez le dossier de destination...
+	</string>
+	<string name="btn_select_directory">Celui-là !</string>
+	<string name="menu_set_as">Définir comme...</string>
+	<string name="menu_load_album">Ouvrir un album</string>
+	<string name="menu_share">Partager</string>
+	<string name="chooser_share">Ouvrir avec...</string>
+	<string name="menu_save">Enregistrer...</string>
+	<string name="menu_save_selected">Enregistrer cette image</string>
+	<string name="menu_save_all">Enregistrer toutes</string>
+	<string name="menu_about">A propos...</string>
+	<string name="menu_open_with">Ouvrir avec...</string>
+	<string name="menu_edit">Editer</string>
+	<string name="menu_demo">Télécharger un exemple</string>
+	<string name="menu_create_album">Créer un album</string>
+	<string name="menu_prefs">Configuration</string>
+	<string name="error_other_intents">Erreur à la création du menu alternatif
+	</string>
+	<string name="error_out_of_mem">Les images sont trop lourdes pour être affichées
+		!</string>
+	<string name="error_saving">Erreur lors de la sauvegarde.</string>
+	<string name="enter_nemmode">Essayons une par une...
+	</string>
+	<string name="about_go_web">Faire un don avec PayPal</string>
+	<string name="about_text">
+		EmailAlbum est un logiciel opensource multi
+		plateformes ultra-léger	permettant de regrouper
+		un ensemble d\'images lourdes dans une archive
+		compacte afin de l\'envoyer par mail.\n\n
+		Les albums générés sont autoexécutables sur la plupart
+		des ordinateurs (nécessite Java) et peuvent être visualisés
+		sur Android avec cette application.\n\n
+		
+		Visitez http://emailalbum.googlecode.com pour
+		plus de détails.
+		\n\n
+		Intègre une adaptation de OI File Manager, merci à
+		http://www.openintents.org.
+		\n\n L\'album de démo a été réalisé avec
+		des photos sous Creative Commons de Romain Guy :
+		http://www.curious-creature.org.
+		\n
+	</string>
+	<string name="url_donate">
+		https://www.paypal.com/cgi-bin/webscr?cmd=_donations&amp;business=DT9H5GSCL9U76&amp;lc=FR&amp;item_name=EmailAlbum%20Viewer&amp;currency_code=EUR&amp;bn=PP-DonationsBF:btn_donateCC_LG.gif:NonHosted</string>
+	<string name="alert_filemanager_missing">OI File Manager est nécessaire pour ouvrir des albums et enregistrer des images depuis/vers la SD Card. Voulez-vous l\'installer ? (C\'est gratuit)</string>
+	<string name="alert_different_viewer">Ouverture de l\'image dans une autre application. Bouton Retour pour revenir à EmailAlbum Viewer</string>
+	<string name="start_slideshow">Démarrer Diaporama</string>
+	<string name="stop_slideshow">Arrêter Diaporama</string>
+
+	<!-- Viewer prefs -->	
+    <string name="pref_slideshow_loop_sum_off">Désactivée</string>
+    <string name="pref_slideshow_loop_sum_on">Activée</string>
+    <string name="pref_slideshow_loop_title">Diaporama en boucle</string>
+    <string name="pref_slideshow_period_summary">Secondes entre deux images</string>
+    <string name="pref_slideshow_period_title">Intervalle</string>
+    <string name="prefcat_slideshow">Diaporama</string>
+    <string name="pref_animation_summary">Choisissez votre transition préférée</string>
+    <string name="pref_animation_title">Type de transition</string>
+    <string name="prefcat_animation">Animations</string>
+	<string name="pref_slideshow_random_animation_title_sum_on">Transition choisie au hasard pendant le diaporama</string>
+    <string name="pref_slideshow_random_animation_title_sum_off">Utilise la transition choisie ci-dessus</string>
+    <string name="pref_slideshow_random_animation_title">Transition aléatoire</string>
+	
+	
+		<!-- Creator Strings -->
+	<string name="btn_album_share">Envoyer</string>
+	<string name="btn_album_export">Exporter</string>
+	<string name="btn_pick_pictures">Ajouter</string>
+	<string name="btn_selection_done">OK</string>
+	<string name="select_bucket">Choisissez le dossier d\'images</string>
+	<string name="clk_to_edit">Ajouter une légende...</string>
+	<string name="dialog_ask_caption">Type the caption for this picture</string>
+	<string name="send_album_with">Envoyer l\'album avec...</string>
+	<string name="exporting">Création de l\'album...</string>
+	<string name="preparing_preview">Chargement...</string>
+	
+	
+	<!-- OI File Manager strings -->
+	<!-- ***************************
+	     About information
+	     *************************** -->
+	
+    <string name="about_comments">OI File Manager est un gestionnaire de fichiers qui interagit avec les autres applications.</string>  
+	<string name="about_website_label">OI File Manager chez OpenIntents</string> 
+	
+	<!-- ***************************
+	     Applicatio-specific strings
+	     *************************** -->
+    
+    <string name="menu_new_folder">Nouveau dossier</string>
+    <string name="menu_delete">Supprimer</string>
+    <string name="menu_rename">Renommer</string>
+    <string name="menu_send">Envoyer</string>
+    <string name="menu_open">Ouvrir</string>
+    <string name="menu_move">Déplacer</string>
+    <string name="menu_copy">Copy</string>
+    
+    <string name="create_new_folder">Créer un nouveau dossier</string>
+    <string name="folder_name">Nom du dossier</string>
+    <string name="file_name">Nom du dossier</string>
+    <string name="this_folder_is_empty">Ce dossier est vide.</string>
+    <string name="really_delete">Voulez-vous vraiment supprimer %s?</string>
+    <string name="file_deleted">Fichier supprimé.</string>
+    <string name="folder_deleted">Dossier supprimé.</string>
+    <string name="file_renamed">Fichier renommé.</string>
+    <string name="folder_renamed">Dossier renommé.</string>
+    <string name="file_moved">Fichier déplacé.</string>
+    <string name="folder_moved">Dossier déplacé.</string>
+    <string name="file_copied">File copied.</string>
+    <string name="move_title">Sélectionner un dossier vers lequel déplacer</string>
+    <string name="move_button">Déplacer ici</string>
+    <string name="copy_title">Select folder to copy to</string>
+    <string name="copy_button">Copy here</string>
+    
+    <string name="copied_file_name">Copy of %s</string>
+    <string name="copied_file_name_2">Copy %d of %s</string>
+    
+    <string name="error_creating_new_folder">Impossible de créer le nouveau dossier.</string>
+    <string name="error_deleting_file">Impossible de supprimer le fichier.</string>
+    <string name="error_folder_not_empty">Le dossier n\'est pas vide.</string>
+    <string name="error_renaming_file">Impossible de renommer le fichier.</string>
+    <string name="error_renaming_folder">Impossible de renommer le dossier.</string>
+    <string name="error_moving_file">Impossible de déplacer le fichier.</string>
+    <string name="error_moving_folder">Impossible de déplacer le dossier.</string>
+    <string name="error_copying_file">Could not copy file.</string>
+    <string name="error_file_does_not_exists">Le fichier n\'existe pas.</string>
+    
+    <string name="send_not_available">Pas d\'application disponible pour l\'envoi</string>
+    
+    <string name="application_not_available">Application non disponible</string>
+
+	<!-- ***************************
+	     Distribution
+	     *************************** -->
+	
+	<!-- EULA -->
+	<string name="eula_title">OI File Manager EULA</string>
+	<string name="eula_accept">Accepter</string>
+	<string name="eula_refuse">Annuler</string>
+	
+	<!-- Update -->
+	<string name="update_box_text">Veuillez vérifier manuellement les mises à jour ou installer OI Update pour les notifications automatique. Version actuelle: %s</string>
+	<string name="update_check_now">Vérifier maintenant.</string>
+	<string name="update_get_updater">Obtenir OI Updater.</string>
+	<string name="update_error">Application téléchargée non disponible</string>
+	<string name="update">Vérifier les mises à jour</string>
+	
+    <!-- About -->
+    <string name="about">À propos de</string>
+	<string name="aboutapp_not_available">Version %s\n\nAucune extension disponible pour afficher la totalité des informations (contact, crédits, licence).</string>
+    <string name="aboutapp_get">Obtenir OI About</string>
+
+
+
+</resources>
