@@ -34,4 +34,15 @@
 		<item>fade</item>
 		<item>carrousel</item>
 	</string-array>
+
+	<string-array name="picturessizes">
+		<item>640 x 480</item>
+		<item>800 x 600</item>
+		<item>1024 x 768</item>
+	</string-array>
+	<string-array name="picturessizesvalues">
+		<item>640x480</item>
+		<item>800x600</item>
+		<item>1024x768</item>
+	</string-array>
 </resources>

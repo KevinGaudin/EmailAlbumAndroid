@@ -80,6 +80,7 @@
 	<string name="stop_slideshow">Stop slideshow</string>
 
 	<!-- Viewer Preferences -->
+	<string name="viewer_pref_screen">Album Viewer Preferences</string>
     <string name="pref_slideshow_loop_sum_off">Off</string>
     <string name="pref_slideshow_loop_sum_on">On</string>
     <string name="pref_slideshow_loop_title">Loop mode</string>
@@ -93,6 +94,21 @@
 	<string name="pref_slideshow_random_animation_title_sum_on">Transition is chosen randomly during slideshow</string>
     <string name="pref_slideshow_random_animation_title_sum_off">Use the previously selected transition</string>
     <string name="pref_slideshow_random_animation_title">Random transition</string>
+
+	<!-- Creator Preferences -->
+	<string name="creator_pref_screen">Album Creator Preferences</string>
+    <string name="pref_picturessize_summary">Pictures will be scaled down to this size when creating the album.</string>
+    <string name="pref_picturessize_title">Pictures size</string>
+    <string name="pref_def_picturessize">640x480</string>
+    <string name="pref_picturesquality_summary">The higher the value, the best quality, but also the heaviest files.</string>
+    <string name="pref_picturesquality_title">Pictures quality</string>
+    <string name="pref_def_picturesquality">70</string>
+    <string name="pref_albumname_summary">Choose a filename for the album.</string>
+    <string name="pref_albumname_title">Album name</string>
+    <string name="pref_def_albumname">album</string>
+    <string name="pref_albumtimestamp_off">No timestamp in the album file name</string>
+    <string name="pref_albumtimestamp_on">Add a timestamp in the album file name</string>
+    <string name="pref_albumtimestamp_title">Add timestamp</string>
 
 	<!-- Creator Strings -->
 	<string name="btn_album_share">Share</string>
