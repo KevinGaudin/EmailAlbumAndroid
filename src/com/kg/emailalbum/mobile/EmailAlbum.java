@@ -22,6 +22,8 @@ import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 
@@ -37,6 +39,7 @@ import com.kg.emailalbum.mobile.viewer.EmailAlbumViewer;
 public class EmailAlbum extends Activity {
     protected static final Uri URI_DEMO = Uri
             .parse("http://www.gaudin.tv/storage/android/curious-creature.jar");
+    private static final int MENU_PREFS_ID = 0;
 
     /**
      * Initialisation of buttons behaviours.
@@ -110,5 +113,40 @@ public class EmailAlbum extends Activity {
         findViewById(R.id.main_menu_root).getBackground().setDither(true);
         initMainMenu();
     }
+    
+    /*
+     * (non-Javadoc)
+     * @see android.app.Activity#onCreateOptionsMenu(android.view.Menu)
+     */
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        boolean result = super.onCreateOptionsMenu(menu);
+        MenuItem item = menu.add(0, MENU_PREFS_ID, 0, R.string.menu_prefs);
+        item.setIcon(android.R.drawable.ic_menu_preferences);
+        return result;
+    }
 
+    /*
+     * (non-Javadoc)
+     * @see android.app.Activity#onOptionsItemSelected(android.view.MenuItem)
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+        case MENU_PREFS_ID:
+            startPreferencesActivity();
+            return true;
+        default:
+            return false;
+        }
+    }
+    
+    /**
+     * Start the settings activity.
+     */
+    private void startPreferencesActivity() {
+        Intent i = new Intent(getApplicationContext(),
+                EmailAlbumPreferences.class);
+        startActivity(i);
+    }
 }

@@ -23,8 +23,7 @@
 			</intent-filter>
 		</activity>
 		<activity android:name="com.kg.emailalbum.mobile.viewer.ShowPics" />
-		<activity
-			android:name="com.kg.emailalbum.mobile.viewer.EmailAlbumViewerPreferences" />
+		
 		<activity android:name=".AboutDialog" android:theme="@android:style/Theme.Dialog" />
 
 		<activity android:name="com.kg.oifilemanager.filemanager.FileManagerActivity"
@@ -63,7 +62,8 @@
 		</activity>
 
 
-	</application>
+	<activity android:name="com.kg.emailalbum.mobile.EmailAlbumPreferences"></activity>
+</application>
 	<supports-screens android:normalScreens="true"
 		android:anyDensity="true" android:resizeable="true"
 		android:largeScreens="true"

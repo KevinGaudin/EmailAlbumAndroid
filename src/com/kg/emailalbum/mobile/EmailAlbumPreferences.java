@@ -17,18 +17,23 @@
  * along with EmailAlbum.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.kg.emailalbum.mobile.viewer;
+package com.kg.emailalbum.mobile;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
+import android.preference.PreferenceScreen;
 
 import com.kg.emailalbum.mobile.R;
 
 /**
  * Standard preferences activity.
  */
-public class EmailAlbumViewerPreferences extends PreferenceActivity {
-
+public class EmailAlbumPreferences extends PreferenceActivity {
+    public static final String EXTRA_SCREEN = "SCREEN";
+    public static final String SCREEN_VIEWER = "viewerscreen";
+    public static final String SCREEN_CREATOR = "creatorscreen";
+    
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -36,9 +41,12 @@ public class EmailAlbumViewerPreferences extends PreferenceActivity {
 	 */
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
 		addPreferencesFromResource(R.xml.viewer_preferences);
+		String screen = getIntent().getStringExtra(EXTRA_SCREEN);
+        if(screen != null) {
+            setPreferenceScreen((PreferenceScreen)findPreference(screen));
+        }
 	}
 
 }

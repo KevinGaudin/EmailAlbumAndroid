@@ -44,7 +44,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
-import android.provider.MediaStore.Images;
 import android.util.Log;
 import android.view.Display;
 import android.view.GestureDetector;
@@ -65,6 +64,7 @@ import android.widget.Toast;
 import android.widget.ViewFlipper;
 
 import com.kg.emailalbum.mobile.AboutDialog;
+import com.kg.emailalbum.mobile.EmailAlbumPreferences;
 import com.kg.emailalbum.mobile.R;
 import com.kg.emailalbum.mobile.animation.Rotate3dAnimation;
 import com.kg.emailalbum.mobile.util.BitmapLoader;
@@ -97,7 +97,6 @@ public class ShowPics extends Activity implements OnGestureListener,
     private static final int ACTIVITY_PICK_DIRECTORY_TO_SAVE = 0;
     private static final int DEFAULT_SLIDESHOW_TIME = 5;
     private static final String LOG_TAG = ShowPics.class.getSimpleName();
-
 
     /**
      * 3 ImageViews to handle the previous, current and next picture. The index
@@ -781,10 +780,11 @@ public class ShowPics extends Activity implements OnGestureListener,
         case MENU_SET_AS_ID:
             try {
                 String imageName = mImageNames.get(mPosition);
-                Uri fileUri = BitmapUtil.storePicture(
-                        getApplicationContext(),
-                        saveTmpPicture(new CacheManager(getApplicationContext())
-                                .getCacheDir("viewer")), imageName);
+                Uri fileUri = BitmapUtil
+                        .storePicture(getApplicationContext(),
+                                saveTmpPicture(new CacheManager(
+                                        getApplicationContext())
+                                        .getCacheDir("viewer")), imageName);
                 if (item.getItemId() == MENU_SEND_ID) {
                     intent = new Intent(Intent.ACTION_SEND, fileUri);
                     intent.putExtra(Intent.EXTRA_STREAM, fileUri);
@@ -1274,7 +1274,9 @@ public class ShowPics extends Activity implements OnGestureListener,
      */
     private void startPreferencesActivity() {
         Intent i = new Intent(getApplicationContext(),
-                EmailAlbumViewerPreferences.class);
+                EmailAlbumPreferences.class);
+        i.putExtra(EmailAlbumPreferences.EXTRA_SCREEN, EmailAlbumPreferences.SCREEN_VIEWER);
+
         startActivity(i);
     }
 

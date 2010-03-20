@@ -14,12 +14,12 @@
 	-->
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
 	android:title="@string/app_name">
-	<PreferenceScreen android:title="@string/creator_pref_screen">
+	<PreferenceScreen android:title="@string/creator_pref_screen" android:key="creatorscreen">
 		<com.hlidskialf.android.preference.SeekBarPreference
 			android:key="picturesquality" android:title="@string/pref_picturesquality_title"
 			android:summary="@string/pref_picturesquality_summary"
-			android:dialogMessage="@string/pref_picturesquality_title"
-			android:defaultValue="@string/pref_def_picturesquality" android:text=""
+			android:dialogMessage=""
+			android:defaultValue="70" android:text=""
 			android:max="100" />
 		<ListPreference android:key="picturessize"
 			android:summary="@string/pref_picturessize_summary" android:entries="@array/picturessizes"
@@ -38,7 +38,7 @@
 			android:key="clearcache" 
 			android:summary="Clear thumbnails and cached albums"/>
 	</PreferenceScreen>
-	<PreferenceScreen android:title="@string/viewer_pref_screen">
+	<PreferenceScreen android:title="@string/viewer_pref_screen" android:key="viewerscreen">
 		<PreferenceCategory android:title="@string/prefcat_animation">
 
 

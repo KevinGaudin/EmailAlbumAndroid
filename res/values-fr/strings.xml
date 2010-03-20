@@ -1,22 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-	Copyright 2009, 2010 Kevin Gaudin
+	<!--
+		Copyright 2009, 2010 Kevin Gaudin This file is part of EmailAlbum.
 
-	This file is part of EmailAlbum.
-
-	EmailAlbum is free software: you can redistribute it and/or modify
-	it under the terms of the GNU General Public License as published by
-	the Free Software Foundation, either version 3 of the License, or
-	(at your option) any later version.
-
-	EmailAlbum is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	GNU General Public License for more details.
-
-	You should have received a copy of the GNU General Public License
-	along with EmailAlbum.  If not, see <http://www.gnu.org/licenses/>.
- -->
+		EmailAlbum is free software: you can redistribute it and/or modify it
+		under the terms of the GNU General Public License as published by the
+		Free Software Foundation, either version 3 of the License, or (at your
+		option) any later version. EmailAlbum is distributed in the hope that
+		it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+		warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+		the GNU General Public License for more details. You should have
+		received a copy of the GNU General Public License along with
+		EmailAlbum. If not, see <http://www.gnu.org/licenses/>.
+	-->
 <resources>
 	<string name="app_name">EmailAlbum</string>
 	<string name="open_archive_error">Une erreur est survenue à l\'ouverture du
@@ -54,20 +49,27 @@
 	<string name="about_go_web">Faire un don avec PayPal</string>
 	<string name="about_text">
 		EmailAlbum est un logiciel opensource multi
-		plateformes ultra-léger	permettant de regrouper
-		un ensemble d\'images lourdes dans une archive
+		plateformes ultra-léger permettant de regrouper
+		un ensemble d\'images
+		lourdes dans une archive
 		compacte afin de l\'envoyer par mail.\n\n
-		Les albums générés sont autoexécutables sur la plupart
-		des ordinateurs (nécessite Java) et peuvent être visualisés
-		sur Android avec cette application.\n\n
-		
+		Les
+		albums générés sont autoexécutables sur la plupart
+		des ordinateurs
+		(nécessite Java) et peuvent être visualisés
+		sur Android avec cette
+		application.\n\n
+
 		Visitez http://emailalbum.googlecode.com pour
 		plus de détails.
 		\n\n
-		Intègre une adaptation de OI File Manager, merci à
+		Intègre une
+		adaptation de OI File Manager, merci à
 		http://www.openintents.org.
-		\n\n L\'album de démo a été réalisé avec
-		des photos sous Creative Commons de Romain Guy :
+		\n\n
+		L\'album de démo a été réalisé avec
+		des photos sous Creative Commons de
+		Romain Guy :
 		http://www.curious-creature.org.
 		\n
 	</string>
@@ -79,6 +81,7 @@
 	<string name="stop_slideshow">Arrêter Diaporama</string>
 
 	<!-- Viewer prefs -->	
+	<string name="viewer_pref_screen">Visionneuse d\'albums</string>
     <string name="pref_slideshow_loop_sum_off">Désactivée</string>
     <string name="pref_slideshow_loop_sum_on">Activée</string>
     <string name="pref_slideshow_loop_title">Diaporama en boucle</string>
@@ -91,6 +94,18 @@
 	<string name="pref_slideshow_random_animation_title_sum_on">Transition choisie au hasard pendant le diaporama</string>
     <string name="pref_slideshow_random_animation_title_sum_off">Utilise la transition choisie ci-dessus</string>
     <string name="pref_slideshow_random_animation_title">Transition aléatoire</string>
+	
+	<!-- Creator Preferences -->
+	<string name="creator_pref_screen">Editeur d\'albums</string>
+    <string name="pref_picturessize_summary">Taille à laquelle seront redimensionnées les images.</string>
+    <string name="pref_picturessize_title">Taille des images</string>
+    <string name="pref_picturesquality_summary">Une valeur élevée indique une meilleure qualité, mais un poids plus lourd (par défaut: 70)</string>
+    <string name="pref_picturesquality_title">Qualité des images</string>
+    <string name="pref_albumname_summary">Choisissez un nom pour l\'album</string>
+    <string name="pref_albumname_title">Nom de l\'album</string>
+    <string name="pref_albumtimestamp_off">Pas d\'horodatage dans le nom d\'album.</string>
+    <string name="pref_albumtimestamp_on">Ajout d\'un horodatage dans le nom d\'album.</string>
+    <string name="pref_albumtimestamp_title">Horodagate</string>
 	
 	
 		<!-- Creator Strings -->

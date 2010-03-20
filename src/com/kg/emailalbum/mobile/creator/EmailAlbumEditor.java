@@ -43,6 +43,8 @@ import android.content.ActivityNotFoundException;
 import android.content.ContentResolver;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.drawable.BitmapDrawable;
@@ -50,8 +52,11 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Parcelable;
+import android.preference.PreferenceManager;
 import android.text.format.DateFormat;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.View.OnClickListener;
@@ -64,6 +69,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.kg.emailalbum.mobile.EmailAlbumPreferences;
 import com.kg.emailalbum.mobile.R;
 import com.kg.emailalbum.mobile.util.BitmapLoader;
 import com.kg.emailalbum.mobile.util.BitmapUtil;
@@ -79,8 +85,44 @@ import com.kg.oifilemanager.intents.FileManagerIntents;
  * @author Kevin Gaudin
  * 
  */
-public class EmailAlbumEditor extends ListActivity {
+public class EmailAlbumEditor extends ListActivity implements OnSharedPreferenceChangeListener {
 
+    private enum PictureSizes {
+        S640X480(640,480),
+        S800X600(800,600),
+        S1024X768(1024,768);
+        
+        int mWidth;
+        int mHeight;
+        
+        PictureSizes(int width, int height) {
+            mWidth = width;
+            mHeight = height;
+        }
+        
+        public int getWidth() {
+            return mWidth;
+        }
+        
+        public int getHeight() {
+            return mHeight;
+        }
+        
+        public static PictureSizes fromString(String strValue) {
+            int iX = strValue.indexOf('x');
+            int width = Integer.parseInt(strValue.substring(0, iX));
+            switch (width) {
+            case 640:
+                return S640X480;
+            case 800:
+                return S800X600;
+            case 1024:
+                return S1024X768;
+            default:
+                return S640X480;
+            }
+        }
+    }
     /**
      * Adapter for handling AlbumItems.
      */
@@ -315,11 +357,11 @@ public class EmailAlbumEditor extends ListActivity {
         }
     }
 
+
     /**
      * Asynchronous task for exporting current album to an EmailAlbum jar file.
      */
     public class ExportAlbumTask extends AsyncTask<File, Integer, Uri> {
-        private static final int DEFAULT_JPG_QUALITY = 70;
         // Constants used to tell the task that it has to send the result
         // album or only store it.
         /**
@@ -391,6 +433,7 @@ public class EmailAlbumEditor extends ListActivity {
                 Properties contentFileBuilder = new Properties();
                 String entryName = "";
                 int itemNumber = 0;
+                BitmapLoader.onLowMemory();
                 for (AlbumItem item : mAdapter.mContentModel) {
                     // Create the file name. All pictures have to be named so
                     // that their alphabetical order is the order set by the
@@ -406,9 +449,9 @@ public class EmailAlbumEditor extends ListActivity {
 
                     entry = new JarEntry(ALBUM_PICTURES_PATH + entryName);
 
-                    // Load and resize a full color 640 x 480 picture
+                    // Load and resize a full color picture
                     Bitmap bmp = BitmapLoader.load(getApplicationContext(),
-                            item.uri, 640, 480, Bitmap.Config.ARGB_8888, false);
+                            item.uri, mPictureSize.getWidth(), mPictureSize.getHeight(), Bitmap.Config.ARGB_8888, false);
 
                     if (item.rotation % 360 != 0) {
                         // Apply the user specified rotation
@@ -416,12 +459,13 @@ public class EmailAlbumEditor extends ListActivity {
                     }
                     out.putNextEntry(entry);
                     // Write the picture to the album
-                    bmp.compress(CompressFormat.JPEG, DEFAULT_JPG_QUALITY, out);
+                    bmp.compress(CompressFormat.JPEG, mPictureQuality , out);
                     // Get rid of the bitmap to avoid memory leaks
                     bmp.recycle();
                     out.closeEntry();
                     itemNumber++;
                     publishProgress((int) (((float) (entryNumber + itemNumber) / (float) count) * 100));
+                    System.gc();
                 }
 
                 // finally write content file
@@ -486,6 +530,9 @@ public class EmailAlbumEditor extends ListActivity {
     private static final String ALBUM_PICTURES_PATH = "com/kg/emailalbum/viewer/pictures/";
     private static final String ALBUM_CONTENT_FILE = ALBUM_PICTURES_PATH
             + "content";
+
+    private static final int DEFAULT_JPG_QUALITY = 70;
+
     // Dialogs
     private static final int DIALOG_EDIT_CAPTION = 0;
     private static final int DIALOG_PROGRESS_EXPORT = 1;
@@ -494,6 +541,9 @@ public class EmailAlbumEditor extends ListActivity {
 
     private static final String LOG_TAG = EmailAlbumEditor.class
             .getSimpleName();
+    
+    // Menu items
+    private static final int MENU_PREFS_ID = 0;
 
     /** A reference to the list adapter */
     private AlbumAdapter mAdapter;
@@ -514,6 +564,9 @@ public class EmailAlbumEditor extends ListActivity {
     /** A holder for asynchronous loading of the bitmap to be previewed */
     protected Bitmap mPreviewPic = null;
 
+    private int mPictureQuality = DEFAULT_JPG_QUALITY;
+    private PictureSizes mPictureSize = null;
+
     /**
      * Listener which applies items removals when TouchInterceptor sends remove
      * events.
@@ -529,6 +582,8 @@ public class EmailAlbumEditor extends ListActivity {
 
     /** ProgressDialog for album exports, reused for each export */
     private ProgressDialog progressDialog;
+
+    private SharedPreferences mPrefs;
 
     /**
      * Start the activity allowing the user to select pictures to be added to
@@ -617,6 +672,11 @@ public class EmailAlbumEditor extends ListActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.album_editor);
 
+        // Get notifications when preferences are updated
+        mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+        mPrefs.registerOnSharedPreferenceChangeListener(this);
+        initPrefs();
+
         // Sets background dithering for older versions of android (1.5 & 1.6)
         findViewById(R.id.album_editor_root).getBackground().setDither(true);
 
@@ -681,6 +741,11 @@ public class EmailAlbumEditor extends ListActivity {
         mList.setCacheColorHint(0);
     }
 
+    private void initPrefs() {
+        mPictureQuality = mPrefs.getInt("picturesquality", DEFAULT_JPG_QUALITY);
+        mPictureSize = PictureSizes.fromString(mPrefs.getString("picturessize", getString(R.string.pref_def_picturessize)));
+    }
+
     /*
      * (non-Javadoc)
      * 
@@ -741,6 +806,18 @@ public class EmailAlbumEditor extends ListActivity {
 
     /*
      * (non-Javadoc)
+     * @see android.app.Activity#onCreateOptionsMenu(android.view.Menu)
+     */
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        boolean result = super.onCreateOptionsMenu(menu);
+        MenuItem item = menu.add(0, MENU_PREFS_ID, 0, R.string.menu_prefs);
+        item.setIcon(android.R.drawable.ic_menu_preferences);
+        return result;
+    }
+    
+    /*
+     * (non-Javadoc)
      * 
      * @see android.app.Activity#onLowMemory()
      */
@@ -749,6 +826,21 @@ public class EmailAlbumEditor extends ListActivity {
         super.onLowMemory();
         // The BitmapLoader might have some caches to clear.
         BitmapLoader.onLowMemory();
+    }
+    
+    /*
+     * (non-Javadoc)
+     * @see android.app.Activity#onOptionsItemSelected(android.view.MenuItem)
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+        case MENU_PREFS_ID:
+            startPreferencesActivity();
+            return true;
+        default:
+            return false;
+        }
     }
 
     /*
@@ -877,6 +969,12 @@ public class EmailAlbumEditor extends ListActivity {
         return state;
     }
 
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
+            String key) {
+        initPrefs();
+    }
+
     /**
      * Starts the pick directory activity.
      * 
@@ -973,6 +1071,16 @@ public class EmailAlbumEditor extends ListActivity {
 
         };
         previewLoader.execute(mSelectedItem);
+    }
+    
+    /**
+     * Start the settings activity.
+     */
+    private void startPreferencesActivity() {
+        Intent i = new Intent(getApplicationContext(),
+                EmailAlbumPreferences.class);
+        i.putExtra(EmailAlbumPreferences.EXTRA_SCREEN, EmailAlbumPreferences.SCREEN_CREATOR);
+        startActivity(i);
     }
 
 }

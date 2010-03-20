@@ -63,6 +63,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.kg.emailalbum.mobile.AboutDialog;
+import com.kg.emailalbum.mobile.EmailAlbumPreferences;
 import com.kg.emailalbum.mobile.R;
 import com.kg.emailalbum.mobile.util.CacheManager;
 import com.kg.emailalbum.mobile.util.ZipUtil;
@@ -602,6 +603,10 @@ public class EmailAlbumViewer extends ListActivity {
         menu.add(0, MENU_SAVE_ALL_ID, 0, R.string.menu_save_all);
     }
 
+    /*
+     * (non-Javadoc)
+     * @see android.app.Activity#onCreateOptionsMenu(android.view.Menu)
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // TODO Auto-generated method stub
@@ -867,7 +872,8 @@ public class EmailAlbumViewer extends ListActivity {
      */
     private void startPreferencesActivity() {
         Intent i = new Intent(getApplicationContext(),
-                EmailAlbumViewerPreferences.class);
+                EmailAlbumPreferences.class);
+        i.putExtra(EmailAlbumPreferences.EXTRA_SCREEN, EmailAlbumPreferences.SCREEN_VIEWER);
         startActivity(i);
     }
 
