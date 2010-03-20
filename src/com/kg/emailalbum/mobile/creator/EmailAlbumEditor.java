@@ -398,8 +398,9 @@ public class EmailAlbumEditor extends ListActivity implements OnSharedPreference
 
             // Generate a filename based on current date and time
             Calendar today = Calendar.getInstance();
-            File album = new File(dests[0], "album"
-                    + DateFormat.format("_yyyyMMdd_hhmm", today) + ".jar");
+            File album = new File(dests[0], mAlbumName.replaceAll("\\W", "_")
+                    + (mAddTimestamp ? DateFormat.format("_yyyyMMdd_hhmm", today) : "")
+                    + ".jar");
             try {
                 // Total progress count.
                 // 14 is the number of files contained in an 'empty' EmailAlbum
@@ -564,6 +565,9 @@ public class EmailAlbumEditor extends ListActivity implements OnSharedPreference
     /** A holder for asynchronous loading of the bitmap to be previewed */
     protected Bitmap mPreviewPic = null;
 
+    // Preferences
+    private String mAlbumName = null;
+    private boolean mAddTimestamp = true;
     private int mPictureQuality = DEFAULT_JPG_QUALITY;
     private PictureSizes mPictureSize = null;
 
@@ -744,6 +748,8 @@ public class EmailAlbumEditor extends ListActivity implements OnSharedPreference
     private void initPrefs() {
         mPictureQuality = mPrefs.getInt("picturesquality", DEFAULT_JPG_QUALITY);
         mPictureSize = PictureSizes.fromString(mPrefs.getString("picturessize", getString(R.string.pref_def_picturessize)));
+        mAlbumName = mPrefs.getString("albumname", getString(R.string.pref_def_albumname));
+        mAddTimestamp = mPrefs.getBoolean("albumtimestamp", mAddTimestamp);
     }
 
     /*
