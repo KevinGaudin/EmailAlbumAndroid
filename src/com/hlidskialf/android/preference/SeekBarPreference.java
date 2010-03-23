@@ -1,25 +1,28 @@
 /* The following code was written by Matthew Wiggins 
  * and is released under the APACHE 2.0 license 
  * 
+ * Modified by Kevin Gaudin : constructor now retrieves resources references values
+ * 
  * http://www.apache.org/licenses/LICENSE-2.0
  */
 package com.hlidskialf.android.preference;
 
 import android.content.Context;
+import android.content.res.TypedArray;
+import android.preference.DialogPreference;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.View;
-import android.view.ViewGroup;
-import android.preference.DialogPreference;
+import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.LinearLayout;
+
+import com.kg.emailalbum.mobile.R;
 
 
 public class SeekBarPreference extends DialogPreference implements SeekBar.OnSeekBarChangeListener
 {
-  private static final String androidns="http://schemas.android.com/apk/res/android";
-
+  
   private SeekBar mSeekBar;
   private TextView mSplashText,mValueText;
   private Context mContext;
@@ -27,16 +30,29 @@ public class SeekBarPreference extends DialogPreference implements SeekBar.OnSee
   private String mDialogMessage, mSuffix;
   private int mDefault, mMax, mValue = 0;
 
-  public SeekBarPreference(Context context, AttributeSet attrs) { 
-    super(context,attrs); 
-    mContext = context;
+  
+  
+  
+  public SeekBarPreference(Context context, AttributeSet attrs, int defStyle) {
+      super(context, attrs, defStyle);
+      
+      mContext = context;
+      
+      TypedArray a = context.obtainStyledAttributes(attrs,
+              R.styleable.SeekBarPreference, defStyle, 0);
 
-    mDialogMessage = attrs.getAttributeValue(androidns,"dialogMessage");
-    mSuffix = attrs.getAttributeValue(androidns,"text");
-    mDefault = attrs.getAttributeIntValue(androidns,"defaultValue", 0);
-    mMax = attrs.getAttributeIntValue(androidns,"max", 100);
-
+      mDialogMessage = a.getString(R.styleable.SeekBarPreference_android_dialogMessage);
+      mSuffix = a.getString(R.styleable.SeekBarPreference_android_text);
+      mDefault = a.getInt(R.styleable.SeekBarPreference_android_defaultValue, 0);
+      mMax = a.getInt(R.styleable.SeekBarPreference_android_max, 100);
+      a.recycle();
+      
   }
+  
+  public SeekBarPreference(Context context, AttributeSet attrs) {
+      this(context, attrs, android.R.attr.dialogPreferenceStyle);
+  }
+  
   @Override 
   protected View onCreateDialogView() {
     LinearLayout.LayoutParams params;
