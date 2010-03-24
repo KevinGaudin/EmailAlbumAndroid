@@ -14,7 +14,8 @@
 	-->
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
 	android:title="@string/app_name">
-	<PreferenceScreen android:title="@string/creator_pref_screen" android:key="creatorscreen">
+	<PreferenceScreen android:title="@string/creator_pref_screen"
+		android:key="creatorscreen">
 		<com.hlidskialf.android.preference.SeekBarPreference
 			android:key="picturesquality" android:title="@string/pref_picturesquality_title"
 			android:summary="@string/pref_picturesquality_summary"
@@ -29,16 +30,19 @@
 		<EditTextPreference android:title="@string/pref_albumname_title"
 			android:key="albumname" android:defaultValue="@string/pref_def_albumname"
 			android:summary="@string/pref_albumname_summary" android:maxLines="1"
-			android:maxLength="20" android:imeOptions="actionDone" android:singleLine="true"/>
+			android:maxLength="20" android:imeOptions="actionDone"
+			android:singleLine="true" />
 		<CheckBoxPreference android:title="@string/pref_albumtimestamp_title"
 			android:summaryOn="@string/pref_albumtimestamp_on"
 			android:summaryOff="@string/pref_albumtimestamp_off" android:key="albumtimestamp"
 			android:defaultValue="true"></CheckBoxPreference>
-		<Preference android:title="@string/pref_clearcache_title"
-			android:key="clearcache" 
-			android:summary="@string/pref_clearcache_summary"/>
+		<PreferenceCategory android:title="@string/prefcat_cache">
+			<Preference android:title="@string/pref_clearcache_title"
+				android:key="clearcache" android:summary="@string/pref_clearcache_summary" />
+		</PreferenceCategory>
 	</PreferenceScreen>
-	<PreferenceScreen android:title="@string/viewer_pref_screen" android:key="viewerscreen">
+	<PreferenceScreen android:title="@string/viewer_pref_screen"
+		android:key="viewerscreen">
 		<PreferenceCategory android:title="@string/prefcat_animation">
 
 
@@ -63,11 +67,11 @@
 				android:summaryOff="@string/pref_slideshow_random_animation_title_sum_off"
 				android:key="slideshow_random_animation" android:defaultValue="false"></CheckBoxPreference>
 		</PreferenceCategory>
-		<Preference android:title="Clear cache"
-			android:key="clearcache" 
-			android:summary="Clear thumbnails and cached albums"/>
+		<PreferenceCategory android:title="@string/prefcat_cache">
+			<Preference android:title="@string/pref_clearcache_title"
+				android:key="clearcache" android:summary="@string/pref_clearcache_summary" />
+		</PreferenceCategory>
 	</PreferenceScreen>
-		<Preference android:title="Clear cache"
-			android:key="clearcache" 
-			android:summary="Clear thumbnails and cached albums"/>
+	<Preference android:title="@string/pref_clearcache_title"
+		android:key="clearcache" android:summary="@string/pref_clearcache_summary" />
 </PreferenceScreen>

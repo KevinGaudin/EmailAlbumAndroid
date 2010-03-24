@@ -81,6 +81,7 @@
 	<string name="stop_slideshow">Arrêter Diaporama</string>
 	
 	<string name="number_files_deleted">%1$d fichier(s) effacés</string>
+	<string name="prefcat_cache">Fichiers temporaires</string>
 	<string name="pref_clearcache_summary">Effacer les miniatures et albums temporaires</string>
 	<string name="pref_clearcache_title">Fichiers temporaires</string>
 

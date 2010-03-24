@@ -80,6 +80,7 @@
 	<string name="stop_slideshow">Stop slideshow</string>
 
 	<string name="number_files_deleted">%1$d file(s) deleted</string>
+	<string name="prefcat_cache">Cache Files</string>
 	<string name="pref_clearcache_summary">Clear thumbnails and cached albums</string>
 	<string name="pref_clearcache_title">Clear cache</string>
 
