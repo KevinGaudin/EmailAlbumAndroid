@@ -29,14 +29,14 @@
 		<EditTextPreference android:title="@string/pref_albumname_title"
 			android:key="albumname" android:defaultValue="@string/pref_def_albumname"
 			android:summary="@string/pref_albumname_summary" android:maxLines="1"
-			android:maxLength="20" />
+			android:maxLength="20" android:imeOptions="actionDone" android:singleLine="true"/>
 		<CheckBoxPreference android:title="@string/pref_albumtimestamp_title"
 			android:summaryOn="@string/pref_albumtimestamp_on"
 			android:summaryOff="@string/pref_albumtimestamp_off" android:key="albumtimestamp"
 			android:defaultValue="true"></CheckBoxPreference>
-		<Preference android:title="Clear cache"
+		<Preference android:title="@string/pref_clearcache_title"
 			android:key="clearcache" 
-			android:summary="Clear thumbnails and cached albums"/>
+			android:summary="@string/pref_clearcache_summary"/>
 	</PreferenceScreen>
 	<PreferenceScreen android:title="@string/viewer_pref_screen" android:key="viewerscreen">
 		<PreferenceCategory android:title="@string/prefcat_animation">
