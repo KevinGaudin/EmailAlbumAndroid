@@ -101,20 +101,26 @@ public class CacheManager {
      *            The directory to delete.
      * @return
      */
-    static public boolean deleteDirectory(File path) {
+    static public int deleteDirectory(File path) {
+        int nbDeleted = 0;
         if (path.exists() && path.isDirectory()) {
             File[] files = path.listFiles();
 
             for (int i = 0; i < files.length; i++) {
                 if (files[i].isDirectory()) {
-                    deleteDirectory(files[i]);
+                    nbDeleted += deleteDirectory(files[i]);
                 } else {
-                    files[i].delete();
+                    if(files[i].delete()) {
+                        nbDeleted++;
+                    }
+                    
                 }
             }
         } else if (path.exists()) {
-            return (path.delete());
+            if(path.delete()) {
+                nbDeleted++;
+            }
         }
-        return false;
+        return nbDeleted;
     }
 }

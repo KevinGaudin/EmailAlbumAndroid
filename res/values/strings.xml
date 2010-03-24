@@ -79,6 +79,9 @@
 	<string name="start_slideshow">Start slideshow</string>
 	<string name="stop_slideshow">Stop slideshow</string>
 
+	<string name="number_files_deleted">%1$d file(s) deleted</string>
+
+
 	<!-- Viewer Preferences -->
 	<string name="viewer_pref_screen">Album Viewer Preferences</string>
     <string name="pref_slideshow_loop_sum_off">Off</string>

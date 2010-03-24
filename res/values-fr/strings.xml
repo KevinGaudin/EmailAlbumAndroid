@@ -79,6 +79,8 @@
 	<string name="alert_different_viewer">Ouverture de l\'image dans une autre application. Bouton Retour pour revenir à EmailAlbum Viewer</string>
 	<string name="start_slideshow">Démarrer Diaporama</string>
 	<string name="stop_slideshow">Arrêter Diaporama</string>
+	
+	<string name="number_files_deleted">%1$d fichier(s) effacés</string>
 
 	<!-- Viewer prefs -->	
 	<string name="viewer_pref_screen">Visionneuse d\'albums</string>
