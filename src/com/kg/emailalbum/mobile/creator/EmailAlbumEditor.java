@@ -68,12 +68,14 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.kg.emailalbum.mobile.EmailAlbumPreferences;
 import com.kg.emailalbum.mobile.R;
 import com.kg.emailalbum.mobile.util.BitmapLoader;
 import com.kg.emailalbum.mobile.util.BitmapUtil;
 import com.kg.emailalbum.mobile.util.CacheManager;
+import com.kg.emailalbum.mobile.util.Compatibility;
 import com.kg.oifilemanager.intents.FileManagerIntents;
 
 /**
@@ -675,7 +677,8 @@ public class EmailAlbumEditor extends ListActivity implements OnSharedPreference
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.album_editor);
-
+       
+        
         // Get notifications when preferences are updated
         mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
         mPrefs.registerOnSharedPreferenceChangeListener(this);
@@ -694,6 +697,8 @@ public class EmailAlbumEditor extends ListActivity implements OnSharedPreference
             mAdapter = new AlbumAdapter();
         }
         setListAdapter(mAdapter);
+        
+        retrieveIntentData();
 
         // When the user clicks on an item, open the item edit dialog
         getListView().setOnItemClickListener(
@@ -743,6 +748,24 @@ public class EmailAlbumEditor extends ListActivity implements OnSharedPreference
 
         // List with transparent background
         mList.setCacheColorHint(0);
+    }
+
+    /**
+     * Fill the adapter with uris received from other apps
+     */
+    private void retrieveIntentData() {
+        Intent i = getIntent();
+        String actionSendMultiple = Compatibility.getActionSendMultiple();
+        if(i.getAction().equals(Intent.ACTION_SEND)) {
+            Uri toSend = (Uri)i.getParcelableExtra(Intent.EXTRA_STREAM);
+            Log.d(LOG_TAG, "Uri to send : " + toSend);
+            mAdapter.addUri(toSend);
+            
+        } else if(actionSendMultiple != null && i.getAction().equals(actionSendMultiple)) {
+            ArrayList<Uri> toSend = i.getParcelableArrayListExtra(Intent.EXTRA_STREAM);
+            Log.d(LOG_TAG, "Uri to send : " + toSend);
+            mAdapter.addAllUris(toSend);
+        }
     }
 
     private void initPrefs() {

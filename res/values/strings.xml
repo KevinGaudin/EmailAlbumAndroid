@@ -127,7 +127,7 @@
 	<string name="send_album_with">Send album with...</string>
 	<string name="exporting">Creating album...</string>
 	<string name="preparing_preview">Preparing preview...</string>
-
+	<string name="send_as_emailalbum">Send as an EmailAlbum</string>
 
 
 	<!-- OI File Manager strings -->

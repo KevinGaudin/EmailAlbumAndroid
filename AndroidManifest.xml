@@ -52,6 +52,15 @@
 		<activity android:name="com.kg.emailalbum.mobile.creator.SelectPictures">
 		</activity>
 		<activity android:name="com.kg.emailalbum.mobile.creator.EmailAlbumEditor">
+			<intent-filter android:icon="@drawable/icon"
+				android:label="@string/send_as_emailalbum">
+				<action android:name="android.intent.action.SEND" />
+				<action android:name="android.intent.action.SEND_MULTIPLE" />
+				<category android:name="android.intent.category.DEFAULT" />
+				<category android:name="android.intent.category.ALTERNATIVE" />
+				<category android:name="android.intent.category.SELECTED_ALTERNATIVE" />
+				<data android:mimeType="image/*" />
+			</intent-filter>
 		</activity>
 
 		<activity android:name=".EmailAlbum" android:label="@string/app_name">
