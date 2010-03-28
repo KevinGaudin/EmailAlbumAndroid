@@ -87,29 +87,28 @@ import com.kg.oifilemanager.intents.FileManagerIntents;
  * @author Kevin Gaudin
  * 
  */
-public class EmailAlbumEditor extends ListActivity implements OnSharedPreferenceChangeListener {
+public class EmailAlbumEditor extends ListActivity implements
+        OnSharedPreferenceChangeListener {
 
     private enum PictureSizes {
-        S640X480(640,480),
-        S800X600(800,600),
-        S1024X768(1024,768);
-        
+        S640X480(640, 480), S800X600(800, 600), S1024X768(1024, 768);
+
         int mWidth;
         int mHeight;
-        
+
         PictureSizes(int width, int height) {
             mWidth = width;
             mHeight = height;
         }
-        
+
         public int getWidth() {
             return mWidth;
         }
-        
+
         public int getHeight() {
             return mHeight;
         }
-        
+
         public static PictureSizes fromString(String strValue) {
             int iX = strValue.indexOf('x');
             int width = Integer.parseInt(strValue.substring(0, iX));
@@ -125,6 +124,7 @@ public class EmailAlbumEditor extends ListActivity implements OnSharedPreference
             }
         }
     }
+
     /**
      * Adapter for handling AlbumItems.
      */
@@ -359,7 +359,6 @@ public class EmailAlbumEditor extends ListActivity implements OnSharedPreference
         }
     }
 
-
     /**
      * Asynchronous task for exporting current album to an EmailAlbum jar file.
      */
@@ -401,8 +400,8 @@ public class EmailAlbumEditor extends ListActivity implements OnSharedPreference
             // Generate a filename based on current date and time
             Calendar today = Calendar.getInstance();
             File album = new File(dests[0], mAlbumName.replaceAll("\\W", "_")
-                    + (mAddTimestamp ? DateFormat.format("_yyyyMMdd_hhmm", today) : "")
-                    + ".jar");
+                    + (mAddTimestamp ? DateFormat.format("_yyyyMMdd_hhmm",
+                            today) : "") + ".jar");
             try {
                 // Total progress count.
                 // 14 is the number of files contained in an 'empty' EmailAlbum
@@ -454,7 +453,9 @@ public class EmailAlbumEditor extends ListActivity implements OnSharedPreference
 
                     // Load and resize a full color picture
                     Bitmap bmp = BitmapLoader.load(getApplicationContext(),
-                            item.uri, mPictureSize.getWidth(), mPictureSize.getHeight(), Bitmap.Config.ARGB_8888, false);
+                            item.uri, mPictureSize.getWidth(), mPictureSize
+                                    .getHeight(), Bitmap.Config.ARGB_8888,
+                            false);
 
                     if (item.rotation % 360 != 0) {
                         // Apply the user specified rotation
@@ -462,7 +463,7 @@ public class EmailAlbumEditor extends ListActivity implements OnSharedPreference
                     }
                     out.putNextEntry(entry);
                     // Write the picture to the album
-                    bmp.compress(CompressFormat.JPEG, mPictureQuality , out);
+                    bmp.compress(CompressFormat.JPEG, mPictureQuality, out);
                     // Get rid of the bitmap to avoid memory leaks
                     bmp.recycle();
                     out.closeEntry();
@@ -544,7 +545,7 @@ public class EmailAlbumEditor extends ListActivity implements OnSharedPreference
 
     private static final String LOG_TAG = EmailAlbumEditor.class
             .getSimpleName();
-    
+
     // Menu items
     private static final int MENU_PREFS_ID = 0;
 
@@ -597,6 +598,9 @@ public class EmailAlbumEditor extends ListActivity implements OnSharedPreference
      */
     protected void addImages() {
         Intent i = new Intent(getApplicationContext(), SelectPictures.class);
+//        TODO        
+//        Intent i = new Intent(Intent.ACTION_GET_CONTENT);
+//        i.setType("image/*");
         startActivityForResult(i, ACTIVITY_SELECT_PICTURES);
     }
 
@@ -647,17 +651,20 @@ public class EmailAlbumEditor extends ListActivity implements OnSharedPreference
 
             }
             break;
-            
+
         case ACTIVITY_EDIT_PICTURE:
-            if (resultCode == Activity.RESULT_OK)
-            {
+            if (resultCode == Activity.RESULT_OK) {
                 dismissDialog(DIALOG_EDIT_CAPTION);
                 Uri editedPictureUri = data.getData();
-                if(editedPictureUri.getScheme().startsWith(ContentResolver.SCHEME_FILE)) {
-                    // Workaround to make Photoshop.com android app able to re-edit its results
+                if (editedPictureUri.getScheme().startsWith(
+                        ContentResolver.SCHEME_FILE)) {
+                    // Workaround to make Photoshop.com android app able to
+                    // re-edit its results
                     File imageFile = new File(editedPictureUri.getPath());
-                    Uri editedPictureContentUri =BitmapUtil.getContentUriFromFile(getApplicationContext(), imageFile); 
-                    if(editedPictureContentUri != null) {
+                    Uri editedPictureContentUri = BitmapUtil
+                            .getContentUriFromFile(getApplicationContext(),
+                                    imageFile);
+                    if (editedPictureContentUri != null) {
                         editedPictureUri = editedPictureContentUri;
                     }
                 }
@@ -677,8 +684,7 @@ public class EmailAlbumEditor extends ListActivity implements OnSharedPreference
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.album_editor);
-       
-        
+
         // Get notifications when preferences are updated
         mPrefs = PreferenceManager.getDefaultSharedPreferences(this);
         mPrefs.registerOnSharedPreferenceChangeListener(this);
@@ -697,7 +703,7 @@ public class EmailAlbumEditor extends ListActivity implements OnSharedPreference
             mAdapter = new AlbumAdapter();
         }
         setListAdapter(mAdapter);
-        
+
         retrieveIntentData();
 
         // When the user clicks on an item, open the item edit dialog
@@ -756,22 +762,28 @@ public class EmailAlbumEditor extends ListActivity implements OnSharedPreference
     private void retrieveIntentData() {
         Intent i = getIntent();
         String actionSendMultiple = Compatibility.getActionSendMultiple();
-        if(i.getAction().equals(Intent.ACTION_SEND)) {
-            Uri toSend = (Uri)i.getParcelableExtra(Intent.EXTRA_STREAM);
-            Log.d(LOG_TAG, "Uri to send : " + toSend);
-            mAdapter.addUri(toSend);
-            
-        } else if(actionSendMultiple != null && i.getAction().equals(actionSendMultiple)) {
-            ArrayList<Uri> toSend = i.getParcelableArrayListExtra(Intent.EXTRA_STREAM);
-            Log.d(LOG_TAG, "Uri to send : " + toSend);
-            mAdapter.addAllUris(toSend);
+        if (i.getAction() != null) {
+            if (i.getAction().equals(Intent.ACTION_SEND)) {
+                Uri toSend = (Uri) i.getParcelableExtra(Intent.EXTRA_STREAM);
+                Log.d(LOG_TAG, "Uri to send : " + toSend);
+                mAdapter.addUri(toSend);
+
+            } else if (actionSendMultiple != null
+                    && i.getAction().equals(actionSendMultiple)) {
+                ArrayList<Uri> toSend = i
+                        .getParcelableArrayListExtra(Intent.EXTRA_STREAM);
+                Log.d(LOG_TAG, "Uri to send : " + toSend);
+                mAdapter.addAllUris(toSend);
+            }
         }
     }
 
     private void initPrefs() {
         mPictureQuality = mPrefs.getInt("picturesquality", DEFAULT_JPG_QUALITY);
-        mPictureSize = PictureSizes.fromString(mPrefs.getString("picturessize", getString(R.string.pref_def_picturessize)));
-        mAlbumName = mPrefs.getString("albumname", getString(R.string.pref_def_albumname));
+        mPictureSize = PictureSizes.fromString(mPrefs.getString("picturessize",
+                getString(R.string.pref_def_picturessize)));
+        mAlbumName = mPrefs.getString("albumname",
+                getString(R.string.pref_def_albumname));
         mAddTimestamp = mPrefs.getBoolean("albumtimestamp", mAddTimestamp);
     }
 
@@ -835,6 +847,7 @@ public class EmailAlbumEditor extends ListActivity implements OnSharedPreference
 
     /*
      * (non-Javadoc)
+     * 
      * @see android.app.Activity#onCreateOptionsMenu(android.view.Menu)
      */
     @Override
@@ -844,7 +857,7 @@ public class EmailAlbumEditor extends ListActivity implements OnSharedPreference
         item.setIcon(android.R.drawable.ic_menu_preferences);
         return result;
     }
-    
+
     /*
      * (non-Javadoc)
      * 
@@ -856,9 +869,10 @@ public class EmailAlbumEditor extends ListActivity implements OnSharedPreference
         // The BitmapLoader might have some caches to clear.
         BitmapLoader.onLowMemory();
     }
-    
+
     /*
      * (non-Javadoc)
+     * 
      * @see android.app.Activity#onOptionsItemSelected(android.view.MenuItem)
      */
     @Override
@@ -1101,14 +1115,15 @@ public class EmailAlbumEditor extends ListActivity implements OnSharedPreference
         };
         previewLoader.execute(mSelectedItem);
     }
-    
+
     /**
      * Start the settings activity.
      */
     private void startPreferencesActivity() {
         Intent i = new Intent(getApplicationContext(),
                 EmailAlbumPreferences.class);
-        i.putExtra(EmailAlbumPreferences.EXTRA_SCREEN, EmailAlbumPreferences.SCREEN_CREATOR);
+        i.putExtra(EmailAlbumPreferences.EXTRA_SCREEN,
+                EmailAlbumPreferences.SCREEN_CREATOR);
         startActivity(i);
     }
 
