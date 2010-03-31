@@ -21,6 +21,7 @@ package com.kg.emailalbum.mobile.creator;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -176,7 +177,7 @@ public class SelectPictures extends Activity {
         /** Contains all the pending requests for thumbnails. */
         private LinkedList<Uri> mPendingThumbnailRequests = new LinkedList<Uri>();
         /** Stores Uris selected by the user */
-        private Set<Uri> mSelectedUris = new HashSet<Uri>(20);
+        private Set<Uri> mSelectedUris = new LinkedHashSet<Uri>(20);
 
         private ThumbnailGetter mThmGetter = null;
 
