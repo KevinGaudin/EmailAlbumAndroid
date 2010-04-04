@@ -78,6 +78,7 @@
 		- Conserve l\'ordre de sélection des photos lors de l\'ajout à un nouvel album\n
 		- Permet la création d\'album depuis d\'autres applis (ex: Galerie)
 		- Ajout des dernières nouveautés dans cette fenêtre
+		- Nouvelle icône de lancement
 	</string>
 	<string name="url_donate">
 		https://www.paypal.com/cgi-bin/webscr?cmd=_donations&amp;business=DT9H5GSCL9U76&amp;lc=FR&amp;item_name=EmailAlbum%20Viewer&amp;currency_code=EUR&amp;bn=PP-DonationsBF:btn_donateCC_LG.gif:NonHosted</string>
@@ -125,8 +126,8 @@
 	<string name="btn_pick_pictures">Ajouter</string>
 	<string name="btn_selection_done">OK</string>
 	<string name="select_bucket">Choisissez le dossier d\'images</string>
-	<string name="clk_to_edit">Ajouter une légende...</string>
-	<string name="dialog_ask_caption">Type the caption for this picture</string>
+	<string name="clk_to_edit">Editer, ajouter une légende...</string>
+	<string name="dialog_ask_caption">Saisissez une légende</string>
 	<string name="send_album_with">Envoyer l\'album avec...</string>
 	<string name="exporting">Création de l\'album...</string>
 	<string name="preparing_preview">Chargement...</string>
