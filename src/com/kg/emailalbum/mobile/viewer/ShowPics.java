@@ -44,6 +44,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
+import android.provider.MediaStore.Images;
 import android.util.Log;
 import android.view.Display;
 import android.view.GestureDetector;
@@ -624,6 +625,7 @@ public class ShowPics extends Activity implements OnGestureListener,
         // Display an edit button only if an application is available
         Intent intent = new Intent(Intent.ACTION_EDIT);
         intent.setType("image/jpeg");
+        intent.setData(Uri.withAppendedPath(Images.Media.EXTERNAL_CONTENT_URI, "1"));
         if (getPackageManager().resolveActivity(intent, 0) != null) {
             item = menu.add(0, MENU_EDIT_ID, 0, R.string.menu_edit);
             item.setIcon(android.R.drawable.ic_menu_edit);
@@ -778,7 +780,9 @@ public class ShowPics extends Activity implements OnGestureListener,
             return true;
         case MENU_SEND_ID:
         case MENU_SET_AS_ID:
+        case MENU_EDIT_ID:
             try {
+                String title = getString(R.string.chooser_share);
                 String imageName = mImageNames.get(mPosition);
                 Uri fileUri = BitmapUtil
                         .storePicture(getApplicationContext(),
@@ -791,10 +795,18 @@ public class ShowPics extends Activity implements OnGestureListener,
                     intent.setType("image/jpeg");
                 } else if (item.getItemId() == MENU_SET_AS_ID) {
                     intent = new Intent(Intent.ACTION_ATTACH_DATA, fileUri);
+                    title = getString(R.string.menu_set_as);
+                } else if (item.getItemId() == MENU_EDIT_ID) {
+                    intent = new Intent(Intent.ACTION_EDIT);
+                    title = getString(R.string.menu_edit);
 
+                    Toast.makeText(getApplicationContext(),
+                            R.string.alert_editor, Toast.LENGTH_LONG)
+                            .show();
+                    intent.setDataAndType(fileUri, "image/jpeg");
                 }
                 startActivity(Intent.createChooser(intent,
-                        getText(R.string.chooser_share)));
+                        title));
 
             } catch (IOException e) {
                 Log.e(this.getClass().getName(), "other intents exception", e);
@@ -815,7 +827,6 @@ public class ShowPics extends Activity implements OnGestureListener,
             startPreferencesActivity();
             return true;
         case MENU_OPEN_WITH_ID:
-        case MENU_EDIT_ID:
             try {
                 Uri fileUri = Uri.parse("file://"
                         + saveTmpPicture(
@@ -824,13 +835,8 @@ public class ShowPics extends Activity implements OnGestureListener,
                                 .getAbsolutePath());
                 Log.d(this.getClass().getSimpleName(), "Open Uri : " + fileUri);
                 CharSequence title = null;
-                if (item.getItemId() == MENU_OPEN_WITH_ID) {
-                    intent = new Intent(Intent.ACTION_VIEW);
-                    title = getText(R.string.menu_open_with);
-                } else {
-                    intent = new Intent(Intent.ACTION_EDIT);
-                    title = getText(R.string.menu_edit);
-                }
+                intent = new Intent(Intent.ACTION_VIEW);
+                title = getText(R.string.menu_open_with);
                 Toast.makeText(getApplicationContext(),
                         R.string.alert_different_viewer, Toast.LENGTH_LONG)
                         .show();
@@ -1275,7 +1281,8 @@ public class ShowPics extends Activity implements OnGestureListener,
     private void startPreferencesActivity() {
         Intent i = new Intent(getApplicationContext(),
                 EmailAlbumPreferences.class);
-        i.putExtra(EmailAlbumPreferences.EXTRA_SCREEN, EmailAlbumPreferences.SCREEN_VIEWER);
+        i.putExtra(EmailAlbumPreferences.EXTRA_SCREEN,
+                EmailAlbumPreferences.SCREEN_VIEWER);
 
         startActivity(i);
     }

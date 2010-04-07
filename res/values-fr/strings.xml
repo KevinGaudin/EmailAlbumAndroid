@@ -79,11 +79,13 @@
 		- Permet la création d\'album depuis d\'autres applis (ex: Galerie)
 		- Ajout des dernières nouveautés dans cette fenêtre
 		- Nouvelle icône de lancement
+		- Ajout de la compatibilité avec Photoshop.com pour l\'édition de photos dans la visionneuse d\'album
 	</string>
 	<string name="url_donate">
 		https://www.paypal.com/cgi-bin/webscr?cmd=_donations&amp;business=DT9H5GSCL9U76&amp;lc=FR&amp;item_name=EmailAlbum%20Viewer&amp;currency_code=EUR&amp;bn=PP-DonationsBF:btn_donateCC_LG.gif:NonHosted</string>
 	<string name="alert_filemanager_missing">OI File Manager est nécessaire pour ouvrir des albums et enregistrer des images depuis/vers la SD Card. Voulez-vous l\'installer ? (C\'est gratuit)</string>
 	<string name="alert_different_viewer">Ouverture de l\'image dans une autre application. Bouton Retour pour revenir à EmailAlbum Viewer</string>
+	<string name="alert_editor">Ouverture de l\'image dans un éditeur. Si Photoshop, le résultat sera ajouté à la Galerie.</string>
 	<string name="start_slideshow">Démarrer Diaporama</string>
 	<string name="stop_slideshow">Arrêter Diaporama</string>
 	
