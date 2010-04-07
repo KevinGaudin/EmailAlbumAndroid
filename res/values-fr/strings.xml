@@ -77,8 +77,8 @@
 		Nouveautés version 2.3.0 :\n
 		- Conserve l\'ordre de sélection des photos lors de l\'ajout à un nouvel album\n
 		- Permet la création d\'album depuis d\'autres applis (ex: Galerie)
-		- Ajout des dernières nouveautés dans cette fenêtre
-		- Nouvelle icône de lancement
+		- Ajout des dernières nouveautés dans cette fenêtre\n
+		- Nouvelle icône de lancement\n
 		- Ajout de la compatibilité avec Photoshop.com pour l\'édition de photos dans la visionneuse d\'album
 	</string>
 	<string name="url_donate">

@@ -38,7 +38,7 @@
 	<string name="menu_save">Save...</string>
 	<string name="menu_save_selected">Save selected picture</string>
 	<string name="menu_save_all">Save all pictures</string>
-	<string name="menu_about">About EmailAlbum Viewer</string>
+	<string name="menu_about">About EmailAlbum</string>
 	<string name="menu_open_with">Open with...</string>
 	<string name="menu_edit">Edit</string>
 	<string name="menu_demo">Download sample album</string>
@@ -74,8 +74,8 @@
 		New in version 2.3.0 :\n
 		- Keep pictures selection order when adding pictures to an album\n
 		- Handle creation of a new album from other apps (like Gallery)\n
-		- Addition of the latest changes to this dialog
-		- New launcher icon
+		- Addition of the latest changes to this dialog\n
+		- New launcher icon\n
 		- Compatibility with Photoshop.com in album viewer picture edition 
 	</string>
 	<string name="url_donate">https://www.paypal.com/cgi-bin/webscr?cmd=_donations&amp;business=DT9H5GSCL9U76&amp;lc=EN&amp;item_name=EmailAlbum%20Viewer&amp;currency_code=EUR&amp;bn=PP-DonationsBF:btn_donateCC_LG.gif:NonHosted</string>
