@@ -15,16 +15,16 @@ public class Compatibility {
             
             return actionSendMultipleValue;
         } catch (SecurityException e) {
-            Log.e(LOG_TAG, "Error : ", e);
+            Log.w(LOG_TAG, "Error : ", e);
             return null;
         } catch (NoSuchFieldException e) {
-            Log.e(LOG_TAG, "Error : ", e);
+            Log.w(LOG_TAG, "Error : ", e);
             return null;
         } catch (IllegalArgumentException e) {
-            Log.e(LOG_TAG, "Error : ", e);
+            Log.w(LOG_TAG, "Error : ", e);
             return null;
         } catch (IllegalAccessException e) {
-            Log.e(LOG_TAG, "Error : ", e);
+            Log.w(LOG_TAG, "Error : ", e);
             return null;
         }
     }
