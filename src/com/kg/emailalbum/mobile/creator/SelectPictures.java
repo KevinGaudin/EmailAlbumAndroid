@@ -20,7 +20,6 @@ package com.kg.emailalbum.mobile.creator;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
