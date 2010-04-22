@@ -563,10 +563,13 @@ public class SelectPictures extends Activity {
         Cursor cursor = MediaStore.Images.Media.query(cr,
                 MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection);
 
-        while (cursor != null && !cursor.isLast()) {
-            // Store all the buckets labels in a Set
+        if(cursor != null) {
             cursor.moveToNext();
-            mBuckets.add(cursor.getString(0));
+            while (!cursor.isLast()) {
+                // Store all the buckets labels in a Set
+                cursor.moveToNext();
+                mBuckets.add(cursor.getString(0));
+            }
         }
         Log.d(getClass().getSimpleName(), "Buckets : " + mBuckets.toString());
 
