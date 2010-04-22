@@ -58,6 +58,7 @@ import android.widget.CompoundButton;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.Spinner;
+import android.widget.Toast;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 
 import com.kg.emailalbum.mobile.R;
@@ -564,8 +565,8 @@ public class SelectPictures extends Activity {
                 MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection);
 
         if(cursor != null) {
-            cursor.moveToNext();
-            while (!cursor.isLast()) {
+            cursor.moveToFirst();
+            while (!cursor.isAfterLast()) {
                 // Store all the buckets labels in a Set
                 cursor.moveToNext();
                 mBuckets.add(cursor.getString(0));
@@ -573,6 +574,10 @@ public class SelectPictures extends Activity {
         }
         Log.d(getClass().getSimpleName(), "Buckets : " + mBuckets.toString());
 
+        if(mBuckets.size() == 0) {
+            Toast.makeText(getApplicationContext(), R.string.no_files_error, Toast.LENGTH_LONG).show();
+            this.finish();
+        }
         // Prepare the adapter for the spinner
         String[] values = new String[mBuckets.size()];
         values = mBuckets.toArray(values);
