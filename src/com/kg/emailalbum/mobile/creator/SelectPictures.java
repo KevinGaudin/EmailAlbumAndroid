@@ -566,7 +566,7 @@ public class SelectPictures extends Activity {
 
         if(cursor != null) {
             cursor.moveToFirst();
-            while (!cursor.isAfterLast()) {
+            while (!cursor.isLast() && !cursor.isAfterLast()) {
                 // Store all the buckets labels in a Set
                 cursor.moveToNext();
                 mBuckets.add(cursor.getString(0));
