@@ -69,7 +69,7 @@ public class CacheManager {
             // If an external storage is available, use it as it will prevent
             // from overloading the internal memory.
             result = new File(Environment.getExternalStorageDirectory(),
-                    "EmailAlbum/.cache/" + subdir);
+                    "data/EmailAlbum/.cache/" + subdir);
         }
 
         // Physically create the directory (and its parents) if it does not
