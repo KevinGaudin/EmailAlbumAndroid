@@ -23,8 +23,8 @@
 	android:layout_gravity="fill_horizontal">
 	<ImageView android:id="@+id/thumbnail" android:layout_width="wrap_content"
 		android:layout_height="wrap_content" android:src="@drawable/robot"
-		android:background="@drawable/picture_frame" android:adjustViewBounds="true"
-		android:minWidth="80px"></ImageView>
+		android:adjustViewBounds="true"
+		android:minWidth="80px" android:scaleType="centerInside"></ImageView>
 	<TextView android:text="TextView01" android:id="@+id/image_name"
 		android:textColor="@android:color/white"
 		android:layout_width="fill_parent" android:layout_height="wrap_content"></TextView>
