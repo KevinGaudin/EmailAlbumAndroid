@@ -27,6 +27,11 @@
 			android:entryValues="@array/picturessizesvalues" android:title="@string/pref_picturessize_title"
 			android:dialogTitle="@string/pref_picturessize_title"
 			android:defaultValue="@string/pref_def_picturessize" />
+		<ListPreference android:key="albumtype"
+			android:summary="@string/pref_albumtype_summary" android:entries="@array/albumtypes"
+			android:entryValues="@array/albumtypesvalues" android:title="@string/pref_albumtype_title"
+			android:dialogTitle="@string/pref_albumtype_title"
+			android:defaultValue="@string/pref_def_albumtype" />
 		<EditTextPreference android:title="@string/pref_albumname_title"
 			android:key="albumname" android:defaultValue="@string/pref_def_albumname"
 			android:summary="@string/pref_albumname_summary" android:maxLines="1"

@@ -117,6 +117,9 @@
     <string name="pref_picturesquality_summary">The higher the value, the best quality, but also the heaviest files.</string>
     <string name="pref_picturesquality_title">Pictures quality</string>
     <string name="pref_def_picturesquality">70</string>
+    <string name="pref_albumtype_summary">Choose the type of packaging for your pictures.</string>
+    <string name="pref_albumtype_title">Album type</string>
+    <string name="pref_def_albumtype">emailalbum</string>
     <string name="pref_albumname_summary">Choose a filename for the album.</string>
     <string name="pref_albumname_title">Album name</string>
     <string name="pref_def_albumname">album</string>
