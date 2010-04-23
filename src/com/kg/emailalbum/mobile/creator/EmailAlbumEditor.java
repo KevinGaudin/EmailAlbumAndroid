@@ -29,9 +29,8 @@ import java.util.Formatter;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
-import java.util.jar.JarEntry;
+import java.util.jar.JarInputStream;
 import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 import android.app.Activity;
@@ -68,7 +67,6 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.kg.emailalbum.mobile.EmailAlbumPreferences;
 import com.kg.emailalbum.mobile.R;
@@ -90,6 +88,29 @@ import com.kg.oifilemanager.intents.FileManagerIntents;
 public class EmailAlbumEditor extends ListActivity implements
         OnSharedPreferenceChangeListener {
 
+    /**
+     * Different kinds of albums we can generate.
+     */
+    private enum AlbumTypes {
+        EMAILALBUM, ZIP, MAIL;
+
+        public static AlbumTypes fromString(String string) {
+            if("emailalbum".equals(string)) {
+                return EMAILALBUM;
+            } else if ("zip".equals(string)) {
+                return ZIP;
+            } else if ("mail".equals(string)) {
+                return MAIL;
+            }
+            return EMAILALBUM;
+        }
+    }
+    
+    /**
+     * The different sizes which can be used when resizing pictures.
+     * 1024x768 is not proposed to the user for the moment as we have
+     * memory issues when loading pictures so large. 
+     */
     private enum PictureSizes {
         S640X480(640, 480), S800X600(800, 600), S1024X768(1024, 768);
 
@@ -363,8 +384,8 @@ public class EmailAlbumEditor extends ListActivity implements
      * Asynchronous task for exporting current album to an EmailAlbum jar file.
      */
     public class ExportAlbumTask extends AsyncTask<File, Integer, Uri> {
-        // Constants used to tell the task that it has to send the result
-        // album or only store it.
+        // These constants are used to tell the task that it has to send
+        // the result album or only store it.
         /**
          * Export to internal storage.
          */
@@ -399,36 +420,43 @@ public class EmailAlbumEditor extends ListActivity implements
 
             // Generate a filename based on current date and time
             Calendar today = Calendar.getInstance();
+            String albumExtension = ".jar";
+            if (mAlbumType == AlbumTypes.ZIP) {
+                albumExtension = ".zip";
+            }
             File album = new File(dests[0], mAlbumName.replaceAll("\\W", "_")
                     + (mAddTimestamp ? DateFormat.format("_yyyyMMdd_hhmm",
-                            today) : "") + ".jar");
+                            today) : "") + albumExtension);
             try {
                 // Total progress count.
                 // 14 is the number of files contained in an 'empty' EmailAlbum
                 // jar. The last +1 is for the content file description
-                int count = 14 + mAdapter.mContentModel.size() + 1;
+                
+                int count = (mAlbumType == AlbumTypes.EMAILALBUM ? 14 : 0) + mAdapter.mContentModel.size() + 1;
 
-                // First copy the album skeleton
-                ZipInputStream in = new ZipInputStream(getAssets().open(
-                        getAssets().list("")[0]));
+                ZipEntry entry = null;
                 ZipOutputStream out = new ZipOutputStream(new FileOutputStream(
                         album));
-                ZipEntry entry = null;
                 int entryNumber = 0;
-                while ((entry = in.getNextEntry()) != null) {
-                    out.putNextEntry(new ZipEntry(entry.getName()));
-                    byte[] buffer = new byte[2048];
-                    int bytesRead = 0;
-                    while ((bytesRead = in.read(buffer)) >= 0) {
-                        out.write(buffer, 0, bytesRead);
-                    }
-                    out.closeEntry();
-                    in.closeEntry();
-                    entryNumber++;
-                    publishProgress((int) (((float) entryNumber / (float) count) * 100));
-                }
-                in.close();
 
+                // First copy the album skeleton (only for EmailAlbums, not for zip albums)
+                if(mAlbumType == AlbumTypes.EMAILALBUM) {
+                    JarInputStream in = new JarInputStream(getAssets().open(
+                            getAssets().list("")[0]));
+                    while ((entry = in.getNextEntry()) != null) {
+                        out.putNextEntry(new ZipEntry(entry.getName()));
+                        byte[] buffer = new byte[2048];
+                        int bytesRead = 0;
+                        while ((bytesRead = in.read(buffer)) >= 0) {
+                            out.write(buffer, 0, bytesRead);
+                        }
+                        out.closeEntry();
+                        in.closeEntry();
+                        entryNumber++;
+                        publishProgress((int) (((float) entryNumber / (float) count) * 100));
+                    }
+                    in.close();
+                }
                 // Now add pictures.
                 // During this process, we build the content description file
                 // data in a Properties.
@@ -449,8 +477,12 @@ public class EmailAlbumEditor extends ListActivity implements
                     // Associate the caption with the picture name.
                     contentFileBuilder.put(entryName, item.caption);
 
-                    entry = new JarEntry(ALBUM_PICTURES_PATH + entryName);
-
+                    if(mAlbumType == AlbumTypes.EMAILALBUM) {
+                        entry = new ZipEntry(ALBUM_PICTURES_PATH + entryName);
+                    } else {
+                        entry = new ZipEntry(entryName);
+                    }
+                    
                     // Load and resize a full color picture
                     Bitmap bmp = BitmapLoader.load(getApplicationContext(),
                             item.uri, mPictureSize.getWidth(), mPictureSize
@@ -473,7 +505,11 @@ public class EmailAlbumEditor extends ListActivity implements
                 }
 
                 // finally write content file
-                entry = new JarEntry(ALBUM_CONTENT_FILE);
+                if(mAlbumType == AlbumTypes.EMAILALBUM) {
+                    entry = new ZipEntry(ALBUM_CONTENT_FILE);
+                } else {
+                    entry = new ZipEntry(ZIP_CONTENT_FILE);
+                }
                 out.putNextEntry(entry);
                 contentFileBuilder.save(out, "");
                 out.closeEntry();
@@ -534,6 +570,7 @@ public class EmailAlbumEditor extends ListActivity implements
     private static final String ALBUM_PICTURES_PATH = "com/kg/emailalbum/viewer/pictures/";
     private static final String ALBUM_CONTENT_FILE = ALBUM_PICTURES_PATH
             + "content";
+    private static final String ZIP_CONTENT_FILE = "content.txt";
 
     private static final int DEFAULT_JPG_QUALITY = 70;
 
@@ -573,6 +610,7 @@ public class EmailAlbumEditor extends ListActivity implements
     private boolean mAddTimestamp = true;
     private int mPictureQuality = DEFAULT_JPG_QUALITY;
     private PictureSizes mPictureSize = null;
+    private AlbumTypes mAlbumType = AlbumTypes.EMAILALBUM;
 
     /**
      * Listener which applies items removals when TouchInterceptor sends remove
@@ -784,6 +822,7 @@ public class EmailAlbumEditor extends ListActivity implements
                 getString(R.string.pref_def_picturessize)));
         mAlbumName = mPrefs.getString("albumname",
                 getString(R.string.pref_def_albumname));
+        mAlbumType = AlbumTypes.fromString(mPrefs.getString("albumtype", getString(R.string.pref_def_albumtype)));
         mAddTimestamp = mPrefs.getBoolean("albumtimestamp", mAddTimestamp);
     }
 
