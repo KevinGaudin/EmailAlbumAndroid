@@ -34,9 +34,12 @@ import android.util.Log;
  *
  */
 public class ZipUtil {
-	public static InputStream getInputStream(ZipFile archive, ZipEntry entry)
+	private static final String LOG_TAG = ZipUtil.class.getSimpleName();
+
+    public static InputStream getInputStream(ZipFile archive, ZipEntry entry)
 			throws IOException {
-		if (archive.getEntry("META-INF/MANIFEST.MF") != null) {
+		if (archive.getEntry("META-INF/MANIFEST.MF") != null
+		        || Integer.parseInt(android.os.Build.VERSION.SDK) >= 5) {
 			return archive.getInputStream(entry);
 		}
 
@@ -48,16 +51,18 @@ public class ZipUtil {
 
 			try {
 				currentEntryName = zio.getNextEntry().getName();
+				Log.d(LOG_TAG, "Examining entry : " + currentEntryName);
 			} catch (Exception e) {
 				// Might be a wrong character encoding... file won't be read
 				// anyway.
-				Log.e(ZipUtil.class.getSimpleName(),
+				Log.e(LOG_TAG,
 						"Read a bad UTF-8 entry name", e);
 				return null;
 			}
 			if (currentEntryName != null
 					&& currentEntryName.equals(entry.getName())) {
 				found = true;
+				Log.d(LOG_TAG, "Entry found");
 			}
 		}
 		if (found) {
