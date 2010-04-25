@@ -32,7 +32,7 @@
 	<string name="select_directory">Please select destination folder...</string>
 	<string name="btn_select_directory">Put it here !</string>
 	<string name="menu_set_as">Set as...</string>
-	<string name="menu_load_album">Open an album</string>
+	<string name="menu_load_album">View an album</string>
 	<string name="menu_share">Share</string>
 	<string name="chooser_share">Open with...</string>
 	<string name="menu_save">Save...</string>

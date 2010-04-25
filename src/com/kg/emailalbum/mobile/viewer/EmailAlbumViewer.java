@@ -65,7 +65,9 @@ import android.widget.Toast;
 import com.kg.emailalbum.mobile.AboutDialog;
 import com.kg.emailalbum.mobile.EmailAlbumPreferences;
 import com.kg.emailalbum.mobile.R;
+import com.kg.emailalbum.mobile.creator.EmailAlbumEditor;
 import com.kg.emailalbum.mobile.util.CacheManager;
+import com.kg.emailalbum.mobile.util.HumanReadableProperties;
 import com.kg.emailalbum.mobile.util.ZipUtil;
 import com.kg.oifilemanager.intents.FileManagerIntents;
 
@@ -204,8 +206,7 @@ public class EmailAlbumViewer extends ListActivity {
             String shortName = currentMetaData.get(KEY_SHORTNAME);
             StringBuilder text = new StringBuilder(shortName);
 
-            if (currentMetaData.get(KEY_FULLNAME).startsWith(
-                    "com/kg/emailalbum/viewer/pictures/")) {
+            if (mCaptions != null && !mCaptions.isEmpty()) {
                 String caption = (String) mCaptions.get(shortName);
                 if (caption != null && !"".equals(caption.trim())) {
                     text.append("\n\n").append(caption);
@@ -382,14 +383,21 @@ public class EmailAlbumViewer extends ListActivity {
 
                     // Test if an EmailAlbum description file is present
                     ZipEntry captions = mArchive
-                            .getEntry("com/kg/emailalbum/viewer/pictures/content");
+                            .getEntry(EmailAlbumEditor.ALBUM_CONTENT_FILE);
                     if (captions != null) {
                         Log.d(this.getClass().getSimpleName(),
                                 "content file found !");
-                        loadCaptions(captions);
+                        loadCaptions(captions, false);
                     } else {
-                        Log.d(this.getClass().getSimpleName(),
-                                "no content file !");
+                        captions = mArchive
+                                .getEntry(EmailAlbumEditor.ZIP_CONTENT_FILE);
+                        if (captions != null) {
+                            loadCaptions(captions, true);
+
+                        } else {
+                            Log.d(this.getClass().getSimpleName(),
+                                    "no content file !");
+                        }
                     }
 
                     ZipEntry entry = null;
@@ -442,10 +450,14 @@ public class EmailAlbumViewer extends ListActivity {
      *            The ZipEntry containing the captions.
      * @throws IOException
      */
-    private void loadCaptions(ZipEntry captions) throws IOException {
+    private void loadCaptions(ZipEntry captions, boolean isHumanReadableProperties) throws IOException {
         mCaptions = new Bundle();
-        Properties props = new Properties();
-        props.load(ZipUtil.getInputStream(mArchive, captions));
+        HumanReadableProperties props = new HumanReadableProperties();
+        if(isHumanReadableProperties) {
+            props.loadHumanReadable(ZipUtil.getInputStream(mArchive, captions));
+        } else {
+            props.load(ZipUtil.getInputStream(mArchive, captions));
+        }
         for (Object key : props.keySet()) {
             mCaptions.putString((String) key, props.getProperty((String) key));
         }
@@ -605,6 +617,7 @@ public class EmailAlbumViewer extends ListActivity {
 
     /*
      * (non-Javadoc)
+     * 
      * @see android.app.Activity#onCreateOptionsMenu(android.view.Menu)
      */
     @Override
@@ -798,8 +811,8 @@ public class EmailAlbumViewer extends ListActivity {
     }
 
     /**
-     * Save all the archive pictures.
-     * TODO: use AsyncTask
+     * Save all the archive pictures. TODO: use AsyncTask
+     * 
      * @param file
      *            The destination directory.
      * @throws IOException
@@ -841,6 +854,7 @@ public class EmailAlbumViewer extends ListActivity {
 
     /**
      * Save one picture from the archive
+     * 
      * @param position
      * @param destDir
      * @return
@@ -873,12 +887,14 @@ public class EmailAlbumViewer extends ListActivity {
     private void startPreferencesActivity() {
         Intent i = new Intent(getApplicationContext(),
                 EmailAlbumPreferences.class);
-        i.putExtra(EmailAlbumPreferences.EXTRA_SCREEN, EmailAlbumPreferences.SCREEN_VIEWER);
+        i.putExtra(EmailAlbumPreferences.EXTRA_SCREEN,
+                EmailAlbumPreferences.SCREEN_VIEWER);
         startActivity(i);
     }
 
     /**
      * Start the asynchronous thumbnails creation process.
+     * 
      * @param clearThumbnails
      */
     private void startThumbnailsCreation(boolean clearThumbnails) {

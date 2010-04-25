@@ -28,7 +28,6 @@ import java.util.Collection;
 import java.util.Formatter;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Properties;
 import java.util.jar.JarInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -74,6 +73,7 @@ import com.kg.emailalbum.mobile.util.BitmapLoader;
 import com.kg.emailalbum.mobile.util.BitmapUtil;
 import com.kg.emailalbum.mobile.util.CacheManager;
 import com.kg.emailalbum.mobile.util.Compatibility;
+import com.kg.emailalbum.mobile.util.HumanReadableProperties;
 import com.kg.oifilemanager.intents.FileManagerIntents;
 
 /**
@@ -460,7 +460,7 @@ public class EmailAlbumEditor extends ListActivity implements
                 // Now add pictures.
                 // During this process, we build the content description file
                 // data in a Properties.
-                Properties contentFileBuilder = new Properties();
+                HumanReadableProperties contentFileBuilder = new HumanReadableProperties();
                 String entryName = "";
                 int itemNumber = 0;
                 BitmapLoader.onLowMemory();
@@ -507,11 +507,13 @@ public class EmailAlbumEditor extends ListActivity implements
                 // finally write content file
                 if(mAlbumType == AlbumTypes.EMAILALBUM) {
                     entry = new ZipEntry(ALBUM_CONTENT_FILE);
+                    out.putNextEntry(entry);
+                    contentFileBuilder.store(out, mAlbumName);
                 } else {
                     entry = new ZipEntry(ZIP_CONTENT_FILE);
+                    out.putNextEntry(entry);
+                    contentFileBuilder.storeHumanReadable(out, mAlbumName);
                 }
-                out.putNextEntry(entry);
-                contentFileBuilder.save(out, "");
                 out.closeEntry();
                 out.finish();
                 out.flush();
@@ -568,9 +570,9 @@ public class EmailAlbumEditor extends ListActivity implements
 
     // structure details for the generated album
     private static final String ALBUM_PICTURES_PATH = "com/kg/emailalbum/viewer/pictures/";
-    private static final String ALBUM_CONTENT_FILE = ALBUM_PICTURES_PATH
+    public static final String ALBUM_CONTENT_FILE = ALBUM_PICTURES_PATH
             + "content";
-    private static final String ZIP_CONTENT_FILE = "content.txt";
+    public static final String ZIP_CONTENT_FILE = "content.txt";
 
     private static final int DEFAULT_JPG_QUALITY = 70;
 
