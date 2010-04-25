@@ -21,6 +21,7 @@ package com.kg.emailalbum.mobile;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceScreen;
@@ -28,6 +29,7 @@ import android.widget.Toast;
 
 import com.kg.emailalbum.mobile.R;
 import com.kg.emailalbum.mobile.util.CacheManager;
+import com.kg.emailalbum.mobile.util.Compatibility;
 
 /**
  * Standard preferences activity.
@@ -50,6 +52,30 @@ public class EmailAlbumPreferences extends PreferenceActivity {
         if (screen != null) {
             setPreferenceScreen((PreferenceScreen) findPreference(screen));
         }
+        
+        // Remove the email with multiple attachments option if not possible
+        // on the running android version
+        if (Compatibility.getActionSendMultiple() == null) {
+            ListPreference albumType = (ListPreference) findPreference("albumtype");
+            int iEmail = albumType.findIndexOfValue("mail");
+            if (iEmail >= 0) {
+                CharSequence[] entries = albumType.getEntries();
+                CharSequence[] values = albumType.getEntryValues();
+                CharSequence[] newEntries = new CharSequence[entries.length - 1];
+                CharSequence[] newValues = new CharSequence[values.length - 1];
+                int iNew = 0;
+                for (int i = 0; i < entries.length; i++) {
+                    if (i != iEmail) {
+                        newEntries[iNew] = entries[i];
+                        newValues[iNew] = values[i];
+                        iNew++;
+                    }
+                }
+                albumType.setEntries(newEntries);
+                albumType.setEntries(newValues);
+            }
+
+        }
     }
 
     /*
@@ -64,7 +90,7 @@ public class EmailAlbumPreferences extends PreferenceActivity {
         if (preference.getKey().equals("clearcache")) {
             CacheManager cm = new CacheManager(getApplicationContext());
             int nbDeleted = CacheManager.deleteDirectory(cm.getCacheDir());
-            
+
             Toast.makeText(
                     getApplicationContext(),
                     String.format(getString(R.string.number_files_deleted),
