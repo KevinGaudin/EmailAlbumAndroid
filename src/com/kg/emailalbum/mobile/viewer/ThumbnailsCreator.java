@@ -21,6 +21,7 @@ package com.kg.emailalbum.mobile.viewer;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -165,7 +166,14 @@ public class ThumbnailsCreator extends Thread {
      * Clear generated thumbnails.
      */
     private void clearFiles() {
-        for (File file : mCacheDir.listFiles()) {
+        for (File file : mCacheDir.listFiles(new FilenameFilter() {
+
+            @Override
+            public boolean accept(File dir, String filename) {
+                return filename.endsWith(".jpg") || filename.endsWith(".JPG");
+            }
+            
+        })) {
             file.delete();
         }
     }
