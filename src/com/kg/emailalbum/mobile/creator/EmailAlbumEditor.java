@@ -346,6 +346,14 @@ public class EmailAlbumEditor extends ListActivity implements
             notifyDataSetChanged();
         }
 
+        public ArrayList<Uri> getUris() {
+            ArrayList<Uri> uris = new ArrayList<Uri>();
+            for (AlbumItem item : mContentModel) {
+                uris.add(item.uri);
+            }
+            return uris;
+        }
+
     }
 
     /**
@@ -1087,8 +1095,23 @@ public class EmailAlbumEditor extends ListActivity implements
      * Starts the process of sending an album.
      */
     private void sendAlbum() {
-        File dir = new CacheManager(getApplicationContext()).getCacheDir();
-        new ExportAlbumTask(ExportAlbumTask.SEND).execute(dir);
+        if(mAlbumType.equals(AlbumTypes.MAIL)) {
+            // TODO : find a way to provide resized pictures
+            // implement a ContentProvider ?
+            Intent sendIntent = new Intent(Compatibility.getActionSendMultiple());
+//            String subject = mAlbumName;
+//            String body = "Corps du message";
+//            sendIntent.putExtra(Intent.EXTRA_TEXT, body);
+//            sendIntent.putExtra(Intent.EXTRA_SUBJECT, subject);
+            ArrayList<Uri> uris = mAdapter.getUris();
+            Log.d(LOG_TAG, "Sending list of Uris : " + uris.toString());
+            sendIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
+            sendIntent.setType("image/*");
+            startActivity(sendIntent);   
+        } else {
+            File dir = new CacheManager(getApplicationContext()).getCacheDir();
+            new ExportAlbumTask(ExportAlbumTask.SEND).execute(dir);
+        }
     }
 
     /**
