@@ -26,4 +26,10 @@
 		<item>Fondu</item>
 		<item>Carrousel</item>
 	</string-array>
+	
+	<string-array name="albumtypes">
+		<item>Diaporama EmailAlbum</item>
+		<item>Archive Zip </item>
+		<!--<item>Mail avec pièces jointes</item>
+	--></string-array>
 </resources>

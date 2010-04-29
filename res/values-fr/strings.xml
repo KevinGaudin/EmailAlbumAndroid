@@ -74,8 +74,9 @@
 		\n
 	</string>
 	<string name="changelog">
-		Nouveautés version 2.3.0 :\n
+		Nouveautés version 2.4.0 :\n
 		- Les albums peuvent être exportés au format Zip simple\n
+		- Fixed critical issue when opening album from gmail\n
 	</string>
 	<string name="url_donate">
 		https://www.paypal.com/cgi-bin/webscr?cmd=_donations&amp;business=DT9H5GSCL9U76&amp;lc=FR&amp;item_name=EmailAlbum%20Viewer&amp;currency_code=EUR&amp;bn=PP-DonationsBF:btn_donateCC_LG.gif:NonHosted</string>
@@ -111,6 +112,9 @@
     <string name="pref_picturessize_title">Taille des images</string>
     <string name="pref_picturesquality_summary">Une valeur élevée indique une meilleure qualité, mais un poids plus lourd (par défaut: 70)</string>
     <string name="pref_picturesquality_title">Qualité des images</string>
+    <string name="pref_albumtype_summary">Quel format d\'envoi ?</string>
+    <string name="pref_albumtype_title">Type d\'album</string>
+    <string name="pref_def_albumtype">emailalbum</string>
     <string name="pref_albumname_summary">Choisissez un nom pour l\'album</string>
     <string name="pref_albumname_title">Nom de l\'album</string>
     <string name="pref_albumtimestamp_off">Pas d\'horodatage dans le nom d\'album.</string>
