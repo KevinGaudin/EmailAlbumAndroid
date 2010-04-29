@@ -31,7 +31,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Properties;
+import java.util.Random;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -94,13 +94,15 @@ public class EmailAlbumViewer extends ListActivity {
             try {
                 // Copy the stream from the intent to a temporary file for later
                 // random access
+                Random generator = new Random();
+                int random = generator.nextInt(99999);
                 InputStream intentInputStream = getContentResolver()
                         .openInputStream(mAlbumFileUri);
-                File tempArchive = File.createTempFile("emailalbum", ".zip",
-                        new CacheManager(getApplicationContext())
-                                .getCacheDir("viewer"));
+                File tempArchive = new File(new CacheManager(getApplicationContext())
+                .getCacheDir("viewer"), "emailalbum" + random + ".zip");
                 OutputStream tempOS = new FileOutputStream(tempArchive);
-
+                Log.d(LOG_TAG,"Write retrieved archive : " + tempArchive.getAbsolutePath());
+                
                 byte[] buffer = new byte[256];
                 int readBytes = -1;
                 while ((readBytes = intentInputStream.read(buffer)) != -1) {
