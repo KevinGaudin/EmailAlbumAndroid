@@ -89,8 +89,14 @@ public class CacheManager {
 
     // Clear only the cache of a specific task.
     public void clearCache(String subdir) {
-        for (String cachedFile : getCacheDir(subdir).list()) {
-            deleteDirectory(new File(getCacheDir(subdir), cachedFile));
+        File cacheDir = getCacheDir(subdir);
+        if(cacheDir != null) {
+            String[] files = cacheDir.list();
+            if(files != null && files.length > 0) {
+                for (String cachedFile : getCacheDir(subdir).list()) {
+                    deleteDirectory(new File(getCacheDir(subdir), cachedFile));
+                }
+            }
         }
     }
 
