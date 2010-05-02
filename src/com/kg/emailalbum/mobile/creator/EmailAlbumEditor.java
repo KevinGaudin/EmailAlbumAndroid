@@ -95,7 +95,7 @@ public class EmailAlbumEditor extends ListActivity implements
         EMAILALBUM, ZIP, MAIL;
 
         public static AlbumTypes fromString(String string) {
-            if("emailalbum".equals(string)) {
+            if ("emailalbum".equals(string)) {
                 return EMAILALBUM;
             } else if ("zip".equals(string)) {
                 return ZIP;
@@ -105,11 +105,11 @@ public class EmailAlbumEditor extends ListActivity implements
             return EMAILALBUM;
         }
     }
-    
+
     /**
-     * The different sizes which can be used when resizing pictures.
-     * 1024x768 is not proposed to the user for the moment as we have
-     * memory issues when loading pictures so large. 
+     * The different sizes which can be used when resizing pictures. 1024x768 is
+     * not proposed to the user for the moment as we have memory issues when
+     * loading pictures so large.
      */
     private enum PictureSizes {
         S640X480(640, 480), S800X600(800, 600), S1024X768(1024, 768);
@@ -439,16 +439,18 @@ public class EmailAlbumEditor extends ListActivity implements
                 // Total progress count.
                 // 14 is the number of files contained in an 'empty' EmailAlbum
                 // jar. The last +1 is for the content file description
-                
-                int count = (mAlbumType == AlbumTypes.EMAILALBUM ? 14 : 0) + mAdapter.mContentModel.size() + 1;
+
+                int count = (mAlbumType == AlbumTypes.EMAILALBUM ? 14 : 0)
+                        + mAdapter.mContentModel.size() + 1;
 
                 ZipEntry entry = null;
                 ZipOutputStream out = new ZipOutputStream(new FileOutputStream(
                         album));
                 int entryNumber = 0;
 
-                // First copy the album skeleton (only for EmailAlbums, not for zip albums)
-                if(mAlbumType == AlbumTypes.EMAILALBUM) {
+                // First copy the album skeleton (only for EmailAlbums, not for
+                // zip albums)
+                if (mAlbumType == AlbumTypes.EMAILALBUM) {
                     JarInputStream in = new JarInputStream(getAssets().open(
                             getAssets().list("")[0]));
                     while ((entry = in.getNextEntry()) != null) {
@@ -485,12 +487,12 @@ public class EmailAlbumEditor extends ListActivity implements
                     // Associate the caption with the picture name.
                     contentFileBuilder.put(entryName, item.caption);
 
-                    if(mAlbumType == AlbumTypes.EMAILALBUM) {
+                    if (mAlbumType == AlbumTypes.EMAILALBUM) {
                         entry = new ZipEntry(ALBUM_PICTURES_PATH + entryName);
                     } else {
                         entry = new ZipEntry(entryName);
                     }
-                    
+
                     // Load and resize a full color picture
                     Bitmap bmp = BitmapLoader.load(getApplicationContext(),
                             item.uri, mPictureSize.getWidth(), mPictureSize
@@ -513,7 +515,7 @@ public class EmailAlbumEditor extends ListActivity implements
                 }
 
                 // finally write content file
-                if(mAlbumType == AlbumTypes.EMAILALBUM) {
+                if (mAlbumType == AlbumTypes.EMAILALBUM) {
                     entry = new ZipEntry(ALBUM_CONTENT_FILE);
                     out.putNextEntry(entry);
                     contentFileBuilder.store(out, mAlbumName);
@@ -646,9 +648,9 @@ public class EmailAlbumEditor extends ListActivity implements
      */
     protected void addImages() {
         Intent i = new Intent(getApplicationContext(), SelectPictures.class);
-//        TODO        
-//        Intent i = new Intent(Intent.ACTION_GET_CONTENT);
-//        i.setType("image/*");
+        // TODO
+        // Intent i = new Intent(Intent.ACTION_GET_CONTENT);
+        // i.setType("image/*");
         startActivityForResult(i, ACTIVITY_SELECT_PICTURES);
     }
 
@@ -832,7 +834,8 @@ public class EmailAlbumEditor extends ListActivity implements
                 getString(R.string.pref_def_picturessize)));
         mAlbumName = mPrefs.getString("albumname",
                 getString(R.string.pref_def_albumname));
-        mAlbumType = AlbumTypes.fromString(mPrefs.getString("albumtype", getString(R.string.pref_def_albumtype)));
+        mAlbumType = AlbumTypes.fromString(mPrefs.getString("albumtype",
+                getString(R.string.pref_def_albumtype)));
         mAddTimestamp = mPrefs.getBoolean("albumtimestamp", mAddTimestamp);
     }
 
@@ -865,9 +868,12 @@ public class EmailAlbumEditor extends ListActivity implements
                             // Retrieve the caption and store it
                             EditText txtField = (EditText) ((Dialog) dlg)
                                     .findViewById(R.id.dialog_textfield);
-                            mSelectedItem.caption = txtField.getText()
-                                    .toString().trim();
-                            mAdapter.notifyDataSetChanged();
+                            if (mSelectedItem != null && txtField != null
+                                    && txtField.getText() != null) {
+                                mSelectedItem.caption = txtField.getText()
+                                        .toString().trim();
+                                mAdapter.notifyDataSetChanged();
+                            }
                         }
 
                     });
@@ -1095,19 +1101,20 @@ public class EmailAlbumEditor extends ListActivity implements
      * Starts the process of sending an album.
      */
     private void sendAlbum() {
-        if(mAlbumType.equals(AlbumTypes.MAIL)) {
+        if (mAlbumType.equals(AlbumTypes.MAIL)) {
             // TODO : find a way to provide resized pictures
             // implement a ContentProvider ?
-            Intent sendIntent = new Intent(Compatibility.getActionSendMultiple());
-//            String subject = mAlbumName;
-//            String body = "Corps du message";
-//            sendIntent.putExtra(Intent.EXTRA_TEXT, body);
-//            sendIntent.putExtra(Intent.EXTRA_SUBJECT, subject);
+            Intent sendIntent = new Intent(Compatibility
+                    .getActionSendMultiple());
+            // String subject = mAlbumName;
+            // String body = "Corps du message";
+            // sendIntent.putExtra(Intent.EXTRA_TEXT, body);
+            // sendIntent.putExtra(Intent.EXTRA_SUBJECT, subject);
             ArrayList<Uri> uris = mAdapter.getUris();
             Log.d(LOG_TAG, "Sending list of Uris : " + uris.toString());
             sendIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
             sendIntent.setType("image/*");
-            startActivity(sendIntent);   
+            startActivity(sendIntent);
         } else {
             File dir = new CacheManager(getApplicationContext()).getCacheDir();
             new ExportAlbumTask(ExportAlbumTask.SEND).execute(dir);
