@@ -49,11 +49,11 @@
 	<string-array name="albumtypes">
 		<item>EmailAlbum slideshow</item>
 		<item>Zip Archive</item>
-		<!--<item>Mail with attachments</item>
-	--></string-array>
+		<item>Mail with attachments</item>
+	</string-array>
 	<string-array name="albumtypesvalues">
 		<item>emailalbum</item>
 		<item>zip</item>
-		<!--<item>mail</item>
-	--></string-array>
+		<item>mail</item>
+	</string-array>
 </resources>

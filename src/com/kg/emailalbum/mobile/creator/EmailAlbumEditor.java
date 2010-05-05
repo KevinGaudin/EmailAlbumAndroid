@@ -22,15 +22,20 @@ package com.kg.emailalbum.mobile.creator;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Formatter;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.jar.JarInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+
+import org.acra.ErrorReporter;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -87,6 +92,11 @@ import com.kg.oifilemanager.intents.FileManagerIntents;
  */
 public class EmailAlbumEditor extends ListActivity implements
         OnSharedPreferenceChangeListener {
+
+    private static final String STATE_SELECTED_URI = "SELECTED_URI";
+    private static final String STATE_ROTATIONS = "ROTATIONS";
+    private static final String STATE_CAPTIONS = "CAPTIONS";
+    private static final String STATE_URIS = "URIS";
 
     /**
      * Different kinds of albums we can generate.
@@ -348,12 +358,41 @@ public class EmailAlbumEditor extends ListActivity implements
 
         public ArrayList<Uri> getUris() {
             ArrayList<Uri> uris = new ArrayList<Uri>();
-            for (AlbumItem item : mContentModel) {
+            for(AlbumItem item : mContentModel) {
                 uris.add(item.uri);
             }
             return uris;
         }
 
+        public ArrayList<String> getCaptions() {
+            ArrayList<String> captions = new ArrayList<String>();
+            for(AlbumItem item : mContentModel) {
+                captions.add(item.caption);
+            }
+            return captions;
+        }
+
+        public ArrayList<Integer> getRotations() {
+            ArrayList<Integer> rotations = new ArrayList<Integer>();
+            for(AlbumItem item : mContentModel) {
+                rotations.add(item.rotation);
+            }
+            return rotations;
+        }
+
+        public AlbumItem getItem(Uri uri) {
+            AlbumItem result = null;
+            if(uri != null) {
+                Iterator<AlbumItem> iterItems = mContentModel.iterator();
+                while(iterItems.hasNext() && result == null) {
+                    AlbumItem item = iterItems.next();
+                    if(uri.equals(item.uri)) {
+                        result = item;
+                    }
+                }
+            }
+            return result;
+        }
     }
 
     /**
@@ -402,8 +441,13 @@ public class EmailAlbumEditor extends ListActivity implements
          * Send through ACTION_SEND Intent.
          */
         public static final int SEND = 1;
-
+        /**
+         * Send through ACTION_SEND_MULTIPLE Intent.
+         */
+        public static final int SEND_MULTIPLE = 2;
+        
         int mReason;
+        private HumanReadableProperties mContentFileBuilder;
 
         /**
          * Create a new export task.
@@ -414,6 +458,7 @@ public class EmailAlbumEditor extends ListActivity implements
          */
         public ExportAlbumTask(int reason) {
             mReason = reason;
+            mContentFileBuilder = new HumanReadableProperties();
         }
 
         /*
@@ -426,110 +471,173 @@ public class EmailAlbumEditor extends ListActivity implements
             // Reset progress dialog in case of reuse.
             publishProgress(0);
 
-            // Generate a filename based on current date and time
-            Calendar today = Calendar.getInstance();
-            String albumExtension = ".jar";
-            if (mAlbumType == AlbumTypes.ZIP) {
-                albumExtension = ".zip";
-            }
-            File album = new File(dests[0], mAlbumName.replaceAll("\\W", "_")
-                    + (mAddTimestamp ? DateFormat.format("_yyyyMMdd_hhmm",
-                            today) : "") + albumExtension);
-            try {
+            File album;
+            if (mAlbumType.equals(AlbumTypes.MAIL)) {
+                ErrorReporter.getInstance().addCustomData("Format", "Mail Attachments");
+                album = dests[0];
                 // Total progress count.
-                // 14 is the number of files contained in an 'empty' EmailAlbum
-                // jar. The last +1 is for the content file description
-
-                int count = (mAlbumType == AlbumTypes.EMAILALBUM ? 14 : 0)
-                        + mAdapter.mContentModel.size() + 1;
-
-                ZipEntry entry = null;
-                ZipOutputStream out = new ZipOutputStream(new FileOutputStream(
-                        album));
-                int entryNumber = 0;
-
-                // First copy the album skeleton (only for EmailAlbums, not for
-                // zip albums)
-                if (mAlbumType == AlbumTypes.EMAILALBUM) {
-                    JarInputStream in = new JarInputStream(getAssets().open(
-                            getAssets().list("")[0]));
-                    while ((entry = in.getNextEntry()) != null) {
-                        out.putNextEntry(new ZipEntry(entry.getName()));
-                        byte[] buffer = new byte[2048];
-                        int bytesRead = 0;
-                        while ((bytesRead = in.read(buffer)) >= 0) {
-                            out.write(buffer, 0, bytesRead);
-                        }
-                        out.closeEntry();
-                        in.closeEntry();
-                        entryNumber++;
-                        publishProgress((int) (((float) entryNumber / (float) count) * 100));
-                    }
-                    in.close();
-                }
-                // Now add pictures.
-                // During this process, we build the content description file
-                // data in a Properties.
-                HumanReadableProperties contentFileBuilder = new HumanReadableProperties();
-                String entryName = "";
+                int count = mAdapter.mContentModel.size();
                 int itemNumber = 0;
-                BitmapLoader.onLowMemory();
                 for (AlbumItem item : mAdapter.mContentModel) {
-                    // Create the file name. All pictures have to be named so
-                    // that their alphabetical order is the order set by the
-                    // user for the album.
-                    // This is due to the use of Properties.load() in the jar
-                    // bundled Viewer.
-                    entryName = new Formatter().format("img%04d_%s.jpg",
-                            itemNumber, item.uri.getLastPathSegment())
-                            .toString();
+                    try {
+                        // Create the file name. All pictures have to be named
+                        // so
+                        // that their alphabetical order is the order set by the
+                        // user for the album.
+                        // This is due to the use of Properties.load() in the
+                        // jar
+                        // bundled Viewer.
+                        String picName = new Formatter().format(
+                                "img%04d.jpg", itemNumber,
+                                item.uri.getLastPathSegment()).toString();
 
-                    // Associate the caption with the picture name.
-                    contentFileBuilder.put(entryName, item.caption);
+                        // Load and resize a full color picture
+                        Bitmap bmp = BitmapLoader.load(getApplicationContext(),
+                                item.uri, mPictureSize.getWidth(), mPictureSize
+                                        .getHeight(), Bitmap.Config.ARGB_8888,
+                                false);
 
+                        ErrorReporter.getInstance().addCustomData("Apply rotation ?", ""+ (item.rotation % 360 != 0));
+                        if (item.rotation % 360 != 0) {
+                            // Apply the user specified rotation
+                            bmp = BitmapUtil.rotate(bmp, item.rotation);
+                        }
+
+                        OutputStream out = new FileOutputStream(new File(album,
+                                picName));
+
+                        // Write the picture to the temp dir
+                        ErrorReporter.getInstance().addCustomData("bmp is null ?", ""+ (bmp == null));
+                        bmp.compress(CompressFormat.JPEG, mPictureQuality, out);
+                        
+                        mContentFileBuilder.put(picName, item.caption);
+
+                        // Get rid of the bitmap to avoid memory leaks
+                        bmp.recycle();
+                        out.close();
+                        itemNumber++;
+                        publishProgress((int) (((float) itemNumber / (float) count) * 100));
+                        System.gc();
+                    } catch (IOException e) {
+                        Log.e(LOG_TAG, "Error while creating temp pics", e);
+                    }
+                }
+            } else { // Zip or Jar
+                // Generate a filename based on current date and time
+                CharSequence timestamp = "";
+                if (mAddTimestamp) {
+                    timestamp = DateFormat.format("_yyyyMMdd_hhmm", Calendar
+                            .getInstance());
+                }
+
+                String albumExtension = ".jar";
+                ErrorReporter.getInstance().addCustomData("Format", "EmailAlbum");
+                if (mAlbumType == AlbumTypes.ZIP) {
+                    ErrorReporter.getInstance().addCustomData("Format", "Zip");
+                    albumExtension = ".zip";
+                }
+                album = new File(dests[0], mAlbumName.replaceAll("\\W", "_")
+                        + timestamp + albumExtension);
+                try {
+                    // Total progress count.
+                    // 14 is the number of files contained in an 'empty'
+                    // EmailAlbum
+                    // jar. The last +1 is for the content file description
+
+                    int count = (mAlbumType == AlbumTypes.EMAILALBUM ? 14 : 0)
+                            + mAdapter.mContentModel.size() + 1;
+
+                    ZipEntry entry = null;
+                    ZipOutputStream out = new ZipOutputStream(
+                            new FileOutputStream(album));
+                    int entryNumber = 0;
+
+                    // First copy the album skeleton (only for EmailAlbums, not
+                    // for
+                    // zip albums)
                     if (mAlbumType == AlbumTypes.EMAILALBUM) {
-                        entry = new ZipEntry(ALBUM_PICTURES_PATH + entryName);
+                        JarInputStream in = new JarInputStream(getAssets()
+                                .open(getAssets().list("")[0]));
+                        while ((entry = in.getNextEntry()) != null) {
+                            out.putNextEntry(new ZipEntry(entry.getName()));
+                            byte[] buffer = new byte[2048];
+                            int bytesRead = 0;
+                            while ((bytesRead = in.read(buffer)) >= 0) {
+                                out.write(buffer, 0, bytesRead);
+                            }
+                            out.closeEntry();
+                            in.closeEntry();
+                            entryNumber++;
+                            publishProgress((int) (((float) entryNumber / (float) count) * 100));
+                        }
+                        in.close();
+                    }
+                    
+                    String entryName = "";
+                    int itemNumber = 0;
+                    BitmapLoader.onLowMemory();
+                    for (AlbumItem item : mAdapter.mContentModel) {
+                        // Create the file name. All pictures have to be named
+                        // so
+                        // that their alphabetical order is the order set by the
+                        // user for the album.
+                        // This is due to the use of Properties.load() in the
+                        // jar
+                        // bundled Viewer.
+                        entryName = new Formatter().format("img%04d_%s.jpg",
+                                itemNumber, item.uri.getLastPathSegment())
+                                .toString();
+
+                        // Associate the caption with the picture name.
+                        mContentFileBuilder.put(entryName, item.caption);
+
+                        if (mAlbumType == AlbumTypes.EMAILALBUM) {
+                            entry = new ZipEntry(ALBUM_PICTURES_PATH
+                                    + entryName);
+                        } else {
+                            entry = new ZipEntry(entryName);
+                        }
+
+                        // Load and resize a full color picture
+                        Bitmap bmp = BitmapLoader.load(getApplicationContext(),
+                                item.uri, mPictureSize.getWidth(), mPictureSize
+                                        .getHeight(), Bitmap.Config.ARGB_8888,
+                                false);
+
+                        ErrorReporter.getInstance().addCustomData("Apply rotation ?", ""+ (item.rotation % 360 != 0));
+                        if (item.rotation % 360 != 0) {
+                            // Apply the user specified rotation
+                            bmp = BitmapUtil.rotate(bmp, item.rotation);
+                        }
+                        out.putNextEntry(entry);
+                        // Write the picture to the album
+                        ErrorReporter.getInstance().addCustomData("bmp is null ?", ""+ (bmp == null));
+                        bmp.compress(CompressFormat.JPEG, mPictureQuality, out);
+                        // Get rid of the bitmap to avoid memory leaks
+                        bmp.recycle();
+                        out.closeEntry();
+                        itemNumber++;
+                        publishProgress((int) (((float) (entryNumber + itemNumber) / (float) count) * 100));
+                        System.gc();
+                    }
+
+                    // finally write content file
+                    if (mAlbumType == AlbumTypes.EMAILALBUM) {
+                        entry = new ZipEntry(ALBUM_CONTENT_FILE);
+                        out.putNextEntry(entry);
+                        mContentFileBuilder.store(out, mAlbumName);
                     } else {
-                        entry = new ZipEntry(entryName);
+                        entry = new ZipEntry(ZIP_CONTENT_FILE);
+                        out.putNextEntry(entry);
+                        mContentFileBuilder.storeHumanReadable(out, mAlbumName);
                     }
-
-                    // Load and resize a full color picture
-                    Bitmap bmp = BitmapLoader.load(getApplicationContext(),
-                            item.uri, mPictureSize.getWidth(), mPictureSize
-                                    .getHeight(), Bitmap.Config.ARGB_8888,
-                            false);
-
-                    if (item.rotation % 360 != 0) {
-                        // Apply the user specified rotation
-                        bmp = BitmapUtil.rotate(bmp, item.rotation);
-                    }
-                    out.putNextEntry(entry);
-                    // Write the picture to the album
-                    bmp.compress(CompressFormat.JPEG, mPictureQuality, out);
-                    // Get rid of the bitmap to avoid memory leaks
-                    bmp.recycle();
                     out.closeEntry();
-                    itemNumber++;
-                    publishProgress((int) (((float) (entryNumber + itemNumber) / (float) count) * 100));
-                    System.gc();
+                    out.finish();
+                    out.flush();
+                    out.close();
+                } catch (IOException e) {
+                    Log.e(LOG_TAG, "Error while creating album", e);
                 }
-
-                // finally write content file
-                if (mAlbumType == AlbumTypes.EMAILALBUM) {
-                    entry = new ZipEntry(ALBUM_CONTENT_FILE);
-                    out.putNextEntry(entry);
-                    contentFileBuilder.store(out, mAlbumName);
-                } else {
-                    entry = new ZipEntry(ZIP_CONTENT_FILE);
-                    out.putNextEntry(entry);
-                    contentFileBuilder.storeHumanReadable(out, mAlbumName);
-                }
-                out.closeEntry();
-                out.finish();
-                out.flush();
-                out.close();
-            } catch (IOException e) {
-                Log.e(LOG_TAG, "Error while creating album", e);
             }
             publishProgress(100);
             return Uri.fromFile(album);
@@ -542,6 +650,29 @@ public class EmailAlbumEditor extends ListActivity implements
             // Optionally send the resulting file if the user requested it
             if (mReason == SEND) {
                 sendAlbum(result);
+            } else if (mReason == SEND_MULTIPLE) {
+                ArrayList<Uri> uris = new ArrayList<Uri>();
+                for(File item : new File(result.getPath()).listFiles()) {
+                    uris.add(Uri.fromFile(item));
+                }
+                
+                Intent sendIntent = new Intent(Compatibility
+                        .getActionSendMultiple());
+                String subject = mAlbumName;
+                StringWriter bodyWriter = new StringWriter();
+                try {
+                    mContentFileBuilder.storeHumanReadable(bodyWriter, null, null);
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    Log.e(LOG_TAG, "Error : ", e);
+                }
+                sendIntent.putExtra(Intent.EXTRA_TEXT, bodyWriter.toString());
+                sendIntent.putExtra(Intent.EXTRA_SUBJECT, subject);
+                Log.d(LOG_TAG, "Sending list of Uris : " + uris.toString());
+                sendIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
+                sendIntent.setType("image/*");
+                startActivity(sendIntent);
+                
             }
         }
 
@@ -743,6 +874,23 @@ public class EmailAlbumEditor extends ListActivity implements
         // Sets background dithering for older versions of android (1.5 & 1.6)
         findViewById(R.id.album_editor_root).getBackground().setDither(true);
 
+        // If a previous instance state is available, retrieve it
+        if(savedInstanceState != null && savedInstanceState.containsKey(STATE_URIS)) {
+            ArrayList<String> captions = savedInstanceState.containsKey(STATE_CAPTIONS) ? savedInstanceState.getStringArrayList(STATE_CAPTIONS) : null;
+            ArrayList<Integer> rotations = savedInstanceState.containsKey(STATE_ROTATIONS) ? savedInstanceState.getIntegerArrayList(STATE_ROTATIONS) : null;
+            AlbumItem item = null;
+            int i = 0;
+            for(Parcelable pUri : savedInstanceState.getParcelableArrayList(STATE_URIS)) {
+                item = new AlbumItem((Uri)pUri, captions != null ? captions.get(i) : "", null);
+                item.rotation = rotations != null ? rotations.get(i) : 0;
+                mAdapter.add(item);
+                i++;
+            }
+            if(savedInstanceState.containsKey(STATE_SELECTED_URI)) {
+                mSelectedItem = mAdapter.getItem((Uri)savedInstanceState.getParcelable(STATE_SELECTED_URI));
+            }
+        }
+        
         // If an orientation change occurred, retrieve previous state
         StateHolder state = (StateHolder) getLastNonConfigurationInstance();
         if (state != null) {
@@ -1067,6 +1215,23 @@ public class EmailAlbumEditor extends ListActivity implements
         return state;
     }
 
+    
+    
+    
+    /* (non-Javadoc)
+     * @see android.app.Activity#onSaveInstanceState(android.os.Bundle)
+     */
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putParcelableArrayList(STATE_URIS, mAdapter.getUris());
+        outState.putStringArrayList(STATE_CAPTIONS, mAdapter.getCaptions());
+        outState.putIntegerArrayList(STATE_ROTATIONS, mAdapter.getRotations());
+        if(mSelectedItem != null) {
+            outState.putParcelable(STATE_SELECTED_URI, mSelectedItem.uri);
+        }
+        super.onSaveInstanceState(outState);
+    }
+
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
             String key) {
@@ -1102,19 +1267,12 @@ public class EmailAlbumEditor extends ListActivity implements
      */
     private void sendAlbum() {
         if (mAlbumType.equals(AlbumTypes.MAIL)) {
-            // TODO : find a way to provide resized pictures
-            // implement a ContentProvider ?
-            Intent sendIntent = new Intent(Compatibility
-                    .getActionSendMultiple());
-            // String subject = mAlbumName;
-            // String body = "Corps du message";
-            // sendIntent.putExtra(Intent.EXTRA_TEXT, body);
-            // sendIntent.putExtra(Intent.EXTRA_SUBJECT, subject);
-            ArrayList<Uri> uris = mAdapter.getUris();
-            Log.d(LOG_TAG, "Sending list of Uris : " + uris.toString());
-            sendIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
-            sendIntent.setType("image/*");
-            startActivity(sendIntent);
+            CacheManager cm = new CacheManager(getApplicationContext());
+            File dir = cm.getCacheDir("temp");
+            cm.clearCache("temp");
+            
+            new ExportAlbumTask(ExportAlbumTask.SEND_MULTIPLE).execute(dir);
+
         } else {
             File dir = new CacheManager(getApplicationContext()).getCacheDir();
             new ExportAlbumTask(ExportAlbumTask.SEND).execute(dir);

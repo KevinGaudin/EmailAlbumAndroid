@@ -19,7 +19,6 @@
 
 package com.kg.emailalbum.mobile;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.Preference;
@@ -27,7 +26,6 @@ import android.preference.PreferenceActivity;
 import android.preference.PreferenceScreen;
 import android.widget.Toast;
 
-import com.kg.emailalbum.mobile.R;
 import com.kg.emailalbum.mobile.util.CacheManager;
 import com.kg.emailalbum.mobile.util.Compatibility;
 
@@ -52,7 +50,7 @@ public class EmailAlbumPreferences extends PreferenceActivity {
         if (screen != null) {
             setPreferenceScreen((PreferenceScreen) findPreference(screen));
         }
-        
+
         // Remove the email with multiple attachments option if not possible
         // on the running android version
         if (Compatibility.getActionSendMultiple() == null) {

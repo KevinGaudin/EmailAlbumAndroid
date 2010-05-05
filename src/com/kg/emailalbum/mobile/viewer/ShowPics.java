@@ -31,6 +31,7 @@ import java.util.zip.ZipFile;
 
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -72,6 +73,7 @@ import com.kg.emailalbum.mobile.util.BitmapLoader;
 import com.kg.emailalbum.mobile.util.BitmapUtil;
 import com.kg.emailalbum.mobile.util.CacheManager;
 import com.kg.emailalbum.mobile.util.ZipUtil;
+import com.kg.oifilemanager.filemanager.FileManagerProvider;
 import com.kg.oifilemanager.intents.FileManagerIntents;
 
 /**
@@ -625,7 +627,8 @@ public class ShowPics extends Activity implements OnGestureListener,
         // Display an edit button only if an application is available
         Intent intent = new Intent(Intent.ACTION_EDIT);
         intent.setType("image/jpeg");
-        intent.setData(Uri.withAppendedPath(Images.Media.EXTERNAL_CONTENT_URI, "1"));
+        intent.setData(Uri.withAppendedPath(Images.Media.EXTERNAL_CONTENT_URI,
+                "1"));
         if (getPackageManager().resolveActivity(intent, 0) != null) {
             item = menu.add(0, MENU_EDIT_ID, 0, R.string.menu_edit);
             item.setIcon(android.R.drawable.ic_menu_edit);
@@ -801,12 +804,10 @@ public class ShowPics extends Activity implements OnGestureListener,
                     title = getString(R.string.menu_edit);
 
                     Toast.makeText(getApplicationContext(),
-                            R.string.alert_editor, Toast.LENGTH_LONG)
-                            .show();
+                            R.string.alert_editor, Toast.LENGTH_LONG).show();
                     intent.setDataAndType(fileUri, "image/jpeg");
                 }
-                startActivity(Intent.createChooser(intent,
-                        title));
+                startActivity(Intent.createChooser(intent, title));
 
             } catch (IOException e) {
                 Log.e(this.getClass().getName(), "other intents exception", e);
@@ -828,8 +829,8 @@ public class ShowPics extends Activity implements OnGestureListener,
             return true;
         case MENU_OPEN_WITH_ID:
             try {
-                Uri fileUri = Uri.parse("file://"
-                        + saveTmpPicture(
+                Uri fileUri = Uri.withAppendedPath(
+                        FileManagerProvider.CONTENT_URI, saveTmpPicture(
                                 new CacheManager(getApplicationContext())
                                         .getCacheDir("viewer"))
                                 .getAbsolutePath());

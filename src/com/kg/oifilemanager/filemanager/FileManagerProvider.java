@@ -7,6 +7,7 @@ import java.io.IOException;
 import org.xmlpull.v1.XmlPullParserException;
 
 import android.content.ContentProvider;
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.res.XmlResourceParser;
 import android.database.Cursor;
@@ -22,9 +23,10 @@ import com.kg.oifilemanager.filemanager.util.MimeTypes;
 
 public class FileManagerProvider extends ContentProvider {
 
-	private static final String MIME_TYPE_PREFIX = "content://org.openintents.filemanager/mimetype/";
 	private static final String TAG = "FileManagerProvider";
-	public static final String AUTHORITY = "org.openintents.filemanager";
+	public static final String AUTHORITY = "com.kg.emailalbum.share";
+	public static final String CONTENT_URI_STRING = ContentResolver.SCHEME_CONTENT + "://" + AUTHORITY;
+	public static final Uri CONTENT_URI = Uri.parse(CONTENT_URI_STRING);
 	private MimeTypes mMimeTypes;
 
 	@Override
@@ -80,11 +82,10 @@ public class FileManagerProvider extends ContentProvider {
 	@Override
 	public Cursor query(Uri uri, String[] as, String s, String[] as1, String s1) {
 		if (uri.toString().startsWith(
-				MIME_TYPE_PREFIX)) {
+				CONTENT_URI_STRING)) {
 			MatrixCursor c = new MatrixCursor(new String[] { Images.Media.DATA,
 					Images.Media.MIME_TYPE });
-			// data = absolute path = uri - content://authority/mimetype
-			String data = uri.toString().substring(20 + AUTHORITY.length());
+			String data = uri.toString().substring(CONTENT_URI_STRING.length());
 			String mimeType = mMimeTypes.getMimeType(data);
 			c.addRow(new String[] { data, mimeType });
 			return c;
@@ -97,12 +98,12 @@ public class FileManagerProvider extends ContentProvider {
 	public ParcelFileDescriptor openFile(Uri uri, String mode)
 			throws FileNotFoundException {
 		if (uri.toString().startsWith(
-				MIME_TYPE_PREFIX)) {
+				CONTENT_URI_STRING)) {
 			int m = ParcelFileDescriptor.MODE_READ_ONLY;
 			if (mode.equalsIgnoreCase("rw"))
 				m = ParcelFileDescriptor.MODE_READ_WRITE;
 			
-			File f = new File(uri.toString().substring(20 + AUTHORITY.length()));
+			File f = new File(uri.toString().substring(CONTENT_URI_STRING.length()));
 			ParcelFileDescriptor pfd = ParcelFileDescriptor.open(f, m);
 			return pfd;
 		} else {

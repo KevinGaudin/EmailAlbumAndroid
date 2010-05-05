@@ -7,6 +7,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.nio.charset.Charset;
 import java.util.Properties;
 import java.util.SortedSet;
@@ -42,27 +44,37 @@ public class HumanReadableProperties extends Properties {
                         put(key, value);
                     }
                 }
-            }
-            else {
+            } else {
                 Log.d("HRP", "Skipping comment line...");
             }
         }
     }
 
-    public synchronized void storeHumanReadable(OutputStream out, String comment)
+    public synchronized void storeHumanReadable(Writer wrt, String comment, String lineTerminator)
             throws IOException {
-        PrintWriter pWriter = new PrintWriter(new OutputStreamWriter(out,
-                "UTF-8"));
-        Log.d("HRP", "Writing comment line");
-        pWriter.println("# " + comment + '\r');
-        pWriter.println("\r");
+        if(lineTerminator == null) {
+            lineTerminator = "";
+        }
+        
+        PrintWriter pWriter = new PrintWriter(wrt);
+        if (comment != null) {
+            Log.d("HRP", "Writing comment line");
+            pWriter.println("# " + comment + lineTerminator);
+            pWriter.println(lineTerminator);
+        }
         SortedSet<Object> keys = new TreeSet<Object>(keySet());
         Log.d("HRP", "Number of keys : " + keys.size());
         for (Object key : keys) {
             String value = getProperty((String) key);
             Log.d("HRP", "Writing : " + (String) key + ": " + value);
-            pWriter.println((String) key + ": " + value + '\r');
+            pWriter.println((String) key + ": " + value + lineTerminator);
         }
         pWriter.flush();
+    }
+
+    public synchronized void storeHumanReadable(OutputStream out, String comment)
+            throws IOException {
+
+        storeHumanReadable(new OutputStreamWriter(out, "UTF-8"), comment, "\r");
     }
 }

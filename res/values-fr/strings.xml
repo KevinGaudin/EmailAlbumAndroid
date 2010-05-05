@@ -74,9 +74,13 @@
 		\n
 	</string>
 	<string name="changelog">
-		Nouveautés version 2.4.0 :\n
-		- Les albums peuvent être exportés au format Zip simple\n
-		- Correction d\'une anomalie qui empêchait la visualisation des albums reçus via GMail\n
+		Nouveautés version 2.5.0 :\n
+		- Ajout possibilité d\'envoi d\'albums par mail avec images directement en attachement et les légendes dans le corps du mail. Voir \'Type d\'album\' dans la configuration.\n
+		- Correction bug sur ouverture de pièce jointe GMail (Droid)\n
+		- Correction bug à la fermeture de l\'application par le système\n
+		- Correction bug à la sortie de l\'édition d\'image sur les terminaux à faible mémoire\n
+		- Correction bug visionneuse \'Ouvrir avec\' gallerie Nexus One\n
+		- Correction bug à la fermeture de la boite d\'édition de légende\n
 	</string>
 	<string name="url_donate">
 		https://www.paypal.com/cgi-bin/webscr?cmd=_donations&amp;business=DT9H5GSCL9U76&amp;lc=FR&amp;item_name=EmailAlbum%20Viewer&amp;currency_code=EUR&amp;bn=PP-DonationsBF:btn_donateCC_LG.gif:NonHosted</string>
