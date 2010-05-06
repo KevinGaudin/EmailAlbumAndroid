@@ -75,7 +75,8 @@
 	</string>
 	<string name="changelog">
 		Nouveautés version 2.5.0 :\n
-		- Ajout possibilité d\'envoi d\'albums par mail avec images directement en attachement et les légendes dans le corps du mail. Voir \'Type d\'album\' dans la configuration.\n
+		- Ajout possibilité d\'envoi d\'albums par mail avec images directement en attachement et les légendes dans le corps du mail. Voir \'Type d\'album\' dans la configuration (nécessite android 2.0 ou plus).\n
+		- Correction envoi par GMail sur Archos 5IT. Devrait corriger même problème sur Samsung Galaxy et HTC Incredible\n
 		- Correction bug sur ouverture de pièce jointe GMail (Droid)\n
 		- Correction bug à la fermeture de l\'application par le système\n
 		- Correction bug à la sortie de l\'édition d\'image sur les terminaux à faible mémoire\n

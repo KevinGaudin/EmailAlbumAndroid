@@ -19,6 +19,7 @@
 
 package com.kg.emailalbum.mobile;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.Preference;
@@ -53,7 +54,7 @@ public class EmailAlbumPreferences extends PreferenceActivity {
 
         // Remove the email with multiple attachments option if not possible
         // on the running android version
-        if (Compatibility.getActionSendMultiple() == null) {
+        if (!Compatibility.isSendMultipleAppAvailable(getApplicationContext())) {
             ListPreference albumType = (ListPreference) findPreference("albumtype");
             int iEmail = albumType.findIndexOfValue("mail");
             if (iEmail >= 0) {
@@ -75,6 +76,8 @@ public class EmailAlbumPreferences extends PreferenceActivity {
 
         }
     }
+
+
 
     /*
      * (non-Javadoc)

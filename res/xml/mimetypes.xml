@@ -18,7 +18,7 @@
 	<!-- Image types -->
 	<type extension=".png" mimetype="image/png" />
 	<type extension=".gif" mimetype="image/gif" />
-	<type extension=".jpg" mimetype="image/jpg" />
+	<type extension=".jpg" mimetype="image/jpeg" />
 	<type extension=".jpeg" mimetype="image/jpeg" />
 	<type extension=".bmp" mimetype="image/bmp" />
 	    

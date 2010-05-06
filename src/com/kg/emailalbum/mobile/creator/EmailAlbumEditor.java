@@ -79,6 +79,7 @@ import com.kg.emailalbum.mobile.util.BitmapUtil;
 import com.kg.emailalbum.mobile.util.CacheManager;
 import com.kg.emailalbum.mobile.util.Compatibility;
 import com.kg.emailalbum.mobile.util.HumanReadableProperties;
+import com.kg.oifilemanager.filemanager.FileManagerProvider;
 import com.kg.oifilemanager.intents.FileManagerIntents;
 
 /**
@@ -984,6 +985,9 @@ public class EmailAlbumEditor extends ListActivity implements
                 getString(R.string.pref_def_albumname));
         mAlbumType = AlbumTypes.fromString(mPrefs.getString("albumtype",
                 getString(R.string.pref_def_albumtype)));
+        if(AlbumTypes.MAIL.equals(mAlbumType) && !Compatibility.isSendMultipleAppAvailable(getApplicationContext())) {
+            mAlbumType = AlbumTypes.fromString(getString(R.string.pref_def_albumtype));
+        }
         mAddTimestamp = mPrefs.getBoolean("albumtimestamp", mAddTimestamp);
     }
 
@@ -1287,6 +1291,9 @@ public class EmailAlbumEditor extends ListActivity implements
      *            The Uri of the album to be sent.
      */
     private void sendAlbum(Uri album) {
+        if(album.getScheme().equals(ContentResolver.SCHEME_FILE)) {
+            album = Uri.withAppendedPath(FileManagerProvider.CONTENT_URI, album.getEncodedPath());
+        }
         Intent intent = new Intent(Intent.ACTION_SEND);
         intent.setType("application/zip");
         intent.putExtra(Intent.EXTRA_STREAM, album);

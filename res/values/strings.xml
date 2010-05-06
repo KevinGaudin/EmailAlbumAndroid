@@ -72,7 +72,8 @@
 	</string>
 	<string name="changelog">
 		New in version 2.5.0 :\n
-		- Added feature to send albums as mail attachments with captions listed in the mail body. See \'Album type\' in creator preferences.\n
+		- Added feature to send albums as mail attachments with captions listed in the mail body. See \'Album type\' in creator preferences (req. android 2.0 or more).\n
+		- Archos 5IT can now send albums with GMail application might fix same issue on other devices like Samsung Galaxy and HTC Incredible\n
 		- Fixed issue when opening albums from GMail on Droid devices\n
 		- Fixed issue when system destroys the viewer\n
 		- Fixed issues with returning from picture editor on low memory devices\n
