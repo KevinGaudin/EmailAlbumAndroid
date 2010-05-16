@@ -19,7 +19,6 @@
 
 package com.kg.emailalbum.mobile;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.Preference;
