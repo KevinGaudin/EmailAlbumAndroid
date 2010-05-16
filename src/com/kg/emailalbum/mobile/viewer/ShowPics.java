@@ -91,7 +91,7 @@ public class ShowPics extends Activity implements OnGestureListener,
     private static final int MENU_ABOUT_ID = 6;
     private static final int MENU_SLIDESHOW_ID = 7;
     private static final int MENU_PREFS_ID = 8;
-    
+
     private static final int BACKWARD = -1;
     private static final int FORWARD = 1;
 
@@ -784,10 +784,9 @@ public class ShowPics extends Activity implements OnGestureListener,
         case MENU_EDIT_ID:
             try {
                 String title = getString(R.string.chooser_share);
-                Uri fileUri = Uri.withAppendedPath(FileManagerProvider.CONTENT_URI,
-                                saveTmpPicture(new CacheManager(
-                                        getApplicationContext())
-                                        .getCacheDir("viewer")).getAbsolutePath());
+                Uri fileUri = FileManagerProvider
+                        .getContentUri(saveTmpPicture(new CacheManager(
+                                getApplicationContext()).getCacheDir("viewer")));
                 if (item.getItemId() == MENU_SEND_ID) {
                     intent = new Intent(Intent.ACTION_SEND, fileUri);
                     intent.putExtra(Intent.EXTRA_STREAM, fileUri);
