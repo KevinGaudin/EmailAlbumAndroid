@@ -79,6 +79,7 @@ import com.kg.emailalbum.mobile.util.BitmapUtil;
 import com.kg.emailalbum.mobile.util.CacheManager;
 import com.kg.emailalbum.mobile.util.Compatibility;
 import com.kg.emailalbum.mobile.util.HumanReadableProperties;
+import com.kg.emailalbum.mobile.util.IntentHelper;
 import com.kg.oifilemanager.filemanager.FileManagerProvider;
 import com.kg.oifilemanager.intents.FileManagerIntents;
 
@@ -359,7 +360,7 @@ public class EmailAlbumEditor extends ListActivity implements
 
         public ArrayList<Uri> getUris() {
             ArrayList<Uri> uris = new ArrayList<Uri>();
-            for(AlbumItem item : mContentModel) {
+            for (AlbumItem item : mContentModel) {
                 uris.add(item.uri);
             }
             return uris;
@@ -367,7 +368,7 @@ public class EmailAlbumEditor extends ListActivity implements
 
         public ArrayList<String> getCaptions() {
             ArrayList<String> captions = new ArrayList<String>();
-            for(AlbumItem item : mContentModel) {
+            for (AlbumItem item : mContentModel) {
                 captions.add(item.caption);
             }
             return captions;
@@ -375,7 +376,7 @@ public class EmailAlbumEditor extends ListActivity implements
 
         public ArrayList<Integer> getRotations() {
             ArrayList<Integer> rotations = new ArrayList<Integer>();
-            for(AlbumItem item : mContentModel) {
+            for (AlbumItem item : mContentModel) {
                 rotations.add(item.rotation);
             }
             return rotations;
@@ -383,11 +384,11 @@ public class EmailAlbumEditor extends ListActivity implements
 
         public AlbumItem getItem(Uri uri) {
             AlbumItem result = null;
-            if(uri != null) {
+            if (uri != null) {
                 Iterator<AlbumItem> iterItems = mContentModel.iterator();
-                while(iterItems.hasNext() && result == null) {
+                while (iterItems.hasNext() && result == null) {
                     AlbumItem item = iterItems.next();
-                    if(uri.equals(item.uri)) {
+                    if (uri.equals(item.uri)) {
                         result = item;
                     }
                 }
@@ -446,7 +447,7 @@ public class EmailAlbumEditor extends ListActivity implements
          * Send through ACTION_SEND_MULTIPLE Intent.
          */
         public static final int SEND_MULTIPLE = 2;
-        
+
         int mReason;
         private HumanReadableProperties mContentFileBuilder;
 
@@ -474,7 +475,8 @@ public class EmailAlbumEditor extends ListActivity implements
 
             File album;
             if (mAlbumType.equals(AlbumTypes.MAIL)) {
-                ErrorReporter.getInstance().addCustomData("Format", "Mail Attachments");
+                ErrorReporter.getInstance().addCustomData("Format",
+                        "Mail Attachments");
                 album = dests[0];
                 // Total progress count.
                 int count = mAdapter.mContentModel.size();
@@ -488,9 +490,9 @@ public class EmailAlbumEditor extends ListActivity implements
                         // This is due to the use of Properties.load() in the
                         // jar
                         // bundled Viewer.
-                        String picName = new Formatter().format(
-                                "img%04d.jpg", itemNumber,
-                                item.uri.getLastPathSegment()).toString();
+                        String picName = new Formatter().format("img%04d.jpg",
+                                itemNumber, item.uri.getLastPathSegment())
+                                .toString();
 
                         // Load and resize a full color picture
                         Bitmap bmp = BitmapLoader.load(getApplicationContext(),
@@ -498,7 +500,9 @@ public class EmailAlbumEditor extends ListActivity implements
                                         .getHeight(), Bitmap.Config.ARGB_8888,
                                 false);
 
-                        ErrorReporter.getInstance().addCustomData("Apply rotation ?", ""+ (item.rotation % 360 != 0));
+                        ErrorReporter.getInstance().addCustomData(
+                                "Apply rotation ?",
+                                "" + (item.rotation % 360 != 0));
                         if (item.rotation % 360 != 0) {
                             // Apply the user specified rotation
                             bmp = BitmapUtil.rotate(bmp, item.rotation);
@@ -508,9 +512,10 @@ public class EmailAlbumEditor extends ListActivity implements
                                 picName));
 
                         // Write the picture to the temp dir
-                        ErrorReporter.getInstance().addCustomData("bmp is null ?", ""+ (bmp == null));
+                        ErrorReporter.getInstance().addCustomData(
+                                "bmp is null ?", "" + (bmp == null));
                         bmp.compress(CompressFormat.JPEG, mPictureQuality, out);
-                        
+
                         mContentFileBuilder.put(picName, item.caption);
 
                         // Get rid of the bitmap to avoid memory leaks
@@ -532,7 +537,8 @@ public class EmailAlbumEditor extends ListActivity implements
                 }
 
                 String albumExtension = ".jar";
-                ErrorReporter.getInstance().addCustomData("Format", "EmailAlbum");
+                ErrorReporter.getInstance().addCustomData("Format",
+                        "EmailAlbum");
                 if (mAlbumType == AlbumTypes.ZIP) {
                     ErrorReporter.getInstance().addCustomData("Format", "Zip");
                     albumExtension = ".zip";
@@ -573,7 +579,7 @@ public class EmailAlbumEditor extends ListActivity implements
                         }
                         in.close();
                     }
-                    
+
                     String entryName = "";
                     int itemNumber = 0;
                     BitmapLoader.onLowMemory();
@@ -605,14 +611,17 @@ public class EmailAlbumEditor extends ListActivity implements
                                         .getHeight(), Bitmap.Config.ARGB_8888,
                                 false);
 
-                        ErrorReporter.getInstance().addCustomData("Apply rotation ?", ""+ (item.rotation % 360 != 0));
+                        ErrorReporter.getInstance().addCustomData(
+                                "Apply rotation ?",
+                                "" + (item.rotation % 360 != 0));
                         if (item.rotation % 360 != 0) {
                             // Apply the user specified rotation
                             bmp = BitmapUtil.rotate(bmp, item.rotation);
                         }
                         out.putNextEntry(entry);
                         // Write the picture to the album
-                        ErrorReporter.getInstance().addCustomData("bmp is null ?", ""+ (bmp == null));
+                        ErrorReporter.getInstance().addCustomData(
+                                "bmp is null ?", "" + (bmp == null));
                         bmp.compress(CompressFormat.JPEG, mPictureQuality, out);
                         // Get rid of the bitmap to avoid memory leaks
                         bmp.recycle();
@@ -652,28 +661,17 @@ public class EmailAlbumEditor extends ListActivity implements
             if (mReason == SEND) {
                 sendAlbum(result);
             } else if (mReason == SEND_MULTIPLE) {
-                ArrayList<Uri> uris = new ArrayList<Uri>();
-                for(File item : new File(result.getPath()).listFiles()) {
-                    uris.add(Uri.fromFile(item));
-                }
-                
-                Intent sendIntent = new Intent(Compatibility
-                        .getActionSendMultiple());
-                String subject = mAlbumName;
                 StringWriter bodyWriter = new StringWriter();
                 try {
-                    mContentFileBuilder.storeHumanReadable(bodyWriter, null, null);
+                    mContentFileBuilder.storeHumanReadable(bodyWriter, null,
+                            null);
                 } catch (IOException e) {
                     // TODO Auto-generated catch block
                     Log.e(LOG_TAG, "Error : ", e);
                 }
-                sendIntent.putExtra(Intent.EXTRA_TEXT, bodyWriter.toString());
-                sendIntent.putExtra(Intent.EXTRA_SUBJECT, subject);
-                Log.d(LOG_TAG, "Sending list of Uris : " + uris.toString());
-                sendIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
-                sendIntent.setType("image/*");
-                startActivity(sendIntent);
-                
+                IntentHelper.sendAllPicturesInFolder(getApplicationContext(), new File(result.getPath()), mAlbumName,
+                        bodyWriter.toString());
+
             }
         }
 
@@ -876,22 +874,30 @@ public class EmailAlbumEditor extends ListActivity implements
         findViewById(R.id.album_editor_root).getBackground().setDither(true);
 
         // If a previous instance state is available, retrieve it
-        if(savedInstanceState != null && savedInstanceState.containsKey(STATE_URIS)) {
-            ArrayList<String> captions = savedInstanceState.containsKey(STATE_CAPTIONS) ? savedInstanceState.getStringArrayList(STATE_CAPTIONS) : null;
-            ArrayList<Integer> rotations = savedInstanceState.containsKey(STATE_ROTATIONS) ? savedInstanceState.getIntegerArrayList(STATE_ROTATIONS) : null;
+        if (savedInstanceState != null
+                && savedInstanceState.containsKey(STATE_URIS)) {
+            ArrayList<String> captions = savedInstanceState
+                    .containsKey(STATE_CAPTIONS) ? savedInstanceState
+                    .getStringArrayList(STATE_CAPTIONS) : null;
+            ArrayList<Integer> rotations = savedInstanceState
+                    .containsKey(STATE_ROTATIONS) ? savedInstanceState
+                    .getIntegerArrayList(STATE_ROTATIONS) : null;
             AlbumItem item = null;
             int i = 0;
-            for(Parcelable pUri : savedInstanceState.getParcelableArrayList(STATE_URIS)) {
-                item = new AlbumItem((Uri)pUri, captions != null ? captions.get(i) : "", null);
+            for (Parcelable pUri : savedInstanceState
+                    .getParcelableArrayList(STATE_URIS)) {
+                item = new AlbumItem((Uri) pUri, captions != null ? captions
+                        .get(i) : "", null);
                 item.rotation = rotations != null ? rotations.get(i) : 0;
                 mAdapter.add(item);
                 i++;
             }
-            if(savedInstanceState.containsKey(STATE_SELECTED_URI)) {
-                mSelectedItem = mAdapter.getItem((Uri)savedInstanceState.getParcelable(STATE_SELECTED_URI));
+            if (savedInstanceState.containsKey(STATE_SELECTED_URI)) {
+                mSelectedItem = mAdapter.getItem((Uri) savedInstanceState
+                        .getParcelable(STATE_SELECTED_URI));
             }
         }
-        
+
         // If an orientation change occurred, retrieve previous state
         StateHolder state = (StateHolder) getLastNonConfigurationInstance();
         if (state != null) {
@@ -985,8 +991,11 @@ public class EmailAlbumEditor extends ListActivity implements
                 getString(R.string.pref_def_albumname));
         mAlbumType = AlbumTypes.fromString(mPrefs.getString("albumtype",
                 getString(R.string.pref_def_albumtype)));
-        if(AlbumTypes.MAIL.equals(mAlbumType) && !Compatibility.isSendMultipleAppAvailable(getApplicationContext())) {
-            mAlbumType = AlbumTypes.fromString(getString(R.string.pref_def_albumtype));
+        if (AlbumTypes.MAIL.equals(mAlbumType)
+                && !Compatibility
+                        .isSendMultipleAppAvailable(getApplicationContext())) {
+            mAlbumType = AlbumTypes
+                    .fromString(getString(R.string.pref_def_albumtype));
         }
         mAddTimestamp = mPrefs.getBoolean("albumtimestamp", mAddTimestamp);
     }
@@ -1219,10 +1228,9 @@ public class EmailAlbumEditor extends ListActivity implements
         return state;
     }
 
-    
-    
-    
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see android.app.Activity#onSaveInstanceState(android.os.Bundle)
      */
     @Override
@@ -1230,7 +1238,7 @@ public class EmailAlbumEditor extends ListActivity implements
         outState.putParcelableArrayList(STATE_URIS, mAdapter.getUris());
         outState.putStringArrayList(STATE_CAPTIONS, mAdapter.getCaptions());
         outState.putIntegerArrayList(STATE_ROTATIONS, mAdapter.getRotations());
-        if(mSelectedItem != null) {
+        if (mSelectedItem != null) {
             outState.putParcelable(STATE_SELECTED_URI, mSelectedItem.uri);
         }
         super.onSaveInstanceState(outState);
@@ -1274,7 +1282,7 @@ public class EmailAlbumEditor extends ListActivity implements
             CacheManager cm = new CacheManager(getApplicationContext());
             File dir = cm.getCacheDir("temp");
             cm.clearCache("temp");
-            
+
             new ExportAlbumTask(ExportAlbumTask.SEND_MULTIPLE).execute(dir);
 
         } else {
@@ -1291,8 +1299,9 @@ public class EmailAlbumEditor extends ListActivity implements
      *            The Uri of the album to be sent.
      */
     private void sendAlbum(Uri album) {
-        if(album.getScheme().equals(ContentResolver.SCHEME_FILE)) {
-            album = Uri.withAppendedPath(FileManagerProvider.CONTENT_URI, album.getEncodedPath());
+        if (album.getScheme().equals(ContentResolver.SCHEME_FILE)) {
+            album = Uri.withAppendedPath(FileManagerProvider.CONTENT_URI, album
+                    .getEncodedPath());
         }
         Intent intent = new Intent(Intent.ACTION_SEND);
         intent.setType("application/zip");
