@@ -31,7 +31,6 @@ import java.util.zip.ZipFile;
 
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -70,7 +69,6 @@ import com.kg.emailalbum.mobile.EmailAlbumPreferences;
 import com.kg.emailalbum.mobile.R;
 import com.kg.emailalbum.mobile.animation.Rotate3dAnimation;
 import com.kg.emailalbum.mobile.util.BitmapLoader;
-import com.kg.emailalbum.mobile.util.BitmapUtil;
 import com.kg.emailalbum.mobile.util.CacheManager;
 import com.kg.emailalbum.mobile.util.ZipUtil;
 import com.kg.oifilemanager.filemanager.FileManagerProvider;
@@ -93,7 +91,7 @@ public class ShowPics extends Activity implements OnGestureListener,
     private static final int MENU_ABOUT_ID = 6;
     private static final int MENU_SLIDESHOW_ID = 7;
     private static final int MENU_PREFS_ID = 8;
-
+    
     private static final int BACKWARD = -1;
     private static final int FORWARD = 1;
 
@@ -786,12 +784,10 @@ public class ShowPics extends Activity implements OnGestureListener,
         case MENU_EDIT_ID:
             try {
                 String title = getString(R.string.chooser_share);
-                String imageName = mImageNames.get(mPosition);
-                Uri fileUri = BitmapUtil
-                        .storePicture(getApplicationContext(),
+                Uri fileUri = Uri.withAppendedPath(FileManagerProvider.CONTENT_URI,
                                 saveTmpPicture(new CacheManager(
                                         getApplicationContext())
-                                        .getCacheDir("viewer")), imageName);
+                                        .getCacheDir("viewer")).getAbsolutePath());
                 if (item.getItemId() == MENU_SEND_ID) {
                     intent = new Intent(Intent.ACTION_SEND, fileUri);
                     intent.putExtra(Intent.EXTRA_STREAM, fileUri);
