@@ -67,7 +67,9 @@ import com.kg.emailalbum.mobile.EmailAlbumPreferences;
 import com.kg.emailalbum.mobile.R;
 import com.kg.emailalbum.mobile.creator.EmailAlbumEditor;
 import com.kg.emailalbum.mobile.util.CacheManager;
+import com.kg.emailalbum.mobile.util.Compatibility;
 import com.kg.emailalbum.mobile.util.HumanReadableProperties;
+import com.kg.emailalbum.mobile.util.IntentHelper;
 import com.kg.emailalbum.mobile.util.ZipUtil;
 import com.kg.oifilemanager.intents.FileManagerIntents;
 
@@ -98,11 +100,13 @@ public class EmailAlbumViewer extends ListActivity {
                 int random = generator.nextInt(99999);
                 InputStream intentInputStream = getContentResolver()
                         .openInputStream(mAlbumFileUri);
-                File tempArchive = new File(new CacheManager(getApplicationContext())
-                .getCacheDir("viewer"), "emailalbum" + random + ".zip");
+                File tempArchive = new File(new CacheManager(
+                        getApplicationContext()).getCacheDir("viewer"),
+                        "emailalbum" + random + ".zip");
                 OutputStream tempOS = new FileOutputStream(tempArchive);
-                Log.d(LOG_TAG,"Write retrieved archive : " + tempArchive.getAbsolutePath());
-                
+                Log.d(LOG_TAG, "Write retrieved archive : "
+                        + tempArchive.getAbsolutePath());
+
                 byte[] buffer = new byte[256];
                 int readBytes = -1;
                 while ((readBytes = intentInputStream.read(buffer)) != -1) {
@@ -254,6 +258,7 @@ public class EmailAlbumViewer extends ListActivity {
     private static final int MENU_SAVE_ALL_ID = 2;
     private static final int MENU_ABOUT_ID = 3;
     private static final int MENU_PREFS_ID = 4;
+    private static final int MENU_SEND_ALL_ID = 5;
 
     // Context menu items
     private static final int MENUCTX_SAVE_SELECTED_ID = 4;
@@ -311,7 +316,7 @@ public class EmailAlbumViewer extends ListActivity {
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             if (msg.arg1 < 0) {
-                Toast.makeText(context, msg.getData().getShort("EXCEPTION"),
+                Toast.makeText(context, msg.getData().getString("EXCEPTION"),
                         Toast.LENGTH_SHORT).show();
                 setProgressBarVisibility(false);
             } else {
@@ -452,10 +457,11 @@ public class EmailAlbumViewer extends ListActivity {
      *            The ZipEntry containing the captions.
      * @throws IOException
      */
-    private void loadCaptions(ZipEntry captions, boolean isHumanReadableProperties) throws IOException {
+    private void loadCaptions(ZipEntry captions,
+            boolean isHumanReadableProperties) throws IOException {
         mCaptions = new Bundle();
         HumanReadableProperties props = new HumanReadableProperties();
-        if(isHumanReadableProperties) {
+        if (isHumanReadableProperties) {
             props.loadHumanReadable(ZipUtil.getInputStream(mArchive, captions));
         } else {
             props.load(ZipUtil.getInputStream(mArchive, captions));
@@ -501,10 +507,9 @@ public class EmailAlbumViewer extends ListActivity {
                 try {
                     if (requestCode == ACTIVITY_PICK_DIRECTORY_TO_SAVE_SELECTED) {
                         savePicture(posPictureToSave, new File(Uri.parse(
-                                dirname).getEncodedPath()));
+                                dirname).getPath()));
                     } else {
-                        saveAllPictures(new File(Uri.parse(dirname)
-                                .getEncodedPath()));
+                        saveAllPictures(new File(Uri.parse(dirname).getPath()));
                     }
                 } catch (IOException e) {
                     Log.e(this.getClass().getName(),
@@ -631,6 +636,10 @@ public class EmailAlbumViewer extends ListActivity {
         item.setIcon(android.R.drawable.ic_menu_gallery);
         item = menu.add(0, MENU_SAVE_ALL_ID, 0, R.string.menu_save_all);
         item.setIcon(android.R.drawable.ic_menu_save);
+        if (Compatibility.isSendMultipleAppAvailable(getApplicationContext())) {
+            item = menu.add(0, MENU_SEND_ALL_ID, 0, R.string.menu_share_all);
+            item.setIcon(android.R.drawable.ic_menu_share);
+        }
         item = menu.add(0, MENU_PREFS_ID, 0, R.string.menu_prefs);
         item.setIcon(android.R.drawable.ic_menu_preferences);
         item = menu.add(0, MENU_ABOUT_ID, 0, R.string.menu_about);
@@ -693,6 +702,12 @@ public class EmailAlbumViewer extends ListActivity {
             return true;
         case MENU_SAVE_ALL_ID:
             pickDirectory(ACTIVITY_PICK_DIRECTORY_TO_SAVE_ALL);
+            return true;
+        case MENU_SEND_ALL_ID:
+            File dir = new CacheManager(getApplicationContext())
+                    .getCacheDir("temp");
+            IntentHelper.sendAllPicturesInFolder(getApplicationContext(), dir,
+                    "", "");
             return true;
         case MENU_ABOUT_ID:
             Intent intent = new Intent(this, AboutDialog.class);
