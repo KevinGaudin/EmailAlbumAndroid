@@ -18,10 +18,6 @@
  */
 package com.kg.emailalbum.mobile.util;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.ConcurrentHashMap;
@@ -96,36 +92,6 @@ public class BitmapLoader {
     private static BitmapLoader instance = new BitmapLoader();
 
     private static final String LOG_TAG = BitmapLoader.class.getSimpleName();
-
-    /**
-     * When reading a picture from a stream, we can't "rewind" the stream for
-     * the second pass. So we create a temporary file.
-     * 
-     * @param context
-     *            The application Context.
-     * @param input
-     *            An input stream of the picture.
-     * @return The File that has been created.
-     * @throws IOException
-     */
-    private static File createTempCopy(Context context, InputStream input)
-            throws IOException {
-        File tempFile = File.createTempFile("tmpbmp", ".jpg", context
-                .getFilesDir());
-        byte[] buffer = new byte[16 * 1024];
-        BufferedOutputStream out = new BufferedOutputStream(
-                new FileOutputStream(tempFile), buffer.length);
-        BufferedInputStream in = new BufferedInputStream(input, buffer.length);
-        int readBytes = 0;
-        while ((readBytes = in.read(buffer)) != -1) {
-            out.write(buffer, 0, readBytes);
-        }
-        out.flush();
-        out.close();
-        input.close();
-        in.close();
-        return tempFile;
-    }
 
     /**
      * First pass: read the picture real size and calculate what will be the
@@ -321,7 +287,6 @@ public class BitmapLoader {
         // Store the dimension in cache so we don't have to get it again
         dimensionCache.put(uri, dimensionToCache);
 
-        InputStream spInput = null;
         if (fpInput == null) {
             // We first pass input is null, so we can reuse the original input
             // stream as it has not been used for the first pass.
