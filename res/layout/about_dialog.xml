@@ -20,15 +20,17 @@
 		android:text="@string/about_go_web" android:src="@drawable/donate"></ImageButton>
 	<ScrollView android:id="@+id/ScrollView01"
 		android:layout_width="wrap_content" android:layout_height="wrap_content">
-		
-	<LinearLayout android:id="@+id/LinearLayout01" android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="vertical">
-		<TextView android:layout_height="wrap_content" android:layout_width="fill_parent" android:id="@+id/changelog" android:text="@string/changelog"  android:padding="4dp"></TextView>
-		<TextView android:id="@+id/AboutText" android:layout_width="fill_parent" android:layout_height="wrap_content" android:text="@string/about_text" android:autoLink="web|email" android:padding="4dp" android:textColor="#fff"></TextView>
-	</LinearLayout>
-</ScrollView>
 
-
-
-
-
+		<LinearLayout android:id="@+id/LinearLayout01"
+			android:layout_width="wrap_content" android:layout_height="wrap_content"
+			android:orientation="vertical">
+			<TextView android:layout_height="wrap_content"
+				android:layout_width="fill_parent" android:id="@+id/changelog"
+				android:text="@string/changelog" android:padding="4dp"></TextView>
+			<TextView android:id="@+id/AboutText" android:layout_width="fill_parent"
+				android:layout_height="wrap_content" android:text="@string/about_text"
+				android:autoLink="web|email" android:padding="4dp"
+				android:textColor="#fff"></TextView>
+		</LinearLayout>
+	</ScrollView>
 </LinearLayout>
