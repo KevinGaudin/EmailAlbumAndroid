@@ -13,6 +13,20 @@
 		EmailAlbum. If not, see <http://www.gnu.org/licenses/>.
 	-->
 <resources>
+	<!-- ACRA -->
+	<string name="crash_notif_ticker_text">Erreur inattendue, envoyer un rapport ?</string>
+	<string name="crash_notif_title">EmailAlbum s\'est arrêté...</string>
+	<string name="crash_notif_text">Aidez à corriger le problème en envoyant un rapport.
+	</string>
+	<string name="crash_dialog_title">EmailAlbum s\'est arrêté</string>
+	<string name="crash_dialog_text">Une erreur inattendue est survenue forçant l\'application à s\arrêter. Merci d\'aider à corriger le problème en envoyant un rapport d\'erreur.
+	\n\n Il suffit de sélectionner \'OK\'.</string>
+	<string name="crash_dialog_comment_prompt">Un commentaire ?</string>
+	<string name="crash_dialog_ok_toast">Merci !</string>
+	<string name="pref_disable_acra">Pas de rapports d\'erreur</string>
+	<string name="pref_acra_disabled">Aucun rapport d\'erreur n\'est envoyé. Les bugs ne pourront être corrigés.</string>
+	<string name="pref_acra_enabled">Les rapports d\'erreur sont envoyés automatiquement pour aider à la correction des bugs.</string>
+
 	<string name="app_name">EmailAlbum</string>
 	<string name="open_archive_error">Une erreur est survenue à l\'ouverture du
 		fichier :</string>
@@ -29,6 +43,7 @@
 	<string name="menu_set_as">Définir comme...</string>
 	<string name="menu_load_album">Regarder un album</string>
 	<string name="menu_share">Partager</string>
+	<string name="menu_share_all">Partager toutes</string>
 	<string name="chooser_share">Ouvrir avec...</string>
 	<string name="menu_save">Enregistrer...</string>
 	<string name="menu_save_selected">Enregistrer cette image</string>
@@ -71,6 +86,8 @@
 		des photos sous Creative Commons de
 		Romain Guy :
 		http://www.curious-creature.org.
+		\n\n
+		Rapports d\'erreur gérés avec ACRA : http://acra.googlecode.com
 		\n
 	</string>
 	<string name="changelog">
@@ -78,10 +95,12 @@
 		- Ajout possibilité d\'envoi d\'albums par mail avec images directement en attachement et les légendes dans le corps du mail. Voir \'Type d\'album\' dans la configuration (nécessite android 2.0 ou plus).\n
 		- Correction envoi par GMail sur Archos 5IT. Devrait corriger même problème sur Samsung Galaxy et HTC Incredible\n
 		- Correction bug sur ouverture de pièce jointe GMail (Droid)\n
+		- Correction bug sur ouverture d\'image SMS (Droid)\n
 		- Correction bug à la fermeture de l\'application par le système\n
 		- Correction bug à la sortie de l\'édition d\'image sur les terminaux à faible mémoire\n
 		- Correction bug visionneuse \'Ouvrir avec\' gallerie Nexus One\n
 		- Correction bug à la fermeture de la boite d\'édition de légende\n
+		- Rapports d\'erreur via notifications de la barre d\'état
 	</string>
 	<string name="url_donate">
 		https://www.paypal.com/cgi-bin/webscr?cmd=_donations&amp;business=DT9H5GSCL9U76&amp;lc=FR&amp;item_name=EmailAlbum%20Viewer&amp;currency_code=EUR&amp;bn=PP-DonationsBF:btn_donateCC_LG.gif:NonHosted</string>

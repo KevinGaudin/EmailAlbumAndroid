@@ -79,4 +79,7 @@
 	</PreferenceScreen>
 	<Preference android:title="@string/pref_clearcache_title"
 		android:key="clearcache" android:summary="@string/pref_clearcache_summary" />
+	<CheckBoxPreference android:key="acra.disable"
+		android:title="@string/pref_disable_acra" android:summaryOn="@string/pref_acra_disabled"
+		android:summaryOff="@string/pref_acra_enabled" android:defaultValue="false" />
 </PreferenceScreen>

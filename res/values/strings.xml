@@ -1,23 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-	Copyright 2009, 2010 Kevin Gaudin
+	<!--
+		Copyright 2009, 2010 Kevin Gaudin This file is part of EmailAlbum.
 
-	This file is part of EmailAlbum.
-
-	EmailAlbum is free software: you can redistribute it and/or modify
-	it under the terms of the GNU General Public License as published by
-	the Free Software Foundation, either version 3 of the License, or
-	(at your option) any later version.
-
-	EmailAlbum is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	GNU General Public License for more details.
-
-	You should have received a copy of the GNU General Public License
-	along with EmailAlbum.  If not, see <http://www.gnu.org/licenses/>.
- -->
+		EmailAlbum is free software: you can redistribute it and/or modify it
+		under the terms of the GNU General Public License as published by the
+		Free Software Foundation, either version 3 of the License, or (at your
+		option) any later version. EmailAlbum is distributed in the hope that
+		it will be useful, but WITHOUT ANY WARRANTY; without even the implied
+		warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+		the GNU General Public License for more details. You should have
+		received a copy of the GNU General Public License along with
+		EmailAlbum. If not, see <http://www.gnu.org/licenses/>.
+	-->
 <resources>
+	<!-- ACRA -->
+	<string name="crash_notif_ticker_text">Unexpected error, please send a report...
+	</string>
+	<string name="crash_notif_title">EmailAlbum has crashed...</string>
+	<string name="crash_notif_text">Please tap here to help fix the issue.
+	</string>
+	<string name="crash_dialog_title">EmailAlbum has crashed</string>
+	<string name="crash_dialog_text">An unexpected error occurred forcing the
+		application to stop. Please help us fix this by sending us error data,
+		all you have to do is click \'OK\'.</string>
+	<string name="crash_dialog_comment_prompt">You might add your description of the problem
+		below:</string>
+	<string name="crash_dialog_ok_toast">Thank you !</string>
+	<string name="pref_disable_acra">Disable error reporting</string>
+	<string name="pref_acra_disabled">Error reports are not sent to the developer. He won\'t be able to fix them...</string>
+	<string name="pref_acra_enabled">Error reports are sent automatically to help fix application issues</string>
+
 	<!-- Viewer Strings -->
 	<string name="hello">Hello World!</string>
 	<string name="app_name">EmailAlbum</string>
@@ -34,6 +46,7 @@
 	<string name="menu_set_as">Set as...</string>
 	<string name="menu_load_album">View an album</string>
 	<string name="menu_share">Share</string>
+	<string name="menu_share_all">Share all</string>
 	<string name="chooser_share">Open with...</string>
 	<string name="menu_save">Save...</string>
 	<string name="menu_save_selected">Save selected picture</string>
@@ -53,32 +66,50 @@
 	</string>
 	<string name="about_go_web">Donate via PayPal</string>
 	<string name="about_text">
-		EmailAlbum is a lightweight	opensource
-		multi-platform software	allowing to simply pack a bunch of
-		large pictures in a compact archive	suitable
+		EmailAlbum is a lightweight opensource
+		multi-platform software allowing to simply pack a bunch of
+		large
+		pictures in a compact archive suitable
 		for e-mailing.\n\n
-		The generated albums are self-executable on most desktop
-		computers (req. Java) and can be viewed on Android devices with
+		The generated
+		albums are self-executable on most desktop
+		computers (req. Java) and
+		can be viewed on Android devices with
 		this application.\n\n
-		Visit http://emailalbum.googlecode.com for
+		Visit
+		http://emailalbum.googlecode.com for
 		more
 		details.\n\n
-		Includes an adaptation of OI File Manager from
-		http://www.openintents.org. Thanks guys !
+		Includes an
+		adaptation of OI File Manager from
+		http://www.openintents.org. Thanks
+		guys !
 		\n\n
-		Demo album created with Creative Commons pictures by Romain Guy :
+		Demo album created with Creative Commons pictures by Romain
+		Guy :
 		http://www.curious-creature.org.
-		\n 
+		\n\n
+		Application crash reporting managed with ACRA : http://acra.googlecode.com\n
 	</string>
 	<string name="changelog">
 		New in version 2.5.0 :\n
-		- Added feature to send albums as mail attachments with captions listed in the mail body. See \'Album type\' in creator preferences (req. android 2.0 or more).\n
-		- Archos 5IT can now send albums with GMail application might fix same issue on other devices like Samsung Galaxy and HTC Incredible\n
-		- Fixed issue when opening albums from GMail on Droid devices\n
-		- Fixed issue when system destroys the viewer\n
-		- Fixed issues with returning from picture editor on low memory devices\n
-		- Fixed album viewer \'Open with\' not working with Nexus One Gallery\n
-		- Fixed issue in album editor \'Edit picture\' dialog when closing\n
+		- Added feature to send
+		albums as mail attachments with captions listed in the mail body. See
+		\'Album type\' in creator preferences (req. android 2.0 or more).\n
+		-
+		Archos 5IT can now send albums with GMail application might fix same
+		issue on other devices like Samsung Galaxy and HTC Incredible\n
+		- Fixed
+		issue when opening albums from GMail on Droid devices\n
+		- Fixed issue
+		when system destroys the viewer\n
+		- Fixed issues with returning from
+		picture editor on low memory devices\n
+		- Fixed album viewer \'Open
+		with\' not working with Nexus One Gallery\n
+		- Fixed issue in album
+		editor \'Edit picture\' dialog when closing\n
+		- Application crash reporting via status bar notification\n  
 	</string>
 	<string name="url_donate">https://www.paypal.com/cgi-bin/webscr?cmd=_donations&amp;business=DT9H5GSCL9U76&amp;lc=EN&amp;item_name=EmailAlbum%20Viewer&amp;currency_code=EUR&amp;bn=PP-DonationsBF:btn_donateCC_LG.gif:NonHosted</string>
 	<string name="alert_filemanager_missing">OI File Manager is required for both opening albums and saving pictures from/to SD Card. Do you want to install it ? (It is free)</string>
