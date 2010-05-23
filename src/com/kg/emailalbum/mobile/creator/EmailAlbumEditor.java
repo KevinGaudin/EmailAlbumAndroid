@@ -669,7 +669,7 @@ public class EmailAlbumEditor extends ListActivity implements
                     // TODO Auto-generated catch block
                     Log.e(LOG_TAG, "Error : ", e);
                 }
-                IntentHelper.sendAllPicturesInFolder(getApplicationContext(), new File(result.getPath()), mAlbumName,
+                IntentHelper.sendAllPicturesInFolder(EmailAlbumEditor.this, new File(result.getPath()), mAlbumName,
                         bodyWriter.toString());
 
             }
@@ -870,6 +870,16 @@ public class EmailAlbumEditor extends ListActivity implements
         mPrefs.registerOnSharedPreferenceChangeListener(this);
         initPrefs();
 
+        // If an orientation change occurred, retrieve previous state
+        StateHolder state = (StateHolder) getLastNonConfigurationInstance();
+        if (state != null) {
+            mAdapter = state.adapter;
+            mSelectedItem = state.selectedItem;
+            mPreviewPic = state.previewPic;
+        } else {
+            mAdapter = new AlbumAdapter();
+        }
+        
         // Sets background dithering for older versions of android (1.5 & 1.6)
         findViewById(R.id.album_editor_root).getBackground().setDither(true);
 
@@ -898,15 +908,7 @@ public class EmailAlbumEditor extends ListActivity implements
             }
         }
 
-        // If an orientation change occurred, retrieve previous state
-        StateHolder state = (StateHolder) getLastNonConfigurationInstance();
-        if (state != null) {
-            mAdapter = state.adapter;
-            mSelectedItem = state.selectedItem;
-            mPreviewPic = state.previewPic;
-        } else {
-            mAdapter = new AlbumAdapter();
-        }
+
         setListAdapter(mAdapter);
 
         retrieveIntentData();
