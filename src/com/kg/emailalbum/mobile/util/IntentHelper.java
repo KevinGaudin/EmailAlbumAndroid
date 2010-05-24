@@ -15,9 +15,17 @@ public class IntentHelper {
     
     
     /**
+     * Sends pictures contained in a folder as multiple attachments.
+     * @param activityCtx 
+     *          An Activity context - passing the Application context will crash.
      * @param folder
+     *          The folder containing the pictures.
+     * @param subject
+     *          The subject (used for emails)
+     * @param body
+     *          The message body
      */
-    public static void sendAllPicturesInFolder(Context ctx, File folder, String subject, String body) {
+    public static void sendAllPicturesInFolder(Context activityCtx, File folder, String subject, String body) {
         ArrayList<Uri> uris = new ArrayList<Uri>();
         for (File item : folder.listFiles()) {
             uris.add(FileManagerProvider.getContentUri(item));
@@ -30,6 +38,6 @@ public class IntentHelper {
         Log.d(LOG_TAG, "Sending list of Uris : " + uris.toString());
         sendIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
         sendIntent.setType("image/*");
-        ctx.startActivity(sendIntent);
+        activityCtx.startActivity(sendIntent);
     }
 }
