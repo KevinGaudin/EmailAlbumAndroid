@@ -119,6 +119,6 @@ public class FileManagerProvider extends ContentProvider {
 	}
 
 	public static Uri getContentUri(File file) {
-	    return Uri.withAppendedPath(FileManagerProvider.CONTENT_URI, Uri.encode(file.getAbsolutePath()));
+	    return Uri.withAppendedPath(FileManagerProvider.CONTENT_URI, file.getAbsolutePath());
 	}
 }
