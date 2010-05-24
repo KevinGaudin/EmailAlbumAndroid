@@ -14,7 +14,7 @@
 	-->
 <resources>
 	<!-- ACRA -->
-	<string name="crash_toast_text">Erreur inattendue. Un rapport a été envoyé au développeur pour corriger ce problème !\nL\'envoi de rapports peut être désactivé sur l\'écran de configuration.</string>
+	<string name="crash_toast_text">Erreur inattendue. Un rapport a été envoyé pour aider à corriger ce problème !\n\nL\'envoi de rapports peut être désactivé sur l\'écran de configuration.</string>
 	<string name="crash_notif_ticker_text">Erreur inattendue, envoyer un rapport ?</string>
 	<string name="crash_notif_title">EmailAlbum s\'est arrêté...</string>
 	<string name="crash_notif_text">Aidez à corriger le problème en envoyant un rapport.
