@@ -35,6 +35,8 @@ import java.util.Random;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import org.acra.ErrorReporter;
+
 import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
@@ -861,6 +863,7 @@ public class EmailAlbumViewer extends ListActivity {
                         msg.setData(data);
                         saveAllHandler.sendMessage(msg);
                     } catch (IOException e) {
+                        ErrorReporter.getInstance().handleSilentException(e);
                     }
                 }
             }
