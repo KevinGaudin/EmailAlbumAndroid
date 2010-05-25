@@ -31,8 +31,8 @@ import java.util.Formatter;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.jar.JarInputStream;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 import org.acra.ErrorReporter;
@@ -563,7 +563,7 @@ public class EmailAlbumEditor extends ListActivity implements
                     // for
                     // zip albums)
                     if (mAlbumType == AlbumTypes.EMAILALBUM) {
-                        JarInputStream in = new JarInputStream(getAssets()
+                        ZipInputStream in = new ZipInputStream(getAssets()
                                 .open(getAssets().list("")[0]));
                         while ((entry = in.getNextEntry()) != null) {
                             out.putNextEntry(new ZipEntry(entry.getName()));
