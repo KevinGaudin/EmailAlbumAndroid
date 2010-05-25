@@ -1,9 +1,11 @@
 package com.kg.emailalbum.mobile.util;
 
 import java.lang.reflect.Field;
+import java.util.List;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ResolveInfo;
 import android.util.Log;
 
 public class Compatibility {
@@ -39,10 +41,12 @@ public class Compatibility {
         } else {
             Intent i = new Intent(Compatibility.getActionSendMultiple());
             i.setType("image/jpeg");
-            if(ctx.getPackageManager().resolveActivity(i, 0) == null) {
-                return false;
-            } else {
+            List<ResolveInfo> activities = ctx.getPackageManager().queryIntentActivities(i, 0);
+            // If there is only 1 activity, it is EmailAlbum !
+            if( activities.size() > 1) {
                 return true;
+            } else {
+                return false;
             }
         }
     }
