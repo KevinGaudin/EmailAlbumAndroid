@@ -55,24 +55,25 @@ public class EmailAlbumPreferences extends PreferenceActivity {
         // on the running android version
         if (!Compatibility.isSendMultipleAppAvailable(getApplicationContext())) {
             ListPreference albumType = (ListPreference) findPreference("albumtype");
-            int iEmail = albumType.findIndexOfValue("mail");
-            if (iEmail >= 0) {
-                CharSequence[] entries = albumType.getEntries();
-                CharSequence[] values = albumType.getEntryValues();
-                CharSequence[] newEntries = new CharSequence[entries.length - 1];
-                CharSequence[] newValues = new CharSequence[values.length - 1];
-                int iNew = 0;
-                for (int i = 0; i < entries.length; i++) {
-                    if (i != iEmail) {
-                        newEntries[iNew] = entries[i];
-                        newValues[iNew] = values[i];
-                        iNew++;
+            if(albumType != null) {
+                int iEmail = albumType.findIndexOfValue("mail");
+                if (iEmail >= 0) {
+                    CharSequence[] entries = albumType.getEntries();
+                    CharSequence[] values = albumType.getEntryValues();
+                    CharSequence[] newEntries = new CharSequence[entries.length - 1];
+                    CharSequence[] newValues = new CharSequence[values.length - 1];
+                    int iNew = 0;
+                    for (int i = 0; i < entries.length; i++) {
+                        if (i != iEmail) {
+                            newEntries[iNew] = entries[i];
+                            newValues[iNew] = values[i];
+                            iNew++;
+                        }
                     }
+                    albumType.setEntries(newEntries);
+                    albumType.setEntries(newValues);
                 }
-                albumType.setEntries(newEntries);
-                albumType.setEntries(newValues);
             }
-
         }
     }
 
