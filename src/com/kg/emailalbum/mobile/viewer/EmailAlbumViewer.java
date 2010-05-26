@@ -708,8 +708,7 @@ public class EmailAlbumViewer extends ListActivity {
         case MENU_SEND_ALL_ID:
             File dir = new CacheManager(getApplicationContext())
                     .getCacheDir("temp");
-            IntentHelper.sendAllPicturesInFolder(getApplicationContext(), dir,
-                    "", "");
+            IntentHelper.sendAllPicturesInFolder(this, dir, "", "");
             return true;
         case MENU_ABOUT_ID:
             Intent intent = new Intent(this, AboutDialog.class);
