@@ -45,9 +45,11 @@ import android.os.Handler;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore.Images;
+import android.test.PerformanceTestCase;
 import android.util.Log;
 import android.view.Display;
 import android.view.GestureDetector;
+import android.view.HapticFeedbackConstants;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -71,6 +73,7 @@ import com.kg.emailalbum.mobile.animation.Rotate3dAnimation;
 import com.kg.emailalbum.mobile.util.BitmapLoader;
 import com.kg.emailalbum.mobile.util.CacheManager;
 import com.kg.emailalbum.mobile.util.ZipUtil;
+import com.kg.emailalbum.mobile.viewer.SimpleZoomListener.ControlType;
 import com.kg.oifilemanager.filemanager.FileManagerProvider;
 import com.kg.oifilemanager.intents.FileManagerIntents;
 
@@ -104,7 +107,7 @@ public class ShowPics extends Activity implements OnGestureListener,
      * of each view is not constant, there is a rotation over the three views
      * roles during the slideshow.
      * */
-    private ImageView[] mImgViews = new ImageView[3];
+    private ImageZoomView[] mImgViews = new ImageZoomView[3];
     /**
      * These 3 variables will be updated each time we flip views. so,
      * mImgViews[curPic] will always be the current display pictures,
@@ -137,6 +140,10 @@ public class ShowPics extends Activity implements OnGestureListener,
     private boolean mSlideshowLoop = false;
     private boolean mSlideshowRandomAnim = false;
     private Toast mLatestCaption = null;
+
+    // Zoom handling
+    private SimpleZoomListener mZoomListener;
+    private boolean mZoomMode = false;
 
     Handler mHandler = new Handler();
 
@@ -221,7 +228,7 @@ public class ShowPics extends Activity implements OnGestureListener,
                 mFlipper.setInAnimation(mAnimNextIn);
                 mFlipper.setOutAnimation(mAnimCurrentFwdOut);
             }
-
+            mImgViews[nextPic].resetZoomState();
             mFlipper.showNext();
             mLatestMove = FORWARD;
 
@@ -233,6 +240,7 @@ public class ShowPics extends Activity implements OnGestureListener,
                 mFlipper.setInAnimation(mAnimPreviousIn);
                 mFlipper.setOutAnimation(mAnimCurrentBwdOut);
             }
+            mImgViews[prevPic].resetZoomState();
             mFlipper.showPrevious();
             mLatestMove = BACKWARD;
             break;
@@ -543,6 +551,9 @@ public class ShowPics extends Activity implements OnGestureListener,
 
         setContentView(R.layout.content_view);
 
+        // Zoom handling
+        mZoomListener = new SimpleZoomListener();
+
         // Prevent device from sleeping during slideshow
         PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
         mWakeLock = pm.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK
@@ -550,11 +561,11 @@ public class ShowPics extends Activity implements OnGestureListener,
 
         // Initialize our 3 ImageViews and positions.
         curPic = 0;
-        mImgViews[curPic] = (ImageView) findViewById(R.id.pic0);
+        mImgViews[curPic] = (ImageZoomView) findViewById(R.id.pic0);
         nextPic = 1;
-        mImgViews[nextPic] = (ImageView) findViewById(R.id.pic1);
+        mImgViews[nextPic] = (ImageZoomView) findViewById(R.id.pic1);
         prevPic = 2;
-        mImgViews[prevPic] = (ImageView) findViewById(R.id.pic2);
+        mImgViews[prevPic] = (ImageZoomView) findViewById(R.id.pic2);
         mFlipper = (ViewFlipper) findViewById(R.id.flipper);
 
         // Get notifications when preferences are updated
@@ -648,7 +659,7 @@ public class ShowPics extends Activity implements OnGestureListener,
         super.onDestroy();
         setWakeLock(false);
         if (isFinishing()) {
-            for (ImageView view : mImgViews) {
+            for (ImageZoomView view : mImgViews) {
                 Drawable toRecycle = view.getDrawable();
                 if (toRecycle != null) {
                     Bitmap bmpToRecycle = ((BitmapDrawable) toRecycle)
@@ -753,7 +764,19 @@ public class ShowPics extends Activity implements OnGestureListener,
      */
     @Override
     public void onLongPress(MotionEvent e) {
-        openOptionsMenu();
+        toggleZoomMode();
+    }
+
+    private void toggleZoomMode() {
+        if(mImgViews[curPic].getZoomListener() == null) {
+            Log.d(LOG_TAG, "Entering Zoom mode");
+            mImgViews[curPic].setZoomListener(mZoomListener);
+            mZoomMode = true;
+        } else {
+            Log.d(LOG_TAG, "Leaving Zoom mode");
+            mImgViews[curPic].setZoomListener(null);
+            mZoomMode = false;
+        }
     }
 
     /*
@@ -979,6 +1002,13 @@ public class ShowPics extends Activity implements OnGestureListener,
     @Override
     public boolean onTouchEvent(MotionEvent me) {
         // Let the GestureScanner handle touch events
+        if(mZoomMode) {
+            if(me.getAction() == MotionEvent.ACTION_UP) {
+                toggleZoomMode();
+            } else {
+                return mImgViews[curPic].getZoomListener().onTouch(mImgViews[curPic], me);
+            }
+        }
         return mGestureScanner.onTouchEvent(me);
     }
 
@@ -989,6 +1019,8 @@ public class ShowPics extends Activity implements OnGestureListener,
      * the current picture position.
      */
     private void resetViews() {
+        mImgViews[curPic].setZoomListener(null);
+
         try {
             if (mOldPosition < mPosition) {
                 // Gone forward => rotate positions
@@ -1052,7 +1084,7 @@ public class ShowPics extends Activity implements OnGestureListener,
                     .show();
         }
 
-        for (ImageView imgView : mImgViews) {
+        for (ImageZoomView imgView : mImgViews) {
             if (imgView.getDrawable() != null) {
                 imgView.getDrawable().setDither(true);
                 imgView.getDrawable().setFilterBitmap(true);
@@ -1062,6 +1094,7 @@ public class ShowPics extends Activity implements OnGestureListener,
             }
         }
 
+        
     }
 
     /**
@@ -1218,6 +1251,7 @@ public class ShowPics extends Activity implements OnGestureListener,
                         if (toRecycle != null) {
                             toRecycle.recycle();
                         }
+
                     }
                     mImgViews[curPic].setImageBitmap(loadPicture(mPosition));
 
@@ -1304,4 +1338,7 @@ public class ShowPics extends Activity implements OnGestureListener,
             Toast.makeText(this, R.string.last_pic, Toast.LENGTH_SHORT).show();
         }
     }
+
+
+
 }
