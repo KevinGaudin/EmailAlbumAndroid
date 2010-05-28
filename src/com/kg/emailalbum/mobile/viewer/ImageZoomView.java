@@ -19,7 +19,7 @@ public class ImageZoomView extends ImageView implements Observer {
     private final Paint mPaint = new Paint(Paint.FILTER_BITMAP_FLAG);
     private final Rect mRectSrc = new Rect();
     private final Rect mRectDst = new Rect();
-    private float mAspectQuotient;
+    private AspectQuotient mAspectQuotient;
     private SimpleZoomListener mZoomListener;
 
     public ImageZoomView(Context context, AttributeSet attrs) {
@@ -76,9 +76,9 @@ public class ImageZoomView extends ImageView implements Observer {
 
                 final float panX = mZoomState.getPanX();
                 final float panY = mZoomState.getPanY();
-                final float zoomX = mZoomState.getZoomX(mAspectQuotient)
+                final float zoomX = mZoomState.getZoomX(mAspectQuotient.get())
                         * viewWidth / bitmapWidth;
-                final float zoomY = mZoomState.getZoomY(mAspectQuotient)
+                final float zoomY = mZoomState.getZoomY(mAspectQuotient.get())
                         * viewHeight / bitmapHeight;
 
                 // Setup source and destination rectangles
@@ -122,8 +122,7 @@ public class ImageZoomView extends ImageView implements Observer {
     private void calculateAspectQuotient() {
         Bitmap bitmap = ((BitmapDrawable) getDrawable()).getBitmap();
         if (bitmap != null) {
-            mAspectQuotient = (((float) bitmap.getWidth()) / bitmap.getHeight())
-                    / (((float) getWidth()) / getHeight());
+            mAspectQuotient.updateAspectQuotient(getWidth(), getHeight(), bitmap.getWidth(), bitmap.getHeight());
         }
     }
 

@@ -55,6 +55,7 @@ import android.view.MotionEvent;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.GestureDetector.OnDoubleTapListener;
 import android.view.GestureDetector.OnGestureListener;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
@@ -81,7 +82,7 @@ import com.kg.oifilemanager.intents.FileManagerIntents;
  * 
  */
 public class ShowPics extends Activity implements OnGestureListener,
-        OnSharedPreferenceChangeListener {
+        OnSharedPreferenceChangeListener, OnDoubleTapListener {
     private static final float Z_TRANSLATE_3D = 1000.0f;
     private final static int MENU_SET_AS_ID = 1;
     private static final int MENU_SAVE_ID = 2;
@@ -141,6 +142,7 @@ public class ShowPics extends Activity implements OnGestureListener,
     // Zoom handling
     private SimpleZoomListener mZoomListener;
     private boolean mZoomMode = false;
+    private boolean mPanMode = false;
 
     Handler mHandler = new Handler();
 
@@ -575,6 +577,8 @@ public class ShowPics extends Activity implements OnGestureListener,
         // Handles flings (up / down : rotate picture, left : next, right :
         // previous
         mGestureScanner = new GestureDetector(this);
+        mGestureScanner.setOnDoubleTapListener(this);
+        mGestureScanner.setIsLongpressEnabled(true);
 
         mOldPosition = -1;
 
@@ -761,16 +765,34 @@ public class ShowPics extends Activity implements OnGestureListener,
      */
     @Override
     public void onLongPress(MotionEvent e) {
-        toggleZoomMode();
+        if (!mPanMode) {
+            setZoomMode(true);
+        }
     }
 
-    private void toggleZoomMode() {
+    private void setPanMode(boolean enable) {
+        if (!mPanMode && enable) {
+            Log.d(LOG_TAG, "Entering Pan mode");
+            mZoomListener.setControlType(SimpleZoomListener.ControlType.PAN);
+            mImgViews[curPic].setZoomListener(mZoomListener);
+            mPanMode = true;
+            mZoomMode = false;
+        } else if (!enable) {
+            Log.d(LOG_TAG, "Leaving Pan mode");
+            mImgViews[curPic].setZoomListener(null);
+            mPanMode = false;
+        }
+    }
 
-        if (mImgViews[curPic].getZoomListener() == null) {
+    private void setZoomMode(boolean enable) {
+
+        if (enable) {
             Log.d(LOG_TAG, "Entering Zoom mode");
+            mZoomListener.setControlType(SimpleZoomListener.ControlType.ZOOM);
             mImgViews[curPic].setZoomListener(mZoomListener);
             mZoomMode = true;
-        } else {
+            mPanMode = false;
+        } else if (!enable) {
             Log.d(LOG_TAG, "Leaving Zoom mode");
             mImgViews[curPic].setZoomListener(null);
             mZoomMode = false;
@@ -1001,16 +1023,35 @@ public class ShowPics extends Activity implements OnGestureListener,
     public boolean onTouchEvent(MotionEvent me) {
         // If zoom mode is enabled, the current image view handles touch
         // moves.
+        SimpleZoomListener listener = null;
+        if ((mZoomMode || mPanMode) && me.getAction() == MotionEvent.ACTION_UP) {
+            // We disable zoom mode when the user stops touching
+            // the screen
+            setZoomMode(false);
+            setPanMode(false);
+            return true;
+        }
+
         if (mZoomMode) {
-            if (me.getAction() == MotionEvent.ACTION_UP) {
-                // We disable zoom mode when the user stops touching
-                // the screen
-                toggleZoomMode();
-            } else {
-                return mImgViews[curPic].getZoomListener().onTouch(
-                        mImgViews[curPic], me);
+            listener = mImgViews[curPic].getZoomListener();
+            if (listener != null) {
+                return listener.onTouch(mImgViews[curPic], me);
             }
         }
+
+        if (me.getAction() == MotionEvent.ACTION_MOVE) {
+            if (mImgViews[curPic].getZoomState().getZoom() > 1) {
+                setPanMode(true);
+                listener = mImgViews[curPic].getZoomListener();
+                if (listener != null) {
+                    return listener.onTouch(mImgViews[curPic], me);
+                }
+            } else {
+                setPanMode(false);
+                return true;
+            }
+        }
+
         // Let the GestureScanner handle touch events
         return mGestureScanner.onTouchEvent(me);
     }
@@ -1339,6 +1380,24 @@ public class ShowPics extends Activity implements OnGestureListener,
         } else if (mPosition == mImageNames.size() - 1) {
             Toast.makeText(this, R.string.last_pic, Toast.LENGTH_SHORT).show();
         }
+    }
+
+    @Override
+    public boolean onDoubleTap(MotionEvent arg0) {
+        mImgViews[curPic].resetZoomState();
+        return false;
+    }
+
+    @Override
+    public boolean onDoubleTapEvent(MotionEvent e) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public boolean onSingleTapConfirmed(MotionEvent e) {
+        // TODO Auto-generated method stub
+        return false;
     }
 
 }
