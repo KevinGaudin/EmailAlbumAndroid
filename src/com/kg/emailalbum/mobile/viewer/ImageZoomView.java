@@ -45,6 +45,7 @@ public class ImageZoomView extends ImageView implements Observer {
     }
 
     public void setZoomListener(SimpleZoomListener listener) {
+        performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
         if (mZoomListener != null) {
             mZoomListener.setZoomState(null);
         }

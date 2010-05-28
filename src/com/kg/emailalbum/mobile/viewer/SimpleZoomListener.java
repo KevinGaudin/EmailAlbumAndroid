@@ -17,6 +17,8 @@ public class SimpleZoomListener implements View.OnTouchListener {
     private float mY;
 
     public void setZoomState(ZoomState state) {
+        mX = 0;
+        mY = 0;
         mState = state;
     }
 
@@ -40,6 +42,10 @@ public class SimpleZoomListener implements View.OnTouchListener {
                 break;
 
             case MotionEvent.ACTION_MOVE: {
+                if(mX == 0 && mY == 0) {
+                    mX = x;
+                    mY = y;
+                }
                 final float dx = (x - mX) / v.getWidth();
                 final float dy = (y - mY) / v.getHeight();
 

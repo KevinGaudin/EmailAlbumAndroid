@@ -45,11 +45,9 @@ import android.os.Handler;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore.Images;
-import android.test.PerformanceTestCase;
 import android.util.Log;
 import android.view.Display;
 import android.view.GestureDetector;
-import android.view.HapticFeedbackConstants;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -73,7 +71,6 @@ import com.kg.emailalbum.mobile.animation.Rotate3dAnimation;
 import com.kg.emailalbum.mobile.util.BitmapLoader;
 import com.kg.emailalbum.mobile.util.CacheManager;
 import com.kg.emailalbum.mobile.util.ZipUtil;
-import com.kg.emailalbum.mobile.viewer.SimpleZoomListener.ControlType;
 import com.kg.oifilemanager.filemanager.FileManagerProvider;
 import com.kg.oifilemanager.intents.FileManagerIntents;
 
@@ -768,7 +765,8 @@ public class ShowPics extends Activity implements OnGestureListener,
     }
 
     private void toggleZoomMode() {
-        if(mImgViews[curPic].getZoomListener() == null) {
+
+        if (mImgViews[curPic].getZoomListener() == null) {
             Log.d(LOG_TAG, "Entering Zoom mode");
             mImgViews[curPic].setZoomListener(mZoomListener);
             mZoomMode = true;
@@ -1001,14 +999,19 @@ public class ShowPics extends Activity implements OnGestureListener,
      */
     @Override
     public boolean onTouchEvent(MotionEvent me) {
-        // Let the GestureScanner handle touch events
-        if(mZoomMode) {
-            if(me.getAction() == MotionEvent.ACTION_UP) {
+        // If zoom mode is enabled, the current image view handles touch
+        // moves.
+        if (mZoomMode) {
+            if (me.getAction() == MotionEvent.ACTION_UP) {
+                // We disable zoom mode when the user stops touching
+                // the screen
                 toggleZoomMode();
             } else {
-                return mImgViews[curPic].getZoomListener().onTouch(mImgViews[curPic], me);
+                return mImgViews[curPic].getZoomListener().onTouch(
+                        mImgViews[curPic], me);
             }
         }
+        // Let the GestureScanner handle touch events
         return mGestureScanner.onTouchEvent(me);
     }
 
@@ -1094,7 +1097,6 @@ public class ShowPics extends Activity implements OnGestureListener,
             }
         }
 
-        
     }
 
     /**
@@ -1338,7 +1340,5 @@ public class ShowPics extends Activity implements OnGestureListener,
             Toast.makeText(this, R.string.last_pic, Toast.LENGTH_SHORT).show();
         }
     }
-
-
 
 }
