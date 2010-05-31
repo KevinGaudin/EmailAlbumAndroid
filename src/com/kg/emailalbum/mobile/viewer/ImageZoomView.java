@@ -19,8 +19,7 @@ public class ImageZoomView extends ImageView implements Observer {
     private final Paint mPaint = new Paint(Paint.FILTER_BITMAP_FLAG);
     private final Rect mRectSrc = new Rect();
     private final Rect mRectDst = new Rect();
-    private AspectQuotient mAspectQuotient;
-    private SimpleZoomListener mZoomListener;
+    private AspectQuotient mAspectQuotient = new AspectQuotient();
 
     public ImageZoomView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -33,10 +32,10 @@ public class ImageZoomView extends ImageView implements Observer {
         }
 
         mZoomState = state;
-        mZoomState.addObserver(this);
-        if (getZoomListener() != null) {
-            getZoomListener().setZoomState(mZoomState);
+        if(mZoomState != null) {
+            mZoomState.addObserver(this);
         }
+
         invalidate();
     }
 
@@ -44,24 +43,11 @@ public class ImageZoomView extends ImageView implements Observer {
         return mZoomState;
     }
 
-    public void setZoomListener(SimpleZoomListener listener) {
-        performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
-        if (mZoomListener != null) {
-            mZoomListener.setZoomState(null);
-        }
-        mZoomListener = listener;
-//        setOnTouchListener(listener);
-        if (mZoomListener != null && getZoomState() != null) {
-            mZoomListener.setZoomState(getZoomState());
-        }
-    }
-
-    public SimpleZoomListener getZoomListener() {
-        return mZoomListener;
-    }
 
     public void update(Observable observable, Object data) {
-        invalidate();
+        if(isShown()) {
+            invalidate();
+        }
     }
 
     @Override
@@ -123,6 +109,7 @@ public class ImageZoomView extends ImageView implements Observer {
         Bitmap bitmap = ((BitmapDrawable) getDrawable()).getBitmap();
         if (bitmap != null) {
             mAspectQuotient.updateAspectQuotient(getWidth(), getHeight(), bitmap.getWidth(), bitmap.getHeight());
+            mAspectQuotient.notifyObservers();
         }
     }
 
@@ -147,7 +134,8 @@ public class ImageZoomView extends ImageView implements Observer {
         calculateAspectQuotient();
     }
 
-    public void resetZoomState() {
-        mZoomState.reset();
+    public AspectQuotient getAspectQuotient() {
+        return mAspectQuotient;
     }
+    
 }

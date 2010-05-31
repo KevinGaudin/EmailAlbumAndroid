@@ -54,10 +54,19 @@ public class ZoomState extends Observable {
         return Math.min(mZoom, mZoom / aspectQuotient);
     }
     
-    public void reset() {
+    public ZoomState reset() {
         setPanX(0.5f);
         setPanY(0.5f);
         setZoom(1f);
         notifyObservers();
+        return this;
+    }
+
+    public boolean isZoomed() {
+        if(getPanX() == 0.5f && getPanY() == 0.5f && getZoom() == 1f) {
+            return false;
+        } else {
+            return true;
+        }
     }
 }

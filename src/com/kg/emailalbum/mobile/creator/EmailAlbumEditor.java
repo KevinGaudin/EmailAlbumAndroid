@@ -27,6 +27,7 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Formatter;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -174,7 +175,8 @@ public class EmailAlbumEditor extends ListActivity implements
         private final String LOG_TAG = AlbumAdapter.class.getSimpleName();
 
         /** The album being edited */
-        protected LinkedList<AlbumItem> mContentModel = new LinkedList<AlbumItem>();
+        protected List<AlbumItem> mContentModel = Collections
+                .synchronizedList(new LinkedList<AlbumItem>());
 
         /**
          * Add an item to the list.
@@ -360,24 +362,30 @@ public class EmailAlbumEditor extends ListActivity implements
 
         public ArrayList<Uri> getUris() {
             ArrayList<Uri> uris = new ArrayList<Uri>();
-            for (AlbumItem item : mContentModel) {
-                uris.add(item.uri);
+            synchronized (mContentModel) {
+                for (AlbumItem item : mContentModel) {
+                    uris.add(item.uri);
+                }
             }
             return uris;
         }
 
         public ArrayList<String> getCaptions() {
             ArrayList<String> captions = new ArrayList<String>();
-            for (AlbumItem item : mContentModel) {
-                captions.add(item.caption);
+            synchronized (mContentModel) {
+                for (AlbumItem item : mContentModel) {
+                    captions.add(item.caption);
+                }
             }
             return captions;
         }
 
         public ArrayList<Integer> getRotations() {
             ArrayList<Integer> rotations = new ArrayList<Integer>();
-            for (AlbumItem item : mContentModel) {
-                rotations.add(item.rotation);
+            synchronized (mContentModel) {
+                for (AlbumItem item : mContentModel) {
+                    rotations.add(item.rotation);
+                }
             }
             return rotations;
         }
@@ -481,51 +489,58 @@ public class EmailAlbumEditor extends ListActivity implements
                 // Total progress count.
                 int count = mAdapter.mContentModel.size();
                 int itemNumber = 0;
-                for (AlbumItem item : mAdapter.mContentModel) {
-                    try {
-                        // Create the file name. All pictures have to be named
-                        // so
-                        // that their alphabetical order is the order set by the
-                        // user for the album.
-                        // This is due to the use of Properties.load() in the
-                        // jar
-                        // bundled Viewer.
-                        String picName = new Formatter().format("img%04d.jpg",
-                                itemNumber, item.uri.getLastPathSegment())
-                                .toString();
+                synchronized (mAdapter.mContentModel) {
+                    for (AlbumItem item : mAdapter.mContentModel) {
+                        try {
+                            // Create the file name. All pictures have to be
+                            // named
+                            // so
+                            // that their alphabetical order is the order set by
+                            // the
+                            // user for the album.
+                            // This is due to the use of Properties.load() in
+                            // the
+                            // jar
+                            // bundled Viewer.
+                            String picName = new Formatter().format(
+                                    "img%04d.jpg", itemNumber,
+                                    item.uri.getLastPathSegment()).toString();
 
-                        // Load and resize a full color picture
-                        Bitmap bmp = BitmapLoader.load(getApplicationContext(),
-                                item.uri, mPictureSize.getWidth(), mPictureSize
-                                        .getHeight(), Bitmap.Config.ARGB_8888,
-                                false);
+                            // Load and resize a full color picture
+                            Bitmap bmp = BitmapLoader.load(
+                                    getApplicationContext(), item.uri,
+                                    mPictureSize.getWidth(), mPictureSize
+                                            .getHeight(),
+                                    Bitmap.Config.ARGB_8888, false);
 
-                        ErrorReporter.getInstance().addCustomData(
-                                "Apply rotation ?",
-                                "" + (item.rotation % 360 != 0));
-                        if (item.rotation % 360 != 0) {
-                            // Apply the user specified rotation
-                            bmp = BitmapUtil.rotate(bmp, item.rotation);
+                            ErrorReporter.getInstance().addCustomData(
+                                    "Apply rotation ?",
+                                    "" + (item.rotation % 360 != 0));
+                            if (item.rotation % 360 != 0) {
+                                // Apply the user specified rotation
+                                bmp = BitmapUtil.rotate(bmp, item.rotation);
+                            }
+
+                            OutputStream out = new FileOutputStream(new File(
+                                    album, picName));
+
+                            // Write the picture to the temp dir
+                            ErrorReporter.getInstance().addCustomData(
+                                    "bmp is null ?", "" + (bmp == null));
+                            bmp.compress(CompressFormat.JPEG, mPictureQuality,
+                                    out);
+
+                            mContentFileBuilder.put(picName, item.caption);
+
+                            // Get rid of the bitmap to avoid memory leaks
+                            bmp.recycle();
+                            out.close();
+                            itemNumber++;
+                            publishProgress((int) (((float) itemNumber / (float) count) * 100));
+                            System.gc();
+                        } catch (IOException e) {
+                            Log.e(LOG_TAG, "Error while creating temp pics", e);
                         }
-
-                        OutputStream out = new FileOutputStream(new File(album,
-                                picName));
-
-                        // Write the picture to the temp dir
-                        ErrorReporter.getInstance().addCustomData(
-                                "bmp is null ?", "" + (bmp == null));
-                        bmp.compress(CompressFormat.JPEG, mPictureQuality, out);
-
-                        mContentFileBuilder.put(picName, item.caption);
-
-                        // Get rid of the bitmap to avoid memory leaks
-                        bmp.recycle();
-                        out.close();
-                        itemNumber++;
-                        publishProgress((int) (((float) itemNumber / (float) count) * 100));
-                        System.gc();
-                    } catch (IOException e) {
-                        Log.e(LOG_TAG, "Error while creating temp pics", e);
                     }
                 }
             } else { // Zip or Jar
@@ -669,8 +684,9 @@ public class EmailAlbumEditor extends ListActivity implements
                     // TODO Auto-generated catch block
                     Log.e(LOG_TAG, "Error : ", e);
                 }
-                IntentHelper.sendAllPicturesInFolder(EmailAlbumEditor.this, new File(result.getPath()), mAlbumName,
-                        bodyWriter.toString());
+                IntentHelper.sendAllPicturesInFolder(EmailAlbumEditor.this,
+                        new File(result.getPath()), mAlbumName, bodyWriter
+                                .toString());
 
             }
         }
@@ -879,7 +895,7 @@ public class EmailAlbumEditor extends ListActivity implements
         } else {
             mAdapter = new AlbumAdapter();
         }
-        
+
         // Sets background dithering for older versions of android (1.5 & 1.6)
         findViewById(R.id.album_editor_root).getBackground().setDither(true);
 
@@ -907,7 +923,6 @@ public class EmailAlbumEditor extends ListActivity implements
                         .getParcelable(STATE_SELECTED_URI));
             }
         }
-
 
         setListAdapter(mAdapter);
 

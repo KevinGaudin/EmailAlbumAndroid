@@ -106,5 +106,9 @@ public class BasicZoomControl implements Observer {
 
         mState.notifyObservers();
     }
+    
+    public boolean isZoomed() {
+        return mState.isZoomed();
+    }
 
 }

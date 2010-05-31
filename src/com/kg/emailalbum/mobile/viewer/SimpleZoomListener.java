@@ -11,21 +11,32 @@ public class SimpleZoomListener implements View.OnTouchListener {
 
     private ControlType mControlType = ControlType.ZOOM;
 
-    private ZoomState mState;
-
     private float mX;
     private float mY;
 
-    public void setZoomState(ZoomState state) {
-        mX = 0;
-        mY = 0;
-        mState = state;
+    /** Zoom control to manipulate */
+    private BasicZoomControl mZoomControl;
+
+    /** X-coordinate of latest down event */
+    private float mDownX;
+
+    /** Y-coordinate of latest down event */
+    private float mDownY;
+
+    /**
+     * Sets the zoom control to manipulate
+     * 
+     * @param control
+     *            Zoom control
+     */
+    public void setZoomControl(BasicZoomControl control) {
+        mZoomControl = control;
     }
 
     public void setControlType(ControlType controlType) {
         mControlType = controlType;
     }
-    
+
     public ControlType getControlType() {
         return mControlType;
     }
@@ -36,33 +47,29 @@ public class SimpleZoomListener implements View.OnTouchListener {
         final float y = event.getY();
 
         switch (action) {
-            case MotionEvent.ACTION_DOWN:
-                mX = x;
-                mY = y;
-                break;
+        case MotionEvent.ACTION_DOWN:
+            mDownX = x;
+            mDownY = y;
+            mX = x;
+            mY = y;
+            return false;
 
-            case MotionEvent.ACTION_MOVE: {
-                if(mX == 0 && mY == 0) {
-                    mX = x;
-                    mY = y;
-                }
-                final float dx = (x - mX) / v.getWidth();
-                final float dy = (y - mY) / v.getHeight();
+        case MotionEvent.ACTION_MOVE: {
+            final float dx = (x - mX) / v.getWidth();
+            final float dy = (y - mY) / v.getHeight();
 
-                if (mControlType == ControlType.ZOOM) {
-                    mState.setZoom(mState.getZoom() * (float)Math.pow(20, -dy));
-                    mState.notifyObservers();
-                } else {
-                    mState.setPanX(mState.getPanX() - dx);
-                    mState.setPanY(mState.getPanY() - dy);
-                    mState.notifyObservers();
-                }
-
-                mX = x;
-                mY = y;
-                break;
+            if (mControlType == ControlType.ZOOM) {
+                mZoomControl.zoom((float) Math.pow(20, -dy), mDownX
+                        / v.getWidth(), mDownY / v.getHeight());
+            } else {
+                mZoomControl.pan(-dx, -dy);
             }
-            
+
+            mX = x;
+            mY = y;
+            break;
+        }
+
         }
 
         return true;
