@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
 import android.util.Log;
+import android.view.MotionEvent;
 
 public class Compatibility {
     private static final String LOG_TAG = Compatibility.class.getSimpleName();
@@ -48,6 +49,21 @@ public class Compatibility {
             } else {
                 return false;
             }
+        }
+    }
+    
+    public ScaleGestureDetector getScaleGestureDetector(Context context, ScaleGestureDetector.OnScaleGestureListener listener) {
+        try {
+            Field multiTouchField = MotionEvent.class.getField("ACTION_POINTER_1_DOWN");
+            return new ScaleGestureDetector(context, listener);
+        } catch (SecurityException e) {
+            // TODO Auto-generated catch block
+            Log.w(LOG_TAG, "Error : ", e);
+            return null;
+        } catch (NoSuchFieldException e) {
+            // TODO Auto-generated catch block
+            Log.w(LOG_TAG, "Error : ", e);
+            return null;
         }
     }
 }

@@ -37,6 +37,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
+import android.graphics.PointF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -84,6 +85,8 @@ import com.kg.oifilemanager.intents.FileManagerIntents;
  */
 public class ShowPics extends Activity implements OnGestureListener,
         OnSharedPreferenceChangeListener, OnDoubleTapListener {
+    private static final float DOUBLE_TAP_ZOOM_FACTOR = 2.0f;
+    private static final double ACTIVATE_ZOOM_THRESHOLD = 5.0;
     private static final float Z_TRANSLATE_3D = 1000.0f;
     private final static int MENU_SET_AS_ID = 1;
     private static final int MENU_SAVE_ID = 2;
@@ -146,6 +149,8 @@ public class ShowPics extends Activity implements OnGestureListener,
     private SimpleZoomListener mZoomListener = new SimpleZoomListener();
     private BasicZoomControl mZoomControl = new BasicZoomControl();
     Handler mHandler = new Handler();
+    private PointF mDownPoint = new PointF(0,0);
+    private PointF mLatestPoint = new PointF(0,0);
 
     /**
      * This will be used to trigger the automatic picture change while in
@@ -500,7 +505,7 @@ public class ShowPics extends Activity implements OnGestureListener,
         Log.d(this.getClass().getName(), "Load image "
                 + mImageNames.get(mPosition));
         Bitmap result = BitmapLoader.load(getApplicationContext(), archive,
-                archive.getEntry(mImageNames.get(position)), null, null);
+                archive.getEntry(mImageNames.get(position)), 800, 800);
         return result;
     }
 
@@ -760,8 +765,9 @@ public class ShowPics extends Activity implements OnGestureListener,
                 setPanMode(false);
                 mZoomControl.getZoomState().reset();
                 return true;
+            } else {
+                return super.onKeyDown(keyCode, event);
             }
-            return false;
         }
         return super.onKeyDown(keyCode, event);
     }
@@ -775,9 +781,10 @@ public class ShowPics extends Activity implements OnGestureListener,
      */
     @Override
     public void onLongPress(MotionEvent e) {
-        mImgViews[curPic]
-                .performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
-        if (!mPanMode) {
+        Log.d(LOG_TAG, "Long press, Dx = " + Math.abs(mDownPoint.x - mLatestPoint.x) + " / Dy = " + Math.abs(mDownPoint.y - mLatestPoint.y) );
+        if (!mPanMode || (Math.abs(mDownPoint.x - mLatestPoint.x) < ACTIVATE_ZOOM_THRESHOLD && Math.abs(mDownPoint.y - mLatestPoint.y) < ACTIVATE_ZOOM_THRESHOLD)) {
+            mImgViews[curPic]
+                      .performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
             setZoomMode(true);
         }
     }
@@ -1044,10 +1051,18 @@ public class ShowPics extends Activity implements OnGestureListener,
 
         if (me.getAction() == MotionEvent.ACTION_DOWN) {
             mZoomListener.onTouch(mImgViews[curPic], me);
+//            Log.d(LOG_TAG, "DownX = " + me.getX() + " / DownY = " +  me.getY());
+            mDownPoint.x = me.getX();
+            mDownPoint.y = me.getY();
+            mLatestPoint.x = mDownPoint.x;
+            mLatestPoint.y = mDownPoint.y;
             return mGestureScanner.onTouchEvent(me);
         }
 
         if (me.getAction() == MotionEvent.ACTION_MOVE) {
+//            Log.d(LOG_TAG, "LatestX = " + me.getX() + " / LatestY = " +  me.getY());
+            mLatestPoint.x = me.getX();
+            mLatestPoint.y = me.getY();
             if (mZoomControl.isZoomed()) {
                 setPanMode(true);
                 return mZoomListener.onTouch(mImgViews[curPic], me);
@@ -1389,8 +1404,12 @@ public class ShowPics extends Activity implements OnGestureListener,
     }
 
     @Override
-    public boolean onDoubleTap(MotionEvent arg0) {
-        mZoomControl.getZoomState().reset();
+    public boolean onDoubleTap(MotionEvent me) {
+        if(mZoomControl.isZoomed()) {
+            mZoomControl.getZoomState().reset();
+        } else {
+            mZoomControl.zoom(DOUBLE_TAP_ZOOM_FACTOR, mLatestPoint.x, mLatestPoint.y);
+        }
         return true;
     }
 
@@ -1402,8 +1421,8 @@ public class ShowPics extends Activity implements OnGestureListener,
 
     @Override
     public boolean onSingleTapConfirmed(MotionEvent e) {
-        openOptionsMenu();
-        return true;
+//        openOptionsMenu();
+        return false;
     }
 
 }
