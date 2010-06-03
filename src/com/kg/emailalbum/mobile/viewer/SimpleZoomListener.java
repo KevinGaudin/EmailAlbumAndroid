@@ -9,6 +9,7 @@ public class SimpleZoomListener implements View.OnTouchListener {
         PAN, ZOOM
     }
 
+
     private ControlType mControlType = ControlType.ZOOM;
 
     private float mX;
@@ -74,5 +75,7 @@ public class SimpleZoomListener implements View.OnTouchListener {
 
         return true;
     }
+
+
 
 }

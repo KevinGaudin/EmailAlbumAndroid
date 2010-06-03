@@ -52,16 +52,16 @@ public class Compatibility {
         }
     }
     
-    public ScaleGestureDetector getScaleGestureDetector(Context context, ScaleGestureDetector.OnScaleGestureListener listener) {
+    public static ScaleGestureDetector getScaleGestureDetector(Context context, ScaleGestureDetector.OnScaleGestureListener listener) {
         try {
-            Field multiTouchField = MotionEvent.class.getField("ACTION_POINTER_1_DOWN");
+            // If multitouch is supported, this field exist
+            MotionEvent.class.getField("ACTION_POINTER_1_DOWN");
+            Log.d(LOG_TAG, "Looks like multitouch is supported.");
             return new ScaleGestureDetector(context, listener);
         } catch (SecurityException e) {
-            // TODO Auto-generated catch block
             Log.w(LOG_TAG, "Error : ", e);
             return null;
         } catch (NoSuchFieldException e) {
-            // TODO Auto-generated catch block
             Log.w(LOG_TAG, "Error : ", e);
             return null;
         }
