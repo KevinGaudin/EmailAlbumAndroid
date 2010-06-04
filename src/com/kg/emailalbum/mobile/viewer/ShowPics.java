@@ -157,7 +157,7 @@ public class ShowPics extends Activity implements OnGestureListener,
     Handler mHandler = new Handler();
     private PointF mDownPoint = new PointF(0, 0);
     private PointF mLatestPoint = new PointF(0, 0);
-
+    
     /**
      * This will be used to trigger the automatic picture change while in
      * slideshow mode.
@@ -497,8 +497,12 @@ public class ShowPics extends Activity implements OnGestureListener,
      * Loads Animation objects.
      */
     private void initSlideshow() {
-        mSlideshowPeriod = Long.parseLong(mPrefs.getString("slideshow_period",
-                "" + DEFAULT_SLIDESHOW_TIME)) * 1000;
+        String prefPeriod = mPrefs.getString("slideshow_period", ""
+                + DEFAULT_SLIDESHOW_TIME);
+        if (prefPeriod == null || "".equals(prefPeriod.trim())) {
+            prefPeriod = "" + DEFAULT_SLIDESHOW_TIME;
+        }
+        mSlideshowPeriod = Long.parseLong(prefPeriod) * 1000;
         mSlideshowLoop = mPrefs.getBoolean("slideshow_loop", mSlideshowLoop);
         mSlideshowRandomAnim = mPrefs.getBoolean("slideshow_random_animation",
                 mSlideshowRandomAnim);
@@ -511,7 +515,7 @@ public class ShowPics extends Activity implements OnGestureListener,
         Log.d(this.getClass().getName(), "Load image "
                 + mImageNames.get(mPosition));
         Bitmap result = BitmapLoader.load(getApplicationContext(), archive,
-                archive.getEntry(mImageNames.get(position)), 800, 800);
+                archive.getEntry(mImageNames.get(position)), 900, 900);
         return result;
     }
 
@@ -1143,7 +1147,7 @@ public class ShowPics extends Activity implements OnGestureListener,
                     if (mImgViews[prevPic].getDrawable() != null) {
                         if (((BitmapDrawable) mImgViews[prevPic].getDrawable())
                                 .getBitmap() != null) {
-                            // revPic now contains the picture next to the next
+                            // prevPic now contains the picture next to the next
                             // picture.
                             // Discard it.
                             ((BitmapDrawable) mImgViews[prevPic].getDrawable())
@@ -1428,7 +1432,9 @@ public class ShowPics extends Activity implements OnGestureListener,
         if (mZoomControl.isZoomed()) {
             mZoomControl.getZoomState().reset();
         } else {
-            mZoomControl.zoom(DOUBLE_TAP_ZOOM_FACTOR, me.getX() / mImgViews[curPic].getWidth(), me.getY() / mImgViews[curPic].getHeight());
+            mZoomControl.zoom(DOUBLE_TAP_ZOOM_FACTOR, me.getX()
+                    / mImgViews[curPic].getWidth(), me.getY()
+                    / mImgViews[curPic].getHeight());
         }
         return true;
     }
@@ -1477,4 +1483,5 @@ public class ShowPics extends Activity implements OnGestureListener,
     public void onScaleEnd(ScaleGestureDetector detector) {
         mMTZoomMode = false;
     }
+
 }
