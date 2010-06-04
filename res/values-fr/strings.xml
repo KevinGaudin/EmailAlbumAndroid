@@ -92,12 +92,11 @@
 		\n
 	</string>
 	<string name="changelog">
-		Corrigé version 2.5.1 :\n
-		- Erreur à l\'ouverture de l\'écran de configuration de la visionneuse (android 1.5/1.6)\n
-		- Erreur sur option \'Partager toutes\' de la visionneuse\n
-		Nouveautés version 2.5.0 :\n
-		- Ajout possibilité d\'envoi d\'albums par mail avec images directement en attachement et les légendes dans le corps du mail. Voir \'Type d\'album\' dans la configuration (nécessite android 2.0 ou plus).\n
-	</string>
+		New in version 2.6.0 :\n
+		- Possibilité de zoomer dans la visionneuse d\'albums. Vous pouvez utiliser un appui long (toutes versions), un double tap
+		(toutes versions), ou le fameux zoom multitouch (android 2.0 ou plus).\n
+		- Ajustement du geste de rotation dans la visionneuse d\'album, devrait être plus intuitif.\n
+		- Divers correctifs\n	</string>
 	<string name="url_donate">
 		https://www.paypal.com/cgi-bin/webscr?cmd=_donations&amp;business=DT9H5GSCL9U76&amp;lc=FR&amp;item_name=EmailAlbum%20Viewer&amp;currency_code=EUR&amp;bn=PP-DonationsBF:btn_donateCC_LG.gif:NonHosted</string>
 	<string name="alert_filemanager_missing">OI File Manager est nécessaire pour ouvrir des albums et enregistrer des images depuis/vers la SD Card. Voulez-vous l\'installer ? (C\'est gratuit)</string>

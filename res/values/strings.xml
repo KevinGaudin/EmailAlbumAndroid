@@ -14,7 +14,9 @@
 	-->
 <resources>
 	<!-- ACRA -->
-	<string name="crash_toast_text">An unexpected error occurred. A report has been sent to help fix the issue.\n\nYou can disable error reports in the settings.</string>
+	<string name="crash_toast_text">An unexpected error occurred. A report has been
+		sent to help fix the issue.\n\nYou can disable error reports in the
+		settings.</string>
 	<string name="crash_notif_ticker_text">Unexpected error, please send a report...
 	</string>
 	<string name="crash_notif_title">EmailAlbum has crashed...</string>
@@ -28,8 +30,10 @@
 		below:</string>
 	<string name="crash_dialog_ok_toast">Thank you !</string>
 	<string name="pref_disable_acra">Disable error reporting</string>
-	<string name="pref_acra_disabled">Error reports are not sent to the developer. He won\'t be able to fix them...</string>
-	<string name="pref_acra_enabled">Error reports are sent automatically to help fix application issues</string>
+	<string name="pref_acra_disabled">Error reports are not sent to the developer.
+		He won\'t be able to fix them...</string>
+	<string name="pref_acra_enabled">Error reports are sent automatically to help
+		fix application issues</string>
 
 	<!-- Viewer Strings -->
 	<string name="hello">Hello World!</string>
@@ -90,16 +94,16 @@
 		Guy :
 		http://www.curious-creature.org.
 		\n\n
-		Application crash reporting managed with ACRA : http://acra.googlecode.com\n
+		Application crash reporting
+		managed with ACRA : http://acra.googlecode.com\n
 	</string>
 	<string name="changelog">
-		Fixed in version 2.5.1 :\n
-		- Viewer preferences screen crash (android 1.5/1.6)\n
-		- Viewer \'send all pictures\' option crash\n
-		New in version 2.5.0 :\n
-		- Added feature to send
-		albums as mail attachments with captions listed in the mail body. See
-		\'Album type\' in creator preferences (req. android 2.0 or more).\n
+		New in version 2.6.0 :\n
+		- Added zoom feature to album
+		viewer. You can use a long press (any android version), double tap
+		(any android version), or pinch zoom (android 2.0 or more).\n
+		- Adjusted rotation gesture in album viewer, should be more intuitive.\n
+		- Various bugfixes\n
 	</string>
 	<string name="url_donate">https://www.paypal.com/cgi-bin/webscr?cmd=_donations&amp;business=DT9H5GSCL9U76&amp;lc=EN&amp;item_name=EmailAlbum%20Viewer&amp;currency_code=EUR&amp;bn=PP-DonationsBF:btn_donateCC_LG.gif:NonHosted</string>
 	<string name="alert_filemanager_missing">OI File Manager is required for both opening albums and saving pictures from/to SD Card. Do you want to install it ? (It is free)</string>
