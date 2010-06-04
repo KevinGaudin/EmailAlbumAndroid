@@ -481,6 +481,11 @@ public class EmailAlbumEditor extends ListActivity implements
             // Reset progress dialog in case of reuse.
             publishProgress(0);
 
+            ErrorReporter.getInstance().addCustomData("nbPics",
+                    "" + mAdapter.getCount());
+            ErrorReporter.getInstance().addCustomData("ExportSize",
+                    mPictureSize.name());
+
             File album;
             if (mAlbumType.equals(AlbumTypes.MAIL)) {
                 ErrorReporter.getInstance().addCustomData("Format",
@@ -491,6 +496,8 @@ public class EmailAlbumEditor extends ListActivity implements
                 int itemNumber = 0;
                 synchronized (mAdapter.mContentModel) {
                     for (AlbumItem item : mAdapter.mContentModel) {
+                        ErrorReporter.getInstance().addCustomData("CurrentPic",
+                                "" + itemNumber);
                         try {
                             // Create the file name. All pictures have to be
                             // named
@@ -599,6 +606,8 @@ public class EmailAlbumEditor extends ListActivity implements
                     int itemNumber = 0;
                     BitmapLoader.onLowMemory();
                     for (AlbumItem item : mAdapter.mContentModel) {
+                        ErrorReporter.getInstance().addCustomData("CurrentPic",
+                                "" + itemNumber);
                         // Create the file name. All pictures have to be named
                         // so
                         // that their alphabetical order is the order set by the
