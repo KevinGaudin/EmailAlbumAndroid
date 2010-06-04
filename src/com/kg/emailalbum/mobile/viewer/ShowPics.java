@@ -157,7 +157,7 @@ public class ShowPics extends Activity implements OnGestureListener,
     Handler mHandler = new Handler();
     private PointF mDownPoint = new PointF(0, 0);
     private PointF mLatestPoint = new PointF(0, 0);
-    
+
     /**
      * This will be used to trigger the automatic picture change while in
      * slideshow mode.
@@ -1180,6 +1180,7 @@ public class ShowPics extends Activity implements OnGestureListener,
         }
         mZoomControl.getZoomState().reset();
         mImgViews[curPic].setZoomState(mZoomControl.getZoomState());
+        mZoomControl.setAspectQuotient(mImgViews[curPic].getAspectQuotient());
     }
 
     /**
