@@ -10,7 +10,6 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.util.AttributeSet;
-import android.view.HapticFeedbackConstants;
 import android.widget.ImageView;
 
 public class ImageZoomView extends ImageView implements Observer {
