@@ -23,238 +23,252 @@ import com.kg.oifilemanager.filemanager.util.MimeTypes;
 
 public class DirectoryScanner extends Thread {
 
-	private static final String TAG = "OIFM_DirScanner";
-	
-	private File currentDirectory;
-	boolean cancel;
+    private static final String TAG = "OIFM_DirScanner";
 
-	private String mSdCardPath;
-	private Context context;
+    private File currentDirectory;
+    boolean cancel;
+
+    private String mSdCardPath;
+    private Context context;
     private MimeTypes mMimeTypes;
-	private Handler handler;
-	private long operationStartTime;
-	
-	// Update progress bar every n files
-	static final private int PROGRESS_STEPS = 50;
+    private Handler handler;
+    private long operationStartTime;
 
-	// Cupcake-specific methods
+    // Update progress bar every n files
+    static final private int PROGRESS_STEPS = 50;
+
+    // Cupcake-specific methods
     static Method formatter_formatFileSize;
 
     static {
-    	initializeCupcakeInterface();
+        initializeCupcakeInterface();
     }
-    
 
+    DirectoryScanner(File directory, Context context, Handler handler,
+            MimeTypes mimeTypes, String sdCardPath) {
+        super("Directory Scanner");
+        currentDirectory = directory;
+        this.context = context;
+        this.handler = handler;
+        this.mMimeTypes = mimeTypes;
+        this.mSdCardPath = sdCardPath;
+    }
 
-	DirectoryScanner(File directory, Context context, Handler handler, MimeTypes mimeTypes, String sdCardPath) {
-		super("Directory Scanner");
-		currentDirectory = directory;
-		this.context = context;
-		this.handler = handler;
-		this.mMimeTypes = mimeTypes;
-		this.mSdCardPath = sdCardPath;
-	}
-	
-	private void clearData() {
-		// Remove all references so we don't delay the garbage collection.
-		context = null;
-		mMimeTypes = null;
-		handler = null;
-	}
+    private void clearData() {
+        // Remove all references so we don't delay the garbage collection.
+        context = null;
+        mMimeTypes = null;
+        handler = null;
+    }
 
-	public void run() {
-		Log.v(TAG, "Scanning directory " + currentDirectory);
-		
-		File[] files = currentDirectory.listFiles();
+    public void run() {
+        Log.v(TAG, "Scanning directory " + currentDirectory);
 
+        File[] files = currentDirectory.listFiles();
 
-		int totalCount = 0;
-		
-		if (cancel) {
-			Log.v(TAG, "Scan aborted");
-			clearData();
-			return;
-		}
-		
-		operationStartTime = SystemClock.uptimeMillis();
-		
-		if(files != null) {
-			totalCount = files.length;
-		} else {
-			clearData();
-			return;
-		}
-		
-		Log.v(TAG, "Counting files... (total count=" + totalCount + ")");
+        int totalCount = 0;
 
-		int progress = 0;
-		
-		/** Dir separate for sorting */
-		List<IconifiedText> listDir = new ArrayList<IconifiedText>(totalCount);
+        if (cancel) {
+            Log.v(TAG, "Scan aborted");
+            clearData();
+            return;
+        }
 
-		/** Files separate for sorting */
-		List<IconifiedText> listFile = new ArrayList<IconifiedText>(totalCount);
+        operationStartTime = SystemClock.uptimeMillis();
 
-		/** SD card separate for sorting */
-		List<IconifiedText> listSdCard = new ArrayList<IconifiedText>(3);
+        if (files != null) {
+            totalCount = files.length;
+        } else {
+            clearData();
+            return;
+        }
 
-		// Cache some commonly used icons.
-		Drawable sdIcon = context.getResources().getDrawable(R.drawable.icon_sdcard);
-		Drawable folderIcon = context.getResources().getDrawable(R.drawable.ic_launcher_folder);
-		Drawable genericFileIcon = context.getResources().getDrawable(R.drawable.icon_file);
+        Log.v(TAG, "Counting files... (total count=" + totalCount + ")");
 
-		Drawable currentIcon = null; 
-		for (File currentFile : files){ 
-			if (cancel) {
-				// Abort!
-				Log.v(TAG, "Scan aborted while checking files");
-				clearData();
-				return;
-			}
-			
-			progress++;
-			updateProgress(progress, totalCount);
-			
-			/*
-        	  if (currentFile.isHidden()) {
-        		  continue;
-        	  }
-			 */
-			if (currentFile.isDirectory()) { 
-				if (currentFile.getAbsolutePath().equals(mSdCardPath)) {
-					currentIcon = sdIcon;
+        int progress = 0;
 
-					listSdCard.add(new IconifiedText( 
-							currentFile.getName(), "", currentIcon)); 
-				} else {
-					currentIcon = folderIcon;
+        /** Dir separate for sorting */
+        List<IconifiedText> listDir = new ArrayList<IconifiedText>(totalCount);
 
-					listDir.add(new IconifiedText( 
-							currentFile.getName(), "", currentIcon)); 
-				}
-			}else{ 
-				String fileName = currentFile.getName(); 
+        /** Files separate for sorting */
+        List<IconifiedText> listFile = new ArrayList<IconifiedText>(totalCount);
 
-				String mimetype = mMimeTypes.getMimeType(fileName);
+        /** SD card separate for sorting */
+        List<IconifiedText> listSdCard = new ArrayList<IconifiedText>(3);
 
-				currentIcon = getDrawableForMimetype(currentFile, mimetype);
-				if (currentIcon == null) {
-					currentIcon = genericFileIcon;
-				}
+        // Cache some commonly used icons.
+        Drawable sdIcon = context.getResources().getDrawable(
+                R.drawable.icon_sdcard);
+        Drawable folderIcon = context.getResources().getDrawable(
+                R.drawable.ic_launcher_folder);
+        Drawable genericFileIcon = context.getResources().getDrawable(
+                R.drawable.icon_file);
+        Drawable emailalbumIcon = context.getResources().getDrawable(
+                R.drawable.icon);
 
-				String size = "";
+        Drawable currentIcon = null;
+        for (File currentFile : files) {
+            if (cancel) {
+                // Abort!
+                Log.v(TAG, "Scan aborted while checking files");
+                clearData();
+                return;
+            }
 
-				try {
-					size = (String) formatter_formatFileSize.invoke(null, context, currentFile.length());
-				} catch (Exception e) {
-					// The file size method is probably null (this is most
-					// likely not a Cupcake phone), or something else went wrong.
-					// Let's fall back to something primitive, like just the number
-					// of KB.
-					size = Long.toString(currentFile.length() / 1024);
-					size +=" KB";
+            progress++;
+            updateProgress(progress, totalCount);
 
-					// Technically "KB" should come from a string resource,
-					// but this is just a Cupcake 1.1 fallback, and KB is universal
-					// enough.
-				}
+            /*
+             * if (currentFile.isHidden()) { continue; }
+             */
+            if (currentFile.isDirectory()) {
+                if (currentFile.getAbsolutePath().equals(mSdCardPath)) {
+                    currentIcon = sdIcon;
 
-				listFile.add(new IconifiedText( 
-						currentFile.getName(), size, currentIcon)); 
-			} 
-		}
-		
-		Log.v(TAG, "Sorting results...");
-		
-		//Collections.sort(mListSdCard); 
-		Collections.sort(listDir); 
-		Collections.sort(listFile); 
+                    listSdCard.add(new IconifiedText(currentFile.getName(), "",
+                            currentIcon));
+                } else {
+                    currentIcon = folderIcon;
 
-		if (!cancel) {
-			Log.v(TAG, "Sending data back to main thread");
-			
-			DirectoryContents contents = new DirectoryContents();
+                    listDir.add(new IconifiedText(currentFile.getName(), "",
+                            currentIcon));
+                }
+            } else {
+                String fileName = currentFile.getName();
+                String lcFileName = fileName.toLowerCase();
+                if (lcFileName.endsWith(".jar") || lcFileName.endsWith(".zip")) {
+                    currentIcon = emailalbumIcon;
+                } else {
 
-			contents.listDir = listDir;
-			contents.listFile = listFile;
-			contents.listSdCard = listSdCard;
+                    String mimetype = mMimeTypes.getMimeType(fileName);
 
-			Message msg = handler.obtainMessage(FileManagerActivity.MESSAGE_SHOW_DIRECTORY_CONTENTS);
-			msg.obj = contents;
-			msg.sendToTarget();
-		}
+                    currentIcon = getDrawableForMimetype(currentFile, mimetype);
+                    if (currentIcon == null) {
+                        currentIcon = genericFileIcon;
+                    }
+                }
+                
+                String size = "";
 
-		clearData();
-	}
-	
-	private void updateProgress(int progress, int maxProgress) {
-		// Only update the progress bar every n steps...
-		if ((progress % PROGRESS_STEPS) == 0) {
-			// Also don't update for the first second.
-			long curTime = SystemClock.uptimeMillis();
-			
-			if (curTime - operationStartTime < 1000L) {
-				return;
-			}
-			
-			// Okay, send an update.
-			Message msg = handler.obtainMessage(FileManagerActivity.MESSAGE_SET_PROGRESS);
-			msg.arg1 = progress;
-			msg.arg2 = maxProgress;
-			msg.sendToTarget();
-		}
-	}
+                try {
+                    size = (String) formatter_formatFileSize.invoke(null,
+                            context, currentFile.length());
+                } catch (Exception e) {
+                    // The file size method is probably null (this is most
+                    // likely not a Cupcake phone), or something else went
+                    // wrong.
+                    // Let's fall back to something primitive, like just the
+                    // number
+                    // of KB.
+                    size = Long.toString(currentFile.length() / 1024);
+                    size += " KB";
 
-	/**
-     * Return the Drawable that is associated with a specific mime type
-     * for the VIEW action.
+                    // Technically "KB" should come from a string resource,
+                    // but this is just a Cupcake 1.1 fallback, and KB is
+                    // universal
+                    // enough.
+                }
+
+                listFile.add(new IconifiedText(currentFile.getName(), size,
+                        currentIcon));
+            }
+        }
+
+        Log.v(TAG, "Sorting results...");
+
+        // Collections.sort(mListSdCard);
+        Collections.sort(listDir);
+        Collections.sort(listFile);
+
+        if (!cancel) {
+            Log.v(TAG, "Sending data back to main thread");
+
+            DirectoryContents contents = new DirectoryContents();
+
+            contents.listDir = listDir;
+            contents.listFile = listFile;
+            contents.listSdCard = listSdCard;
+
+            Message msg = handler
+                    .obtainMessage(FileManagerActivity.MESSAGE_SHOW_DIRECTORY_CONTENTS);
+            msg.obj = contents;
+            msg.sendToTarget();
+        }
+
+        clearData();
+    }
+
+    private void updateProgress(int progress, int maxProgress) {
+        // Only update the progress bar every n steps...
+        if ((progress % PROGRESS_STEPS) == 0) {
+            // Also don't update for the first second.
+            long curTime = SystemClock.uptimeMillis();
+
+            if (curTime - operationStartTime < 1000L) {
+                return;
+            }
+
+            // Okay, send an update.
+            Message msg = handler
+                    .obtainMessage(FileManagerActivity.MESSAGE_SET_PROGRESS);
+            msg.arg1 = progress;
+            msg.arg2 = maxProgress;
+            msg.sendToTarget();
+        }
+    }
+
+    /**
+     * Return the Drawable that is associated with a specific mime type for the
+     * VIEW action.
      * 
      * @param mimetype
      * @return
      */
     Drawable getDrawableForMimetype(File file, String mimetype) {
-     if (mimetype == null) {
-    	 return null;
-     }
-     
-   	 PackageManager pm = context.getPackageManager();
-   	 
-   	 Uri data = FileUtils.getUri(file);
-   	
-   	 Intent intent = new Intent(Intent.ACTION_VIEW);
-   	 //intent.setType(mimetype);
-   	 
-   	 // Let's probe the intent exactly in the same way as the VIEW action
-   	 // is performed in FileManagerActivity.openFile(..)
-     intent.setDataAndType(data, mimetype);
-     
-   	 final List<ResolveInfo> lri = pm.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
-   	 
-   	 if (lri != null && lri.size() > 0) {
-   		 //Log.i(TAG, "lri.size()" + lri.size());
-   		 
-   		 // return first element
-   		 int index = 0;
-   		 
-   		 // Actually first element should be "best match",
-   		 // but it seems that more recently installed applications
-   		 // could be even better match.
-   		 index = lri.size()-1;
-   		 
-   		 final ResolveInfo ri = lri.get(index);
-   		 return ri.loadIcon(pm);
-   	 }
-   	 
-   	 return null;
+        if (mimetype == null) {
+            return null;
+        }
+
+        PackageManager pm = context.getPackageManager();
+
+        Uri data = FileUtils.getUri(file);
+
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        // intent.setType(mimetype);
+
+        // Let's probe the intent exactly in the same way as the VIEW action
+        // is performed in FileManagerActivity.openFile(..)
+        intent.setDataAndType(data, mimetype);
+
+        final List<ResolveInfo> lri = pm.queryIntentActivities(intent,
+                PackageManager.MATCH_DEFAULT_ONLY);
+
+        if (lri != null && lri.size() > 0) {
+            // Log.i(TAG, "lri.size()" + lri.size());
+
+            // return first element
+            int index = 0;
+
+            // Actually first element should be "best match",
+            // but it seems that more recently installed applications
+            // could be even better match.
+            index = lri.size() - 1;
+
+            final ResolveInfo ri = lri.get(index);
+            return ri.loadIcon(pm);
+        }
+
+        return null;
     }
 
     private static void initializeCupcakeInterface() {
         try {
-            formatter_formatFileSize = Class.forName("android.text.format.Formatter").getMethod("formatFileSize", Context.class, long.class);
+            formatter_formatFileSize = Class.forName(
+                    "android.text.format.Formatter").getMethod(
+                    "formatFileSize", Context.class, long.class);
         } catch (Exception ex) {
-       	 // This is not cupcake.
-       	 return;
+            // This is not cupcake.
+            return;
         }
     }
 }
-	
