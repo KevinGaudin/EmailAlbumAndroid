@@ -101,7 +101,7 @@
 		Fixed in version 2.6.1:\n
 		- Viewer crashed sometimes on orientation changes (android 2.1)\n
 		- Some possible errors while generating albums\n
-		- GMail attachments should now be in the alum defined order\n
+		- GMail attachments should now be in the album defined order\n
 		New in version 2.6.0:\n
 		- Added zoom feature to album
 		viewer. You can use a long press (any android version), double tap
