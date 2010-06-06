@@ -2,8 +2,10 @@ package com.kg.emailalbum.mobile.util;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import com.kg.oifilemanager.filemanager.FileManagerProvider;
+import static com.kg.emailalbum.mobile.util.Reversed.reversed;
 
 import android.content.Context;
 import android.content.Intent;
@@ -27,7 +29,7 @@ public class IntentHelper {
      */
     public static void sendAllPicturesInFolder(Context activityCtx, File folder, String subject, String body) {
         ArrayList<Uri> uris = new ArrayList<Uri>();
-        for (File item : folder.listFiles()) {
+        for (File item : reversed(Arrays.asList(folder.listFiles()))) {
             uris.add(FileManagerProvider.getContentUri(item));
         }
 
