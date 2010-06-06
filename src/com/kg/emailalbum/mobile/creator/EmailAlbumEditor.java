@@ -500,15 +500,10 @@ public class EmailAlbumEditor extends ListActivity implements
                                 "" + itemNumber);
                         try {
                             // Create the file name. All pictures have to be
-                            // named
-                            // so
-                            // that their alphabetical order is the order set by
-                            // the
-                            // user for the album.
+                            // named so that their alphabetical order is the
+                            // order set by the user for the album.
                             // This is due to the use of Properties.load() in
-                            // the
-                            // jar
-                            // bundled Viewer.
+                            // the jar bundled Viewer.
                             String picName = new Formatter().format(
                                     "img%04d.jpg", itemNumber,
                                     item.uri.getLastPathSegment()).toString();
@@ -605,56 +600,57 @@ public class EmailAlbumEditor extends ListActivity implements
                     String entryName = "";
                     int itemNumber = 0;
                     BitmapLoader.onLowMemory();
-                    for (AlbumItem item : mAdapter.mContentModel) {
-                        ErrorReporter.getInstance().addCustomData("CurrentPic",
-                                "" + itemNumber);
-                        // Create the file name. All pictures have to be named
-                        // so
-                        // that their alphabetical order is the order set by the
-                        // user for the album.
-                        // This is due to the use of Properties.load() in the
-                        // jar
-                        // bundled Viewer.
-                        entryName = new Formatter().format("img%04d_%s.jpg",
-                                itemNumber, item.uri.getLastPathSegment())
-                                .toString();
+                    synchronized (mAdapter.mContentModel) {
+                        for (AlbumItem item : mAdapter.mContentModel) {
+                            ErrorReporter.getInstance().addCustomData(
+                                    "CurrentPic", "" + itemNumber);
+                            // Create the file name. All pictures have to be
+                            // named so that their alphabetical order is the
+                            // order set by the user for the album.
+                            // This is due to the use of Properties.load() in
+                            // the jar bundled Viewer.
+                            entryName = new Formatter().format(
+                                    "img%04d_%s.jpg", itemNumber,
+                                    item.uri.getLastPathSegment()).toString();
 
-                        // Associate the caption with the picture name.
-                        mContentFileBuilder.put(entryName, item.caption);
+                            // Associate the caption with the picture name.
+                            mContentFileBuilder.put(entryName, item.caption);
 
-                        if (mAlbumType == AlbumTypes.EMAILALBUM) {
-                            entry = new ZipEntry(ALBUM_PICTURES_PATH
-                                    + entryName);
-                        } else {
-                            entry = new ZipEntry(entryName);
+                            if (mAlbumType == AlbumTypes.EMAILALBUM) {
+                                entry = new ZipEntry(ALBUM_PICTURES_PATH
+                                        + entryName);
+                            } else {
+                                entry = new ZipEntry(entryName);
+                            }
+
+                            // Load and resize a full color picture
+                            Bitmap bmp = BitmapLoader.load(
+                                    getApplicationContext(), item.uri,
+                                    mPictureSize.getWidth(), mPictureSize
+                                            .getHeight(),
+                                    Bitmap.Config.ARGB_8888, false);
+
+                            ErrorReporter.getInstance().addCustomData(
+                                    "Apply rotation ?",
+                                    "" + (item.rotation % 360 != 0));
+                            if (item.rotation % 360 != 0) {
+                                // Apply the user specified rotation
+                                bmp = BitmapUtil.rotate(bmp, item.rotation);
+                            }
+                            out.putNextEntry(entry);
+                            // Write the picture to the album
+                            ErrorReporter.getInstance().addCustomData(
+                                    "bmp is null ?", "" + (bmp == null));
+                            bmp.compress(CompressFormat.JPEG, mPictureQuality,
+                                    out);
+                            // Get rid of the bitmap to avoid memory leaks
+                            bmp.recycle();
+                            out.closeEntry();
+                            itemNumber++;
+                            publishProgress((int) (((float) (entryNumber + itemNumber) / (float) count) * 100));
+                            System.gc();
                         }
-
-                        // Load and resize a full color picture
-                        Bitmap bmp = BitmapLoader.load(getApplicationContext(),
-                                item.uri, mPictureSize.getWidth(), mPictureSize
-                                        .getHeight(), Bitmap.Config.ARGB_8888,
-                                false);
-
-                        ErrorReporter.getInstance().addCustomData(
-                                "Apply rotation ?",
-                                "" + (item.rotation % 360 != 0));
-                        if (item.rotation % 360 != 0) {
-                            // Apply the user specified rotation
-                            bmp = BitmapUtil.rotate(bmp, item.rotation);
-                        }
-                        out.putNextEntry(entry);
-                        // Write the picture to the album
-                        ErrorReporter.getInstance().addCustomData(
-                                "bmp is null ?", "" + (bmp == null));
-                        bmp.compress(CompressFormat.JPEG, mPictureQuality, out);
-                        // Get rid of the bitmap to avoid memory leaks
-                        bmp.recycle();
-                        out.closeEntry();
-                        itemNumber++;
-                        publishProgress((int) (((float) (entryNumber + itemNumber) / (float) count) * 100));
-                        System.gc();
                     }
-
                     // finally write content file
                     if (mAlbumType == AlbumTypes.EMAILALBUM) {
                         entry = new ZipEntry(ALBUM_CONTENT_FILE);
