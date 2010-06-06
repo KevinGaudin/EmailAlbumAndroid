@@ -562,7 +562,7 @@ public class ShowPics extends Activity implements OnGestureListener,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
 
-        setContentView(R.layout.content_view);
+        setContentView(Compatibility.getShowPicsLayout());
 
         // Prevent device from sleeping during slideshow
         PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
