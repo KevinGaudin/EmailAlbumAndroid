@@ -92,7 +92,11 @@
 		\n
 	</string>
 	<string name="changelog">
-		New in version 2.6.0 :\n
+		Corrigé en 2.6.1 :\n
+		- La visionneuse pouvait s\'arrêter lors de changement d\'orientation (android 2.1)\n
+		- Quelques erreurs lors de la génération de l\'album\n
+		- L\'insertion des images dans GMail devrait maintenant respecter l\'ordre de l\'album\n
+		Nouveautés version 2.6.0 :\n
 		- Possibilité de zoomer dans la visionneuse d\'albums. Vous pouvez utiliser un appui long (toutes versions), un double tap
 		(toutes versions), ou le fameux zoom multitouch (android 2.0 ou plus).\n
 		- Ajustement du geste de rotation dans la visionneuse d\'album, devrait être plus intuitif.\n
