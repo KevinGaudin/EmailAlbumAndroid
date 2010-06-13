@@ -25,9 +25,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.URI;
 import java.util.ArrayList;
-import java.util.zip.ZipFile;
+
+import org.acra.ErrorReporter;
 
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
@@ -71,11 +71,9 @@ import com.kg.emailalbum.mobile.AboutDialog;
 import com.kg.emailalbum.mobile.EmailAlbumPreferences;
 import com.kg.emailalbum.mobile.R;
 import com.kg.emailalbum.mobile.animation.Rotate3dAnimation;
-import com.kg.emailalbum.mobile.util.BitmapLoader;
 import com.kg.emailalbum.mobile.util.CacheManager;
 import com.kg.emailalbum.mobile.util.Compatibility;
 import com.kg.emailalbum.mobile.util.ScaleGestureDetector;
-import com.kg.emailalbum.mobile.util.ZipUtil;
 import com.kg.emailalbum.mobile.util.ScaleGestureDetector.OnScaleGestureListener;
 import com.kg.oifilemanager.filemanager.FileManagerProvider;
 import com.kg.oifilemanager.intents.FileManagerIntents;
@@ -114,6 +112,7 @@ public class ShowPics extends Activity implements OnGestureListener,
      * roles during the slideshow.
      * */
     private ImageZoomView[] mImgViews = new ImageZoomView[3];
+    private SlideshowItem[] mItems = new SlideshowItem[3];
     /**
      * These 3 variables will be updated each time we flip views. so,
      * mImgViews[curPic] will always be the current display pictures,
@@ -122,16 +121,14 @@ public class ShowPics extends Activity implements OnGestureListener,
      * */
     private int prevPic, curPic, nextPic;
     private ViewFlipper mFlipper;
-    private ArrayList<String> mImageNames;
-    private Bundle mCaptions;
-    private String mAlbumName;
+    //private List<SlideshowItem> mSlideshowList;
+    private ArchiveSlideshowList mSlideshowList;
     private int mPosition;
     private int mOldPosition;
     private int mLatestMove = FORWARD;
     /** To catch gestures (mostly flings) */
     private GestureDetector mGestureScanner;
     private ScaleGestureDetector mScaleGestureScanner;
-    private ZipFile archive;
     private Animation mAnimNextIn;
     private Animation mAnimCurrentFwdOut;
     private Animation mAnimCurrentBwdOut;
@@ -286,7 +283,7 @@ public class ShowPics extends Activity implements OnGestureListener,
         if (!mIsFlipping) {
             mIsFlipping = true;
             mOldPosition = mPosition;
-            int lastPos = mImageNames.size() - 1;
+            int lastPos = mSlideshowList.size() - 1;
             if (mPosition == lastPos && mSlideshow && mSlideshowLoop) {
                 // Reached the end in slideshow looping mode, restart from the
                 // beginning
@@ -511,11 +508,8 @@ public class ShowPics extends Activity implements OnGestureListener,
     /**
      * Loads one picture.
      */
-    private Bitmap loadPicture(int position) throws IOException {
-        Log.d(this.getClass().getName(), "Load image "
-                + mImageNames.get(mPosition));
-        Bitmap result = BitmapLoader.load(getApplicationContext(), archive,
-                archive.getEntry(mImageNames.get(position)), 900, 900);
+    private SlideshowItem loadPicture(int position) {
+        SlideshowItem result = mSlideshowList.get(position);
         return result;
     }
 
@@ -600,37 +594,38 @@ public class ShowPics extends Activity implements OnGestureListener,
 
         mOldPosition = -1;
 
+        ArrayList<String> imageNames = null;
+        String albumName = null;
+        Bundle captions = null;
         if (getIntent() != null) {
             // retrieve all data provided by EmailAlbumViewer
-            mImageNames = getIntent().getStringArrayListExtra("PICS");
-            mAlbumName = getIntent().getStringExtra("ALBUM");
+            imageNames = getIntent().getStringArrayListExtra("PICS");
+            albumName = getIntent().getStringExtra("ALBUM");
             mPosition = getIntent().getIntExtra("POSITION", 0);
-            mCaptions = getIntent().getBundleExtra("CAPTIONS");
+            captions = getIntent().getBundleExtra("CAPTIONS");
         }
 
         if (savedInstanceState != null) {
-            mImageNames = savedInstanceState.getStringArrayList("PICS") != null ? savedInstanceState
+            imageNames = savedInstanceState.getStringArrayList("PICS") != null ? savedInstanceState
                     .getStringArrayList("PICS")
-                    : mImageNames;
-            mAlbumName = savedInstanceState.getString("ALBUM") != null ? savedInstanceState
+                    : imageNames;
+            albumName = savedInstanceState.getString("ALBUM") != null ? savedInstanceState
                     .getString("ALBUM")
-                    : mAlbumName;
+                    : albumName;
             mPosition = savedInstanceState.getInt("POSITION");
-            mCaptions = savedInstanceState.getBundle("CAPTIONS");
+            captions = savedInstanceState.getBundle("CAPTIONS");
             mSlideshow = savedInstanceState.getBoolean("SLIDESHOW");
             setWakeLock(mSlideshow);
         }
 
-        try {
-            File albumFile = new File(new URI(mAlbumName.toString().replace(
-                    " ", "%20")));
-            archive = new ZipFile(albumFile);
-            showPicture();
-        } catch (Exception e) {
-            Log.e(this.getClass().getName(), "onCreate() exception", e);
-            Toast.makeText(this, e.getLocalizedMessage(), Toast.LENGTH_SHORT)
-                    .show();
+        if (albumName != null && imageNames != null) {
+            mSlideshowList = new ArchiveSlideshowList(getApplicationContext(),
+                    albumName, imageNames, captions);
+        } else {
+            ErrorReporter.getInstance().handleException(new Exception("ShowPics invoked without data."));
+            finish();
         }
+        showPicture();
     }
 
     /*
@@ -974,9 +969,9 @@ public class ShowPics extends Activity implements OnGestureListener,
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         outState.putInt("POSITION", mPosition);
-        outState.putStringArrayList("PICS", mImageNames);
-        outState.putString("ALBUM", mAlbumName);
-        outState.putBundle("CAPTIONS", mCaptions);
+        outState.putStringArrayList("PICS", mSlideshowList.getItemNames());
+        outState.putString("ALBUM", mSlideshowList.getArchiveName());
+        outState.putBundle("CAPTIONS", mSlideshowList.getCaptions());
         outState.putBoolean("SLIDESHOW", mSlideshow);
         setWakeLock(false);
         super.onSaveInstanceState(outState);
@@ -1112,7 +1107,7 @@ public class ShowPics extends Activity implements OnGestureListener,
                 prevPic = (prevPic + 1) % 3;
                 curPic = (curPic + 1) % 3;
                 nextPic = (nextPic + 1) % 3;
-                if (mPosition + 1 < mImageNames.size()) {
+                if (mPosition + 1 < mSlideshowList.size()) {
                     if (mImgViews[nextPic].getDrawable() != null) {
                         if (((BitmapDrawable) mImgViews[nextPic].getDrawable())
                                 .getBitmap() != null) {
@@ -1123,8 +1118,8 @@ public class ShowPics extends Activity implements OnGestureListener,
                         }
                     }
                     // Preload next picture
-                    mImgViews[nextPic]
-                            .setImageBitmap(loadPicture(mPosition + 1));
+                    mItems[nextPic] = loadPicture(mPosition + 1);
+                    mImgViews[nextPic].setImageBitmap(mItems[nextPic].bitmap);
                 } else if (mSlideshowLoop) {
                     // prepare for looping
                     if (mImgViews[nextPic].getDrawable() != null) {
@@ -1136,7 +1131,8 @@ public class ShowPics extends Activity implements OnGestureListener,
                     }
                     // We are at the end of the slideshow, just before looping.
                     // Preload the first picture to prepare looping.
-                    mImgViews[nextPic].setImageBitmap(loadPicture(0));
+                    mItems[nextPic] = loadPicture(0);
+                    mImgViews[nextPic].setImageBitmap(mItems[nextPic].bitmap);
                 }
             } else if (mOldPosition > mPosition) {
                 // Gone backward
@@ -1155,8 +1151,8 @@ public class ShowPics extends Activity implements OnGestureListener,
                         }
                     }
                     // Preload previous picture.
-                    mImgViews[prevPic]
-                            .setImageBitmap(loadPicture(mPosition - 1));
+                    mItems[prevPic] = loadPicture(mPosition - 1);
+                    mImgViews[prevPic].setImageBitmap(mItems[prevPic].bitmap);
                 }
             }
         } catch (Exception e) {
@@ -1217,7 +1213,7 @@ public class ShowPics extends Activity implements OnGestureListener,
     private File savePicture(File destDir) throws FileNotFoundException,
             IOException {
         File destFile;
-        String fileName = mImageNames.get(mPosition);
+        String fileName = mItems[curPic].name;
         int trailSlashIndex = fileName.lastIndexOf('/');
         if (trailSlashIndex >= 0) {
             fileName = fileName.substring(trailSlashIndex);
@@ -1225,8 +1221,7 @@ public class ShowPics extends Activity implements OnGestureListener,
         destFile = new File(destDir, fileName.toLowerCase());
 
         OutputStream destFileOS = new FileOutputStream(destFile);
-        InputStream imageIS = ZipUtil.getInputStream(archive, archive
-                .getEntry(mImageNames.get(mPosition)));
+        InputStream imageIS = mSlideshowList.getOriginalInputStream(mPosition);
         byte[] buffer = new byte[2048];
         int len = 0;
         while ((len = imageIS.read(buffer)) >= 0) {
@@ -1297,22 +1292,16 @@ public class ShowPics extends Activity implements OnGestureListener,
      * something more user friendly
      */
     private void showCaption() {
-        if (mCaptions != null) {
-            // Show caption
-            String shortName = mImageNames.get(mPosition).substring(
-                    mImageNames.get(mPosition).lastIndexOf('/') + 1);
-            String caption = mCaptions.getString(shortName);
-            if (caption != null && !"".equals(caption.trim())) {
-                if (mLatestCaption != null) {
-                    mLatestCaption.cancel();
-                }
-
-                mLatestCaption = Toast.makeText(getApplicationContext(),
-                        caption, Toast.LENGTH_LONG);
-                mLatestCaption.show();
+        String caption = mItems[curPic].caption;
+        if (caption != null && !"".equals(caption.trim())) {
+            if (mLatestCaption != null) {
+                mLatestCaption.cancel();
             }
-        }
 
+            mLatestCaption = Toast.makeText(getApplicationContext(), caption,
+                    Toast.LENGTH_LONG);
+            mLatestCaption.show();
+        }
     }
 
     /**
@@ -1339,25 +1328,28 @@ public class ShowPics extends Activity implements OnGestureListener,
                         }
 
                     }
-                    mImgViews[curPic].setImageBitmap(loadPicture(mPosition));
+                    mItems[curPic] = loadPicture(mPosition);
+                    mImgViews[curPic].setImageBitmap(mItems[curPic].bitmap);
 
                     // If memory is not a problem, preload pictures
                     if (!mNEMMode) {
                         // Load previous picture
                         if (mPosition > 0) {
+                            mItems[prevPic] = loadPicture(mPosition - 1);
                             mImgViews[prevPic]
-                                    .setImageBitmap(loadPicture(mPosition - 1));
+                                    .setImageBitmap(mItems[prevPic].bitmap);
                         }
 
                         // Load next picture
-                        if (mPosition < mImageNames.size() - 1) {
+                        if (mPosition < mSlideshowList.size() - 1) {
+                            mItems[nextPic] = loadPicture(mPosition + 1);
                             mImgViews[nextPic]
-                                    .setImageBitmap(loadPicture(mPosition + 1));
+                                    .setImageBitmap(mItems[nextPic].bitmap);
                         }
                     }
                 }
             } else if (mOldPosition < mPosition
-                    || ((mOldPosition == mImageNames.size() - 1) && mPosition == 0)) {
+                    || ((mOldPosition == mSlideshowList.size() - 1) && mPosition == 0)) {
                 // Going forward
                 applyTransition(FORWARD);
             } else if (mOldPosition > mPosition) {
@@ -1423,7 +1415,7 @@ public class ShowPics extends Activity implements OnGestureListener,
     private void toastFirstOrLast() {
         if (mPosition == 0) {
             Toast.makeText(this, R.string.first_pic, Toast.LENGTH_SHORT).show();
-        } else if (mPosition == mImageNames.size() - 1) {
+        } else if (mPosition == mSlideshowList.size() - 1) {
             Toast.makeText(this, R.string.last_pic, Toast.LENGTH_SHORT).show();
         }
     }
