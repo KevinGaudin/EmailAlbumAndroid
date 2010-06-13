@@ -121,7 +121,7 @@ public class ShowPics extends Activity implements OnGestureListener,
      * */
     private int prevPic, curPic, nextPic;
     private ViewFlipper mFlipper;
-    //private List<SlideshowItem> mSlideshowList;
+    // private List<SlideshowItem> mSlideshowList;
     private ArchiveSlideshowList mSlideshowList;
     private int mPosition;
     private int mOldPosition;
@@ -594,35 +594,28 @@ public class ShowPics extends Activity implements OnGestureListener,
 
         mOldPosition = -1;
 
-        ArrayList<String> imageNames = null;
         String albumName = null;
-        Bundle captions = null;
         if (getIntent() != null) {
             // retrieve all data provided by EmailAlbumViewer
-            imageNames = getIntent().getStringArrayListExtra("PICS");
             albumName = getIntent().getStringExtra("ALBUM");
             mPosition = getIntent().getIntExtra("POSITION", 0);
-            captions = getIntent().getBundleExtra("CAPTIONS");
         }
 
         if (savedInstanceState != null) {
-            imageNames = savedInstanceState.getStringArrayList("PICS") != null ? savedInstanceState
-                    .getStringArrayList("PICS")
-                    : imageNames;
             albumName = savedInstanceState.getString("ALBUM") != null ? savedInstanceState
                     .getString("ALBUM")
                     : albumName;
             mPosition = savedInstanceState.getInt("POSITION");
-            captions = savedInstanceState.getBundle("CAPTIONS");
             mSlideshow = savedInstanceState.getBoolean("SLIDESHOW");
             setWakeLock(mSlideshow);
         }
 
-        if (albumName != null && imageNames != null) {
+        if (albumName != null) {
             mSlideshowList = new ArchiveSlideshowList(getApplicationContext(),
-                    albumName, imageNames, captions);
+                    albumName, 900);
         } else {
-            ErrorReporter.getInstance().handleException(new Exception("ShowPics invoked without data."));
+            ErrorReporter.getInstance().handleException(
+                    new Exception("ShowPics invoked without data."));
             finish();
         }
         showPicture();
@@ -969,9 +962,7 @@ public class ShowPics extends Activity implements OnGestureListener,
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         outState.putInt("POSITION", mPosition);
-        outState.putStringArrayList("PICS", mSlideshowList.getItemNames());
         outState.putString("ALBUM", mSlideshowList.getArchiveName());
-        outState.putBundle("CAPTIONS", mSlideshowList.getCaptions());
         outState.putBoolean("SLIDESHOW", mSlideshow);
         setWakeLock(false);
         super.onSaveInstanceState(outState);

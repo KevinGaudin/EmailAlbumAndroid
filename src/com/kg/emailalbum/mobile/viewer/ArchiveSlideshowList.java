@@ -26,22 +26,21 @@ public class ArchiveSlideshowList extends AbstractList<SlideshowItem> implements
     private Bundle mCaptions;
     private Context mContext;
     private ArrayList<String> mItemNames;
+    private int mTargetSize = 900;
 
-    public ArchiveSlideshowList(Context context, String archiveName,
-            ArrayList<String> itemNames, Bundle captions) {
+    public ArchiveSlideshowList(Context context, String archiveName, int targetSize) {
         try {
-            File albumFile = new File(new URI(archiveName.toString().replace(
-                    " ", "%20")));
+            File albumFile = new File(new URI(archiveName.replace(" ", "%20")));
             mArchive = new ZipFile(albumFile);
-            mItemNames = itemNames;
-            mCaptions = captions;
+            mItemNames = ZipUtil.getPicturesFilesList(mArchive);
+            mCaptions = ZipUtil.loadCaptions(mArchive);
             mContext = context;
         } catch (Exception e) {
             Log.e(LOG_TAG, "Error while opening archive file.", e);
             ErrorReporter.getInstance().handleException(e);
         }
     }
-
+    
     @Override
     public SlideshowItem get(int position) {
         SlideshowItem result = new SlideshowItem();
@@ -49,7 +48,7 @@ public class ArchiveSlideshowList extends AbstractList<SlideshowItem> implements
                 + mItemNames.get(position));
         try {
             result.bitmap = BitmapLoader.load(mContext, mArchive, mArchive
-                    .getEntry(mItemNames.get(position)), 900, 900);
+                    .getEntry(mItemNames.get(position)), mTargetSize, mTargetSize);
             String shortName = mItemNames.get(position).substring(
                     mItemNames.get(position).lastIndexOf('/') + 1);
             result.caption = mCaptions.getString(shortName);
@@ -66,20 +65,6 @@ public class ArchiveSlideshowList extends AbstractList<SlideshowItem> implements
      */
     public String getArchiveName() {
         return mArchive.getName();
-    }
-
-    /**
-     * @return the mCaptions
-     */
-    public Bundle getCaptions() {
-        return mCaptions;
-    }
-
-    /**
-     * @return the mItemNames
-     */
-    public ArrayList<String> getItemNames() {
-        return mItemNames;
     }
 
     @Override

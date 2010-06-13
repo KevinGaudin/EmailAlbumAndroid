@@ -390,24 +390,7 @@ public class EmailAlbumViewer extends ListActivity {
                     mContentModel = new ArrayList<Map<String, String>>();
                     setTitle(mAlbumFileUri.getLastPathSegment());
 
-                    // Test if an EmailAlbum description file is present
-                    ZipEntry captions = mArchive
-                            .getEntry(EmailAlbumEditor.ALBUM_CONTENT_FILE);
-                    if (captions != null) {
-                        Log.d(this.getClass().getSimpleName(),
-                                "content file found !");
-                        loadCaptions(captions, false);
-                    } else {
-                        captions = mArchive
-                                .getEntry(EmailAlbumEditor.ZIP_CONTENT_FILE);
-                        if (captions != null) {
-                            loadCaptions(captions, true);
-
-                        } else {
-                            Log.d(this.getClass().getSimpleName(),
-                                    "no content file !");
-                        }
-                    }
+                    mCaptions = ZipUtil.loadCaptions(mArchive);
 
                     ZipEntry entry = null;
                     // Read all archive entries
@@ -449,27 +432,6 @@ public class EmailAlbumViewer extends ListActivity {
         if (mContentModel != null) {
             setProgressBarVisibility(true);
             startThumbnailsCreation(clearThumbnails);
-        }
-    }
-
-    /**
-     * Load the captions set in the EmailAlbum content file.
-     * 
-     * @param captions
-     *            The ZipEntry containing the captions.
-     * @throws IOException
-     */
-    private void loadCaptions(ZipEntry captions,
-            boolean isHumanReadableProperties) throws IOException {
-        mCaptions = new Bundle();
-        HumanReadableProperties props = new HumanReadableProperties();
-        if (isHumanReadableProperties) {
-            props.loadHumanReadable(ZipUtil.getInputStream(mArchive, captions));
-        } else {
-            props.load(ZipUtil.getInputStream(mArchive, captions));
-        }
-        for (Object key : props.keySet()) {
-            mCaptions.putString((String) key, props.getProperty((String) key));
         }
     }
 
@@ -680,10 +642,6 @@ public class EmailAlbumViewer extends ListActivity {
         }
 
         // Send to the pictures viewer all the needed data:
-        // The list of pictures names in the archive
-        i.putExtra("PICS", imageNames);
-        // The captions
-        i.putExtra("CAPTIONS", mCaptions);
         // The Uri of the archive
         i.putExtra("ALBUM", mAlbumFileUri.toString());
         // The position selected by the user to start the slideshow
