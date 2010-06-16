@@ -49,7 +49,7 @@ public class ImageZoomView extends ImageView implements Observer {
         }
 
         mZoomState = state;
-        if(mZoomState != null) {
+        if (mZoomState != null) {
             mZoomState.addObserver(this);
         }
 
@@ -60,9 +60,8 @@ public class ImageZoomView extends ImageView implements Observer {
         return mZoomState;
     }
 
-
     public void update(Observable observable, Object data) {
-        if(isShown()) {
+        if (isShown()) {
             invalidate();
         }
     }
@@ -123,10 +122,14 @@ public class ImageZoomView extends ImageView implements Observer {
     }
 
     private void calculateAspectQuotient() {
-        Bitmap bitmap = ((BitmapDrawable) getDrawable()).getBitmap();
-        if (bitmap != null) {
-            mAspectQuotient.updateAspectQuotient(getWidth(), getHeight(), bitmap.getWidth(), bitmap.getHeight());
-            mAspectQuotient.notifyObservers();
+        BitmapDrawable drawable = (BitmapDrawable) getDrawable();
+        if (drawable != null) {
+            Bitmap bitmap = ((BitmapDrawable) getDrawable()).getBitmap();
+            if (bitmap != null) {
+                mAspectQuotient.updateAspectQuotient(getWidth(), getHeight(),
+                        bitmap.getWidth(), bitmap.getHeight());
+                mAspectQuotient.notifyObservers();
+            }
         }
     }
 
@@ -154,5 +157,5 @@ public class ImageZoomView extends ImageView implements Observer {
     public AspectQuotient getAspectQuotient() {
         return mAspectQuotient;
     }
-    
+
 }
