@@ -93,6 +93,10 @@
 		\n
 	</string>
 	<string name="changelog">
+		Corrigé en version 2.6.2 :\n
+		- Affichage d\'un message en cas de mémoire insuffisante pour la rotatation dans la visionneuse.\n
+		- Ajout d\'une Permission pour l\'ouverture de pièces jointes e-mail (Droid).\n
+		- Divers correctifs.\n
 		Corrigé en 2.6.1 :\n
 		- La visionneuse pouvait s\'arrêter lors de changement d\'orientation (android 2.1)\n
 		- Quelques erreurs lors de la génération de l\'album\n
