@@ -24,6 +24,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import org.acra.ErrorReporter;
+
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -131,6 +133,8 @@ public class BitmapLoader {
         }
         int srcWidth = fpResult.options.outWidth;
         int srcHeight = fpResult.options.outHeight;
+        ErrorReporter.getInstance().addCustomData("BitmapLoader.RequiredDim", width + " x " + height);
+        ErrorReporter.getInstance().addCustomData("BitmapLoader.SourceDim", srcWidth + " x " + srcHeight);
         // Log.d(LOG_TAG, "Source picture has dimension " + srcWidth + " x "
         // + srcHeight);
 
@@ -189,6 +193,7 @@ public class BitmapLoader {
         // finer sampled bitmap
         if (srcWidth > fpResult.finalWidth) {
             fpResult.options.inSampleSize = srcWidth / fpResult.finalWidth;
+            ErrorReporter.getInstance().addCustomData("BitmapLoader.SampleSize", "" + fpResult.options.inSampleSize);
         }
         return fpResult;
     }
@@ -422,8 +427,8 @@ public class BitmapLoader {
                 // Log.d(LOG_TAG, "Loaded picture with dimension "
                 // + source.getWidth() + " x " + source.getHeight());
 
-                if (fpResult.finalWidth != source.getWidth()
-                        || fpResult.finalHeight != source.getHeight()) {
+                if (fpResult.finalWidth < source.getWidth()
+                        || fpResult.finalHeight < source.getHeight()) {
                     // Resize the picture to the caller specs.
                     result = Bitmap.createScaledBitmap(source,
                             fpResult.finalWidth, fpResult.finalHeight, true);
