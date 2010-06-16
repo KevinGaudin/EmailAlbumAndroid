@@ -66,6 +66,8 @@
 	</string>
 	<string name="error_out_of_mem">Image files are too large to be displayed !
 	</string>
+	<string name="error_out_of_mem_rotate">Not enough memory to apply rotation.
+	</string>
 	<string name="error_saving">An error occurred while saving.</string>
 	<string name="enter_nemmode">Let\'s try to display them one by one...
 	</string>

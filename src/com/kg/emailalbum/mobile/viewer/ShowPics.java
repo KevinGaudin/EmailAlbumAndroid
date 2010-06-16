@@ -1190,18 +1190,22 @@ public class ShowPics extends Activity implements OnGestureListener,
      *            Rotation angle in degrees.
      */
     private void rotate(float degrees) {
-        Matrix rotMat = new Matrix();
-        rotMat.postRotate(degrees);
-        BitmapDrawable curDrawable = (BitmapDrawable) mImgViews[curPic]
-                .getDrawable();
-        if (curDrawable != null) {
-            Bitmap src = curDrawable.getBitmap();
-            if (src != null) {
-                Bitmap dst = Bitmap.createBitmap(src, 0, 0, src.getWidth(), src
-                        .getHeight(), rotMat, false);
-                mImgViews[curPic].setImageBitmap(dst);
-                src.recycle();
+        try {
+            Matrix rotMat = new Matrix();
+            rotMat.postRotate(degrees);
+            BitmapDrawable curDrawable = (BitmapDrawable) mImgViews[curPic]
+                    .getDrawable();
+            if (curDrawable != null) {
+                Bitmap src = curDrawable.getBitmap();
+                if (src != null) {
+                    Bitmap dst = Bitmap.createBitmap(src, 0, 0, src.getWidth(),
+                            src.getHeight(), rotMat, false);
+                    mImgViews[curPic].setImageBitmap(dst);
+                    src.recycle();
+                }
             }
+        } catch (OutOfMemoryError e) {
+            Toast.makeText(this, R.string.error_out_of_mem_rotate, Toast.LENGTH_SHORT).show();
         }
     }
 

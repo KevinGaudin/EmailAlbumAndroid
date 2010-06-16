@@ -59,6 +59,7 @@
 	</string>
 	<string name="error_out_of_mem">Les images sont trop lourdes pour être affichées
 		!</string>
+	<string name="error_out_of_mem_rotate">Mémoire insuffisante pour appliquer la rotation.</string>
 	<string name="error_saving">Erreur lors de la sauvegarde.</string>
 	<string name="enter_nemmode">Essayons une par une...
 	</string>
