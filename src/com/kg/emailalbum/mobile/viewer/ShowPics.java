@@ -25,7 +25,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
 
 import org.acra.ErrorReporter;
 
@@ -121,8 +120,7 @@ public class ShowPics extends Activity implements OnGestureListener,
      * */
     private int prevPic, curPic, nextPic;
     private ViewFlipper mFlipper;
-    // private List<SlideshowItem> mSlideshowList;
-    private ArchiveSlideshowList mSlideshowList;
+    private SlideshowList mSlideshowList;
     private int mPosition;
     private int mOldPosition;
     private int mLatestMove = FORWARD;
@@ -594,25 +592,23 @@ public class ShowPics extends Activity implements OnGestureListener,
 
         mOldPosition = -1;
 
-        String albumName = null;
+        Uri albumUri = null;
         if (getIntent() != null) {
             // retrieve all data provided by EmailAlbumViewer
-            albumName = getIntent().getStringExtra("ALBUM");
+            albumUri = getIntent().getParcelableExtra("ALBUM");
             mPosition = getIntent().getIntExtra("POSITION", 0);
         }
 
         if (savedInstanceState != null) {
-            albumName = savedInstanceState.getString("ALBUM") != null ? savedInstanceState
-                    .getString("ALBUM")
-                    : albumName;
+            albumUri = (Uri)savedInstanceState.getParcelable("ALBUM");
             mPosition = savedInstanceState.getInt("POSITION");
             mSlideshow = savedInstanceState.getBoolean("SLIDESHOW");
             setWakeLock(mSlideshow);
         }
 
-        if (albumName != null) {
+        if (albumUri != null) {
             mSlideshowList = new ArchiveSlideshowList(getApplicationContext(),
-                    albumName, 900);
+                    albumUri, 900);
         } else {
             ErrorReporter.getInstance().handleException(
                     new Exception("ShowPics invoked without data."));
@@ -962,7 +958,7 @@ public class ShowPics extends Activity implements OnGestureListener,
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         outState.putInt("POSITION", mPosition);
-        outState.putString("ALBUM", mSlideshowList.getArchiveName());
+        outState.putParcelable("ALBUM", mSlideshowList.getAlbumUri());
         outState.putBoolean("SLIDESHOW", mSlideshow);
         setWakeLock(false);
         super.onSaveInstanceState(outState);
@@ -1177,18 +1173,22 @@ public class ShowPics extends Activity implements OnGestureListener,
      *            Rotation angle in degrees.
      */
     private void rotate(float degrees) {
-        Matrix rotMat = new Matrix();
-        rotMat.postRotate(degrees);
-        BitmapDrawable curDrawable = (BitmapDrawable) mImgViews[curPic]
-                .getDrawable();
-        if (curDrawable != null) {
-            Bitmap src = curDrawable.getBitmap();
-            if (src != null) {
-                Bitmap dst = Bitmap.createBitmap(src, 0, 0, src.getWidth(), src
-                        .getHeight(), rotMat, false);
-                mImgViews[curPic].setImageBitmap(dst);
-                src.recycle();
+        try {
+            Matrix rotMat = new Matrix();
+            rotMat.postRotate(degrees);
+            BitmapDrawable curDrawable = (BitmapDrawable) mImgViews[curPic]
+                    .getDrawable();
+            if (curDrawable != null) {
+                Bitmap src = curDrawable.getBitmap();
+                if (src != null) {
+                    Bitmap dst = Bitmap.createBitmap(src, 0, 0, src.getWidth(),
+                            src.getHeight(), rotMat, false);
+                    mImgViews[curPic].setImageBitmap(dst);
+                    src.recycle();
+                }
             }
+        } catch (OutOfMemoryError e) {
+            Toast.makeText(this, R.string.error_out_of_mem_rotate, Toast.LENGTH_SHORT).show();
         }
     }
 

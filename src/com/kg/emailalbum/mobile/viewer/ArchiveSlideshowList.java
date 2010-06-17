@@ -11,6 +11,7 @@ import java.util.zip.ZipFile;
 import org.acra.ErrorReporter;
 
 import android.content.Context;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -28,43 +29,42 @@ public class ArchiveSlideshowList extends AbstractList<SlideshowItem> implements
     private ArrayList<String> mItemNames;
     private int mTargetSize = 900;
 
-    public ArchiveSlideshowList(Context context, String archiveName, int targetSize) {
+    public ArchiveSlideshowList(Context context, Uri archiveUri, int targetSize) {
         try {
-            File albumFile = new File(new URI(archiveName.replace(" ", "%20")));
+            File albumFile = new File(archiveUri.getPath());
             mArchive = new ZipFile(albumFile);
             mItemNames = ZipUtil.getPicturesFilesList(mArchive);
             mCaptions = ZipUtil.loadCaptions(mArchive);
             mContext = context;
+            mTargetSize = targetSize;
         } catch (Exception e) {
             Log.e(LOG_TAG, "Error while opening archive file.", e);
             ErrorReporter.getInstance().handleException(e);
         }
     }
-    
+
     @Override
     public SlideshowItem get(int position) {
-        SlideshowItem result = new SlideshowItem();
-        Log.d(this.getClass().getName(), "Load image "
+        Log.d(this.getClass().getName(), "Get SlideshowItem "
                 + mItemNames.get(position));
+        SlideshowItem result = new SlideshowItem();
         try {
-            result.bitmap = BitmapLoader.load(mContext, mArchive, mArchive
-                    .getEntry(mItemNames.get(position)), mTargetSize, mTargetSize);
+            if (mTargetSize > 0) {
+                Log.d(this.getClass().getName(), "Load image "
+                        + mItemNames.get(position));
+                result.bitmap = BitmapLoader.load(mContext, mArchive, mArchive
+                        .getEntry(mItemNames.get(position)), mTargetSize,
+                        mTargetSize);
+            }
             String shortName = mItemNames.get(position).substring(
                     mItemNames.get(position).lastIndexOf('/') + 1);
             result.caption = mCaptions.getString(shortName);
             result.name = mItemNames.get(position);
         } catch (IOException e) {
             Log.e(LOG_TAG, "Error : ", e);
-            ErrorReporter.getInstance().handleSilentException(e);
+            ErrorReporter.getInstance().handleException(e);
         }
         return result;
-    }
-
-    /**
-     * @return the mArchive
-     */
-    public String getArchiveName() {
-        return mArchive.getName();
     }
 
     @Override
@@ -82,5 +82,10 @@ public class ArchiveSlideshowList extends AbstractList<SlideshowItem> implements
                     .getEntry(mItemNames.get(position)));
         }
         return null;
+    }
+
+    @Override
+    public Uri getAlbumUri() {
+        return Uri.parse(mArchive.getName());
     }
 }

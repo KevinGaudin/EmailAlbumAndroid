@@ -68,11 +68,13 @@ import com.kg.emailalbum.mobile.AboutDialog;
 import com.kg.emailalbum.mobile.EmailAlbumPreferences;
 import com.kg.emailalbum.mobile.R;
 import com.kg.emailalbum.mobile.creator.EmailAlbumEditor;
+import com.kg.emailalbum.mobile.util.BitmapLoader;
 import com.kg.emailalbum.mobile.util.CacheManager;
 import com.kg.emailalbum.mobile.util.Compatibility;
 import com.kg.emailalbum.mobile.util.HumanReadableProperties;
 import com.kg.emailalbum.mobile.util.IntentHelper;
 import com.kg.emailalbum.mobile.util.ZipUtil;
+import com.kg.oifilemanager.filemanager.FileManagerProvider;
 import com.kg.oifilemanager.intents.FileManagerIntents;
 
 /**
@@ -203,22 +205,31 @@ public class EmailAlbumViewer extends ListActivity {
                 holder = (ViewHolder) convertView.getTag();
             }
 
-            Map<String, String> currentMetaData = mContentModel.get(position);
-            String thumbName = currentMetaData.get(KEY_THUMBNAIL);
-            if (thumbName != null) {
-                holder.image.setImageDrawable(new BitmapDrawable(thumbName));
+            SlideshowItem currentMetaData = mContentModel.get(position);
+
+            if (position < mThumbnailsNames.size()) {
+                String thumbName = mThumbnailsNames.get(position);
+                if (thumbName != null) {
+                    try {
+                        holder.image
+                                .setImageBitmap(BitmapLoader.load(getApplicationContext(), FileManagerProvider.getContentUri(new File(thumbName)), ThumbnailsCreator.getThumbWidth(getApplicationContext()), null));
+                    } catch (IOException e) {
+                        // TODO Auto-generated catch block
+                        Log.e(LOG_TAG, "Error : ", e);
+                    }
+                } else {
+                    holder.image.setImageResource(R.drawable.robot);
+                }
             } else {
                 holder.image.setImageResource(R.drawable.robot);
             }
 
-            String shortName = currentMetaData.get(KEY_SHORTNAME);
+            String shortName = currentMetaData.getShortName();
             StringBuilder text = new StringBuilder(shortName);
 
-            if (mCaptions != null && !mCaptions.isEmpty()) {
-                String caption = (String) mCaptions.get(shortName);
-                if (caption != null && !"".equals(caption.trim())) {
-                    text.append("\n\n").append(caption);
-                }
+            if (currentMetaData.caption != null
+                    && !"".equals(currentMetaData.caption.trim())) {
+                text.append("\n\n").append(currentMetaData.caption);
             }
             holder.text.setText(text);
             return convertView;
@@ -233,7 +244,7 @@ public class EmailAlbumViewer extends ListActivity {
          *            The thumbnail file path.
          */
         public void updateThumbnail(int position, String thumbName) {
-            mContentModel.get(position).put(KEY_THUMBNAIL, thumbName);
+            mThumbnailsNames.add(position, thumbName);
             notifyDataSetChanged();
         }
 
@@ -300,9 +311,8 @@ public class EmailAlbumViewer extends ListActivity {
 
     private ZipFile mArchive = null;
 
-    private Bundle mCaptions;
-
-    private ArrayList<Map<String, String>> mContentModel;
+    private SlideshowList mContentModel;
+    private ArrayList<String> mThumbnailsNames = new ArrayList<String>();
     private ProgressDialog mProgress;
 
     private ThumbnailsCreator mThmbCreator;
@@ -387,38 +397,11 @@ public class EmailAlbumViewer extends ListActivity {
             } else {
                 try {
                     // Each picture is represented as a Map containing metadata
-                    mContentModel = new ArrayList<Map<String, String>>();
+                    mContentModel = new ArchiveSlideshowList(context,
+                            mAlbumFileUri, 0);
+
                     setTitle(mAlbumFileUri.getLastPathSegment());
 
-                    mCaptions = ZipUtil.loadCaptions(mArchive);
-
-                    ZipEntry entry = null;
-                    // Read all archive entries
-                    Enumeration<? extends ZipEntry> entries = mArchive
-                            .entries();
-                    while (entries.hasMoreElements()) {
-                        entry = entries.nextElement();
-                        if (entry.getName().endsWith(".jpg")
-                                || entry.getName().endsWith(".JPG")
-                                || entry.getName().endsWith(".gif")
-                                || entry.getName().endsWith(".GIF")
-                                || entry.getName().endsWith(".png")
-                                || entry.getName().endsWith(".PNG")) {
-                            Map<String, String> contentLine = new HashMap<String, String>();
-                            contentLine.put(KEY_FULLNAME, entry.getName());
-                            contentLine
-                                    .put(
-                                            KEY_SHORTNAME,
-                                            entry
-                                                    .getName()
-                                                    .substring(
-                                                            entry
-                                                                    .getName()
-                                                                    .lastIndexOf(
-                                                                            '/') + 1));
-                            mContentModel.add(contentLine);
-                        }
-                    }
                     registerForContextMenu(getListView());
                     getListView().setSelection(
                             getListView().getFirstVisiblePosition());
@@ -636,14 +619,9 @@ public class EmailAlbumViewer extends ListActivity {
         super.onListItemClick(l, v, position, id);
         Intent i = new Intent(this, ShowPics.class);
 
-        ArrayList<String> imageNames = new ArrayList<String>();
-        for (Map<String, String> contentItem : mContentModel) {
-            imageNames.add(contentItem.get(KEY_FULLNAME));
-        }
-
         // Send to the pictures viewer all the needed data:
         // The Uri of the archive
-        i.putExtra("ALBUM", mAlbumFileUri.toString());
+        i.putExtra("ALBUM", mAlbumFileUri);
         // The position selected by the user to start the slideshow
         i.putExtra("POSITION", position);
         startActivity(i);
@@ -841,13 +819,13 @@ public class EmailAlbumViewer extends ListActivity {
     private File savePicture(int position, File destDir)
             throws FileNotFoundException, IOException {
         File destFile;
-        Map<String, String> imgModel = mContentModel.get(position);
-        destFile = new File(destDir, imgModel.get(KEY_SHORTNAME).toLowerCase());
+        SlideshowItem imgModel = mContentModel.get(position);
+        destFile = new File(destDir, imgModel.getShortName().toLowerCase());
 
         // Raw copy of the file
         OutputStream destFileOS = new FileOutputStream(destFile);
-        InputStream imageIS = ZipUtil.getInputStream(mArchive, mArchive
-                .getEntry(imgModel.get(KEY_FULLNAME)));
+        InputStream imageIS = mContentModel.getOriginalInputStream(position);
+
         byte[] buffer = new byte[2048];
         int len = 0;
         while ((len = imageIS.read(buffer)) >= 0) {
@@ -877,10 +855,10 @@ public class EmailAlbumViewer extends ListActivity {
     private void startThumbnailsCreation(boolean clearThumbnails) {
         if (mContentModel != null) {
             ArrayList<String> pictureNames = new ArrayList<String>();
-            Iterator<Map<String, String>> i = mContentModel.iterator();
+            Iterator<SlideshowItem> i = mContentModel.iterator();
             while (i.hasNext()) {
-                Map<String, String> entry = i.next();
-                pictureNames.add(entry.get(KEY_FULLNAME));
+                SlideshowItem entry = i.next();
+                pictureNames.add(entry.name);
             }
             mThmbCreator = new ThumbnailsCreator(this, mArchive, pictureNames,
                     thumbnailsCreationHandler, clearThumbnails);

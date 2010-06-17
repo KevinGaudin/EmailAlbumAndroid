@@ -84,12 +84,19 @@ public class ThumbnailsCreator extends Thread {
         mPictures = pictures;
         mHandler = handler;
         mClearThumbnails = clearThumbnails;
-        Display display = ((WindowManager) mContext
+        mThumbWidth = getThumbWidth(mContext);
+        mCacheDir = new CacheManager(mContext).getCacheDir("viewer");
+    }
+
+    /**
+     * 
+     */
+    static int getThumbWidth(Context context) {
+        Display display = ((WindowManager) context
                 .getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
         int screenWidth = display.getWidth();
         int screenHeight = display.getHeight();
-        mThumbWidth = Math.min(screenWidth, screenHeight) / 3;
-        mCacheDir = new CacheManager(mContext).getCacheDir("viewer");
+        return Math.min(screenWidth, screenHeight) / 3;
     }
 
     /*

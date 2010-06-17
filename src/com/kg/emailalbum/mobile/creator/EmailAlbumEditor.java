@@ -1136,7 +1136,7 @@ public class EmailAlbumEditor extends ListActivity implements
         switch (id) {
         case DIALOG_EDIT_CAPTION:
             // Prepare a dialog for editing caption an rotating picture
-            if (mPreviewPic != null) {
+            if (mPreviewPic != null && mSelectedItem != null) {
                 // Prepare the image. Click on the image to close the dialog.
                 ImageView imgPrv = (ImageView) dialog
                         .findViewById(R.id.image_preview);

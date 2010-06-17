@@ -66,6 +66,8 @@
 	</string>
 	<string name="error_out_of_mem">Image files are too large to be displayed !
 	</string>
+	<string name="error_out_of_mem_rotate">Not enough memory to apply rotation.
+	</string>
 	<string name="error_saving">An error occurred while saving.</string>
 	<string name="enter_nemmode">Let\'s try to display them one by one...
 	</string>
@@ -98,6 +100,8 @@
 		managed with ACRA : http://acra.googlecode.com\n
 	</string>
 	<string name="changelog">
+		Fixed in version 2.6.2:\n
+		- Permission required to open email attachments on Droid.\n
 		Fixed in version 2.6.1:\n
 		- Viewer crashed sometimes on orientation changes (android 2.1)\n
 		- Some possible errors while generating albums\n
