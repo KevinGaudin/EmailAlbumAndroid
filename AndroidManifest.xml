@@ -2,7 +2,7 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
 	package="com.kg.emailalbum.mobile" android:installLocation="auto"
-	android:versionName="2.6.2" android:versionCode="34">
+	android:versionName="2.6.3" android:versionCode="35">
 	<uses-sdk android:minSdkVersion="3" android:targetSdkVersion="8"
 		android:debuggable="true" />
 
