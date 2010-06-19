@@ -450,7 +450,7 @@ public class EmailAlbumEditor extends ListActivity implements
             File rotFile = new File(storageDir, "rot-" + thumbUri
                     .getLastPathSegment());
             try {
-                Bitmap rotBmp = BitmapUtil.rotate(BitmapLoader.load(ctx, thumbUri, null, null, Config.RGB_565, false), rotation + angle);
+                Bitmap rotBmp = BitmapUtil.rotate(BitmapLoader.load(ctx, thumbUri, null, null, Config.RGB_565, false), angle);
                 if(rotBmp != null) {
                     rotBmp.compress(CompressFormat.JPEG, ItemsLoader.THUMBNAILS_QUALITY, new FileOutputStream(rotFile));
                     rotation += angle;
