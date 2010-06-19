@@ -45,12 +45,14 @@ import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
+import android.graphics.Bitmap.Config;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -72,6 +74,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.kg.emailalbum.mobile.EmailAlbumPreferences;
 import com.kg.emailalbum.mobile.R;
@@ -293,7 +296,13 @@ public class EmailAlbumEditor extends ListActivity implements
             }
 
             AlbumItem albumItem = mContentModel.get(position);
-            Bitmap thumb = albumItem.thumb;
+            Bitmap thumb = null;
+            try {
+                thumb = albumItem.getThumb();
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                Log.e(LOG_TAG, "Error : ", e);
+            }
 
             if (thumb != null) {
                 // We have a thumbnail for this item, put it in the ImageView
@@ -348,14 +357,13 @@ public class EmailAlbumEditor extends ListActivity implements
          *            Rotation angle in degrees.
          */
         public void rotate(AlbumItem selectedItem, int angle) {
-            selectedItem.rotation += angle;
-            selectedItem.thumb = BitmapUtil.rotate(selectedItem.thumb, angle);
+            selectedItem.rotate(angle);
             notifyDataSetChanged();
         }
 
         public void changeItemUri(AlbumItem selectedItem, Uri newUri) {
             selectedItem.uri = newUri;
-            selectedItem.thumb = ItemsLoader.getThumbnail(
+            selectedItem.thumbUri = ItemsLoader.getThumbnail(
                     getApplicationContext(), newUri);
             notifyDataSetChanged();
         }
@@ -417,7 +425,7 @@ public class EmailAlbumEditor extends ListActivity implements
     private class AlbumItem {
         String caption = "";
         int rotation = 0;
-        Bitmap thumb = null;
+        Uri thumbUri = null;
         Uri uri = null;
 
         /**
@@ -430,10 +438,38 @@ public class EmailAlbumEditor extends ListActivity implements
          * @param thumb
          *            The generated Thumbnail.
          */
-        public AlbumItem(Uri uri, String caption, Bitmap thumb) {
+        public AlbumItem(Uri uri, String caption, Uri thumbUri) {
             this.uri = uri;
             this.caption = caption != null ? caption : "";
-            this.thumb = thumb;
+            this.thumbUri = thumbUri;
+        }
+        
+        public void rotate(int angle) {
+            Context ctx = EmailAlbumEditor.this.getApplicationContext();
+            File storageDir = new CacheManager(ctx).getCacheDir("creator");
+            File rotFile = new File(storageDir, "rot-" + thumbUri
+                    .getLastPathSegment());
+            try {
+                Bitmap rotBmp = BitmapUtil.rotate(BitmapLoader.load(ctx, thumbUri, null, null, Config.RGB_565, false), angle);
+                if(rotBmp != null) {
+                    rotBmp.compress(CompressFormat.JPEG, ItemsLoader.THUMBNAILS_QUALITY, new FileOutputStream(rotFile));
+                    rotation += angle;
+                    thumbUri = FileManagerProvider.getContentUri(rotFile);
+                } else {
+                    Toast.makeText(ctx, R.string.error_out_of_mem_rotate, Toast.LENGTH_LONG).show();
+                }
+            } catch (IOException e) {
+                Log.e(LOG_TAG, "Error : ", e);
+                Toast.makeText(ctx, R.string.error_out_of_mem_rotate, Toast.LENGTH_LONG).show();
+            }
+            
+        }
+
+        public Bitmap getThumb() throws IOException {
+            if(thumbUri != null) {
+                return BitmapLoader.load(EmailAlbumEditor.this.getApplicationContext(), thumbUri, null, null);
+            }
+            return null;
         }
     }
 

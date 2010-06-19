@@ -10,8 +10,8 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Bitmap.CompressFormat;
+import android.graphics.Bitmap.Config;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -25,6 +25,7 @@ import android.view.WindowManager;
 
 import com.kg.emailalbum.mobile.util.BitmapLoader;
 import com.kg.emailalbum.mobile.util.CacheManager;
+import com.kg.oifilemanager.filemanager.FileManagerProvider;
 
 /**
  * Helper Thread to retrieve the content of MediaStore pictures buckets.
@@ -50,7 +51,7 @@ public class ItemsLoader extends Thread {
     private static final int THUMBNAIL_WIDTH_HEIGHT_DIP = 90;
 
     /** Quality for compressed thumbnail */
-    private static final int THUMBNAILS_QUALITY = 70;
+    public static final int THUMBNAILS_QUALITY = 70;
 
     /**
      * This static method allows to create and store a thumbnail.
@@ -62,8 +63,8 @@ public class ItemsLoader extends Thread {
      * @return The Bitmap containing a scaled-down version of the requested
      *         picture.
      */
-    public static Bitmap getThumbnail(Context context, Uri imageUri) {
-        Bitmap bmp = null;
+    public static Uri getThumbnail(Context context, Uri imageUri) {
+        Uri result = null;
         if (context != null) {
             File storageDir = new CacheManager(context).getCacheDir("creator");
 
@@ -74,12 +75,10 @@ public class ItemsLoader extends Thread {
                 File tmpFile = new File(storageDir, imageUri
                         .getLastPathSegment()
                         + ".jpg");
-                if (tmpFile.exists()
-                        && System.currentTimeMillis() - tmpFile.lastModified() < CACHE_TTL) {
-                    // a thumbnail has already been generated and is not too old
-                    // let's use it
-                    bmp = BitmapFactory.decodeFile(tmpFile.getPath());
-                } else {
+                if (!(tmpFile.exists()
+                        && System.currentTimeMillis() - tmpFile.lastModified() < CACHE_TTL)) {
+                    // No thumbnail in cache or too old
+                    Bitmap bmp = null;
                     DisplayMetrics metrics = new DisplayMetrics();
                     ((WindowManager) context
                             .getSystemService(Context.WINDOW_SERVICE))
@@ -89,7 +88,7 @@ public class ItemsLoader extends Thread {
                     // TODO: add the dip to pixels calculation to the
                     // BitmapLoader
                     int size = (int) (THUMBNAIL_WIDTH_HEIGHT_DIP * metrics.density);
-                    bmp = BitmapLoader.load(context, imageUri, size, size);
+                    bmp = BitmapLoader.load(context, imageUri, size, size, Config.RGB_565, false);
                     if (bmp != null) {
                         // we were able to load the image, let's store the
                         // thumbnail
@@ -97,8 +96,10 @@ public class ItemsLoader extends Thread {
                         bmp.compress(CompressFormat.JPEG, THUMBNAILS_QUALITY,
                                 out);
                         out.close();
+                        bmp.recycle();
                     }
                 }
+                result = FileManagerProvider.getContentUri(tmpFile);
             } catch (FileNotFoundException e) {
                 Log.e(LOG_TAG, "Error : ", e);
             } catch (IOException e) {
@@ -107,7 +108,7 @@ public class ItemsLoader extends Thread {
         } else {
             Log.e(LOG_TAG, "Context is null !");
         }
-        return bmp;
+        return result;
     }
 
     /** A boolean for the running state of the process */
@@ -180,12 +181,8 @@ public class ItemsLoader extends Thread {
      * Queries the MediaStore to retrieve the list of pictures contained in a
      * bucket.
      * 
-     * @param withBitmap
-     *            If true, the process also creates each Thumbnail and sends
-     *            them to the UI. This is not used anymore.
-     * 
      */
-    private void loadAllItems(boolean withBitmap) {
+    private void loadAllItems() {
         String[] projection = { ImageColumns.BUCKET_DISPLAY_NAME,
                 ImageColumns.DATE_TAKEN, ImageColumns.TITLE,
                 ImageColumns.MINI_THUMB_MAGIC, ImageColumns._ID,
@@ -208,17 +205,6 @@ public class ItemsLoader extends Thread {
             Bundle data = new Bundle();
 
             data.putString("IMAGE_URI", imageUri.toString());
-
-            Bitmap thumb = null;
-
-            // If the image has to be sent during list initialisation, send it
-            // too.
-            if (withBitmap) {
-                thumb = getThumbnail(mContext, imageUri);
-                if (thumb != null) {
-                    data.putParcelable("THUMB", thumb);
-                }
-            }
 
             msg.setData(data);
             mHandler.handleMessage(msg);
@@ -249,7 +235,7 @@ public class ItemsLoader extends Thread {
             createLock();
             isRunning = true;
 
-            loadAllItems(false);
+            loadAllItems();
 
             isRunning = false;
             removeLock();

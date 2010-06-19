@@ -22,6 +22,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore.Images.Media;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -29,6 +30,7 @@ import android.widget.Button;
 
 import com.kg.emailalbum.mobile.creator.EmailAlbumEditor;
 import com.kg.emailalbum.mobile.viewer.EmailAlbumViewer;
+import com.kg.emailalbum.mobile.viewer.ShowPics;
 
 /**
  * Application main menu.
@@ -59,6 +61,21 @@ public class EmailAlbum extends Activity {
 
         });
 
+        // View Gallery
+        btn = (Button) findViewById(R.id.BtnOpenGallery);
+        btn.getBackground().setDither(true);
+        btn.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(getApplicationContext(),
+                        ShowPics.class);
+                i.putExtra("ALBUM", Media.EXTERNAL_CONTENT_URI);
+                startActivity(i);
+            }
+
+        });
+        
         // Create a new album
         btn = (Button) findViewById(R.id.BtnCreateAlbum);
         btn.getBackground().setDither(true);

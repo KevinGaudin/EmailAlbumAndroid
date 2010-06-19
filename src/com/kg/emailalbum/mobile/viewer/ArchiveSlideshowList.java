@@ -18,8 +18,7 @@ import android.util.Log;
 import com.kg.emailalbum.mobile.util.BitmapLoader;
 import com.kg.emailalbum.mobile.util.ZipUtil;
 
-public class ArchiveSlideshowList extends AbstractList<SlideshowItem> implements
-        SlideshowList {
+public class ArchiveSlideshowList extends SlideshowList {
 
     private static final String LOG_TAG = ArchiveSlideshowList.class
             .getSimpleName();

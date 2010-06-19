@@ -103,10 +103,12 @@ public class BitmapLoader {
         }
         int srcWidth = fpResult.options.outWidth;
         int srcHeight = fpResult.options.outHeight;
+
         ErrorReporter.getInstance().addCustomData("BitmapLoader.RequiredDim",
                 width + " x " + height);
         ErrorReporter.getInstance().addCustomData("BitmapLoader.SourceDim",
                 srcWidth + " x " + srcHeight);
+
         // Log.d(LOG_TAG, "Source picture has dimension " + srcWidth + " x "
         // + srcHeight);
 
@@ -300,7 +302,8 @@ public class BitmapLoader {
                 cachedBitmap);
 
         // Store the result in cache
-        if (cacheResult && result != null && !bmpCache.containsKey(uri.toString())) {
+        if (cacheResult && result != null
+                && !bmpCache.containsKey(uri.toString())) {
             bmpCache.put(uri.toString(), result);
         }
 

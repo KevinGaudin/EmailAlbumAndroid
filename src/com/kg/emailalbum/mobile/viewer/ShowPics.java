@@ -45,6 +45,7 @@ import android.os.Handler;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore.Images;
+import android.provider.MediaStore.Images.Media;
 import android.util.Log;
 import android.view.Display;
 import android.view.GestureDetector;
@@ -600,15 +601,19 @@ public class ShowPics extends Activity implements OnGestureListener,
         }
 
         if (savedInstanceState != null) {
-            albumUri = (Uri)savedInstanceState.getParcelable("ALBUM");
+            albumUri = (Uri) savedInstanceState.getParcelable("ALBUM");
             mPosition = savedInstanceState.getInt("POSITION");
             mSlideshow = savedInstanceState.getBoolean("SLIDESHOW");
             setWakeLock(mSlideshow);
         }
 
         if (albumUri != null) {
-            mSlideshowList = new ArchiveSlideshowList(getApplicationContext(),
-                    albumUri, 900);
+            if (albumUri.equals(Media.EXTERNAL_CONTENT_URI)) {
+                mSlideshowList = new GallerySlideshowList(getApplicationContext(), 900);
+            } else {
+                mSlideshowList = new ArchiveSlideshowList(
+                        getApplicationContext(), albumUri, 900);
+            }
         } else {
             ErrorReporter.getInstance().handleException(
                     new Exception("ShowPics invoked without data."));
@@ -1095,27 +1100,27 @@ public class ShowPics extends Activity implements OnGestureListener,
                 curPic = (curPic + 1) % 3;
                 nextPic = (nextPic + 1) % 3;
                 if (mPosition + 1 < mSlideshowList.size()) {
-                    if (mImgViews[nextPic].getDrawable() != null) {
-                        if (((BitmapDrawable) mImgViews[nextPic].getDrawable())
-                                .getBitmap() != null) {
-                            // nextPic currently contains the picture previous
-                            // to the previous picture. Discard it.
-                            ((BitmapDrawable) mImgViews[nextPic].getDrawable())
-                                    .getBitmap().recycle();
-                        }
-                    }
+//                    if (mImgViews[nextPic].getDrawable() != null) {
+//                        if (((BitmapDrawable) mImgViews[nextPic].getDrawable())
+//                                .getBitmap() != null) {
+//                            // nextPic currently contains the picture previous
+//                            // to the previous picture. Discard it.
+//                            ((BitmapDrawable) mImgViews[nextPic].getDrawable())
+//                                    .getBitmap().recycle();
+//                        }
+//                    }
                     // Preload next picture
                     mItems[nextPic] = loadPicture(mPosition + 1);
                     mImgViews[nextPic].setImageBitmap(mItems[nextPic].bitmap);
                 } else if (mSlideshowLoop) {
                     // prepare for looping
-                    if (mImgViews[nextPic].getDrawable() != null) {
-                        if (((BitmapDrawable) mImgViews[nextPic].getDrawable())
-                                .getBitmap() != null) {
-                            ((BitmapDrawable) mImgViews[nextPic].getDrawable())
-                                    .getBitmap().recycle();
-                        }
-                    }
+//                    if (mImgViews[nextPic].getDrawable() != null) {
+//                        if (((BitmapDrawable) mImgViews[nextPic].getDrawable())
+//                                .getBitmap() != null) {
+//                            ((BitmapDrawable) mImgViews[nextPic].getDrawable())
+//                                    .getBitmap().recycle();
+//                        }
+//                    }
                     // We are at the end of the slideshow, just before looping.
                     // Preload the first picture to prepare looping.
                     mItems[nextPic] = loadPicture(0);
@@ -1127,16 +1132,16 @@ public class ShowPics extends Activity implements OnGestureListener,
                 curPic = (curPic == 0) ? 2 : curPic - 1;
                 nextPic = (nextPic == 0) ? 2 : nextPic - 1;
                 if (mPosition - 1 >= 0) {
-                    if (mImgViews[prevPic].getDrawable() != null) {
-                        if (((BitmapDrawable) mImgViews[prevPic].getDrawable())
-                                .getBitmap() != null) {
-                            // prevPic now contains the picture next to the next
-                            // picture.
-                            // Discard it.
-                            ((BitmapDrawable) mImgViews[prevPic].getDrawable())
-                                    .getBitmap().recycle();
-                        }
-                    }
+//                    if (mImgViews[prevPic].getDrawable() != null) {
+//                        if (((BitmapDrawable) mImgViews[prevPic].getDrawable())
+//                                .getBitmap() != null) {
+//                            // prevPic now contains the picture next to the next
+//                            // picture.
+//                            // Discard it.
+//                            ((BitmapDrawable) mImgViews[prevPic].getDrawable())
+//                                    .getBitmap().recycle();
+//                        }
+//                    }
                     // Preload previous picture.
                     mItems[prevPic] = loadPicture(mPosition - 1);
                     mImgViews[prevPic].setImageBitmap(mItems[prevPic].bitmap);
@@ -1184,11 +1189,12 @@ public class ShowPics extends Activity implements OnGestureListener,
                     Bitmap dst = Bitmap.createBitmap(src, 0, 0, src.getWidth(),
                             src.getHeight(), rotMat, false);
                     mImgViews[curPic].setImageBitmap(dst);
-                    src.recycle();
+                    //src.recycle();
                 }
             }
         } catch (OutOfMemoryError e) {
-            Toast.makeText(this, R.string.error_out_of_mem_rotate, Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.error_out_of_mem_rotate,
+                    Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -1312,11 +1318,11 @@ public class ShowPics extends Activity implements OnGestureListener,
                     // Load first picture
                     if (mImgViews[curPic].getDrawable() != null) {
                         mImgViews[curPic].getDrawable().setCallback(null);
-                        Bitmap toRecycle = ((BitmapDrawable) mImgViews[curPic]
-                                .getDrawable()).getBitmap();
-                        if (toRecycle != null) {
-                            toRecycle.recycle();
-                        }
+//                        Bitmap toRecycle = ((BitmapDrawable) mImgViews[curPic]
+//                                .getDrawable()).getBitmap();
+//                        if (toRecycle != null) {
+//                            toRecycle.recycle();
+//                        }
 
                     }
                     mItems[curPic] = loadPicture(mPosition);

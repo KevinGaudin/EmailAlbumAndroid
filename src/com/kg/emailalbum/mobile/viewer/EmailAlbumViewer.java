@@ -27,12 +27,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Random;
-import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import org.acra.ErrorReporter;
@@ -43,12 +39,12 @@ import android.content.ActivityNotFoundException;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.MediaStore.Images.Media;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
@@ -67,13 +63,10 @@ import android.widget.Toast;
 import com.kg.emailalbum.mobile.AboutDialog;
 import com.kg.emailalbum.mobile.EmailAlbumPreferences;
 import com.kg.emailalbum.mobile.R;
-import com.kg.emailalbum.mobile.creator.EmailAlbumEditor;
 import com.kg.emailalbum.mobile.util.BitmapLoader;
 import com.kg.emailalbum.mobile.util.CacheManager;
 import com.kg.emailalbum.mobile.util.Compatibility;
-import com.kg.emailalbum.mobile.util.HumanReadableProperties;
 import com.kg.emailalbum.mobile.util.IntentHelper;
-import com.kg.emailalbum.mobile.util.ZipUtil;
 import com.kg.oifilemanager.filemanager.FileManagerProvider;
 import com.kg.oifilemanager.intents.FileManagerIntents;
 
@@ -212,7 +205,15 @@ public class EmailAlbumViewer extends ListActivity {
                 if (thumbName != null) {
                     try {
                         holder.image
-                                .setImageBitmap(BitmapLoader.load(getApplicationContext(), FileManagerProvider.getContentUri(new File(thumbName)), ThumbnailsCreator.getThumbWidth(getApplicationContext()), null));
+                                .setImageBitmap(BitmapLoader
+                                        .load(
+                                                getApplicationContext(),
+                                                FileManagerProvider
+                                                        .getContentUri(new File(
+                                                                thumbName)),
+                                                ThumbnailsCreator
+                                                        .getThumbWidth(getApplicationContext()),
+                                                null));
                     } catch (IOException e) {
                         // TODO Auto-generated catch block
                         Log.e(LOG_TAG, "Error : ", e);
@@ -381,35 +382,46 @@ public class EmailAlbumViewer extends ListActivity {
      */
     private void fillData(boolean clearThumbnails) {
         if (mAlbumFileUri != null) {
-            try {
-                File selectedFile = new File(new URI(mAlbumFileUri.toString()
-                        .replace(" ", "%20")));
-                mArchive = new ZipFile(selectedFile);
-            } catch (Exception e) {
-                Toast.makeText(this,
-                        R.string.open_archive_error + e.getLocalizedMessage(),
-                        Toast.LENGTH_SHORT).show();
-            }
+            if (mAlbumFileUri.toString().startsWith(
+                    Media.EXTERNAL_CONTENT_URI.toString())) {
+                mContentModel = new GallerySlideshowList(getApplicationContext(), ThumbnailsCreator.getThumbWidth(getApplicationContext()));
+                setTitle("Gallery");
 
-            if (mArchive == null) {
-                Toast.makeText(this, R.string.open_archive_error,
-                        Toast.LENGTH_SHORT).show();
+                registerForContextMenu(getListView());
+                getListView().setSelection(
+                        getListView().getFirstVisiblePosition());
             } else {
                 try {
-                    // Each picture is represented as a Map containing metadata
-                    mContentModel = new ArchiveSlideshowList(context,
-                            mAlbumFileUri, 0);
-
-                    setTitle(mAlbumFileUri.getLastPathSegment());
-
-                    registerForContextMenu(getListView());
-                    getListView().setSelection(
-                            getListView().getFirstVisiblePosition());
+                    File selectedFile = new File(new URI(mAlbumFileUri
+                            .toString().replace(" ", "%20")));
+                    mArchive = new ZipFile(selectedFile);
                 } catch (Exception e) {
-                    Toast.makeText(this, e.getLocalizedMessage(),
+                    Toast.makeText(
+                            this,
+                            R.string.open_archive_error
+                                    + e.getLocalizedMessage(),
                             Toast.LENGTH_SHORT).show();
                 }
+                if (mArchive == null) {
+                    ErrorReporter.getInstance().handleException(
+                            new Exception("No archive file."));
+                } else {
+                    try {
+                        mContentModel = new ArchiveSlideshowList(context,
+                                mAlbumFileUri, 0);
+
+                        setTitle(mAlbumFileUri.getLastPathSegment());
+
+                        registerForContextMenu(getListView());
+                        getListView().setSelection(
+                                getListView().getFirstVisiblePosition());
+                    } catch (Exception e) {
+                        Toast.makeText(this, e.getLocalizedMessage(),
+                                Toast.LENGTH_SHORT).show();
+                    }
+                }
             }
+
         }
         // We have some pictures to display, start creating thumbnails
         if (mContentModel != null) {
@@ -530,7 +542,9 @@ public class EmailAlbumViewer extends ListActivity {
             // An album is provided by another app
             mAlbumFileUri = getIntent().getData();
             if (mAlbumFileUri.getScheme()
-                    .equals(ContentResolver.SCHEME_CONTENT)) {
+                    .equals(ContentResolver.SCHEME_CONTENT)
+                    && !(mAlbumFileUri.toString()
+                            .startsWith(Media.EXTERNAL_CONTENT_URI.toString()))) {
                 // In this case, the Intent certainly comes from GMail
                 // This is not a file:// Uri, we have to store a temporary
                 // copy of the album.
