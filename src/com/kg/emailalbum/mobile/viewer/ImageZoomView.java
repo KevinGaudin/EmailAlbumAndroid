@@ -68,8 +68,8 @@ public class ImageZoomView extends ImageView implements Observer {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        Bitmap bitmap = ((BitmapDrawable) getDrawable()).getBitmap();
-        if (mZoomState != null) {
+        if (mZoomState != null && getDrawable() != null && getDrawable() instanceof BitmapDrawable) {
+            Bitmap bitmap = ((BitmapDrawable) getDrawable()).getBitmap();
             if (bitmap != null) {
                 final int viewWidth = getWidth();
                 final int viewHeight = getHeight();

@@ -85,7 +85,7 @@ public class SelectPictures extends Activity {
         /**
          * Asynchronous process for retrieving thumbnails from Uris.
          */
-        private class ThumbnailGetter extends AsyncTask<Uri, Integer, Bitmap> {
+        private class ThumbnailGetter extends AsyncTask<Uri, Integer, Uri> {
             private final String LOG_TAG = ThumbnailGetter.class
                     .getSimpleName();
 
@@ -98,12 +98,12 @@ public class SelectPictures extends Activity {
              * @see android.os.AsyncTask#doInBackground(Params[])
              */
             @Override
-            protected Bitmap doInBackground(Uri... uris) {
+            protected Uri doInBackground(Uri... uris) {
                 // We process Uris one after another... so the Array contains
                 // only one Uri.
                 mUri = uris[0];
                 // Let the ThumbnailLoader do the job.
-                Bitmap result = ItemsLoader.getThumbnail(mContext, mUri);
+                Uri result = ItemsLoader.getThumbnail(mContext, mUri);
                 return result;
             }
 
@@ -113,7 +113,7 @@ public class SelectPictures extends Activity {
              * @see android.os.AsyncTask#onPostExecute(java.lang.Object)
              */
             @Override
-            protected void onPostExecute(Bitmap result) {
+            protected void onPostExecute(Uri result) {
                 super.onPostExecute(result);
                 // Give the retrieved thumbnail to the adapter...
                 mImageAdapter.updateCache(mUri, result);
@@ -203,7 +203,7 @@ public class SelectPictures extends Activity {
          * TODO: check that this is still necessary now that
          * {@link BitmapLoader} manages its own cache...
          */
-        private CacheMap<Uri, Bitmap> mThumbs = new CacheMap<Uri, Bitmap>(
+        private CacheMap<Uri, Uri> mThumbsUris = new CacheMap<Uri, Uri>(
                 THUMBS_CACHE_SIZE, THUMBS_CACHE_REVOC_SIZE);
 
         /**
@@ -233,15 +233,15 @@ public class SelectPictures extends Activity {
          * @param thumb
          *            A thumbnail representation of the picture.
          */
-        protected void addItem(String imageUri, Bitmap thumb) {
+        protected void addItem(String imageUri, Uri thumbUri) {
             if (imageUri != null) {
                 Uri uri = Uri.parse(imageUri);
                 if (!mImagesUris.contains(uri)) {
                     // Store the Uri in the list
                     mImagesUris.add(uri);
-                    if (thumb != null) {
+                    if (thumbUri != null) {
                         // Store the thumbnail in cache
-                        mThumbs.put(uri, thumb);
+                        mThumbsUris.put(uri, thumbUri);
                     }
                 }
             } else {
@@ -358,9 +358,14 @@ public class SelectPictures extends Activity {
             vh.checkableImage.setTag(imageUri);
 
             // Try to retrieve the thumbnail from cache
-            Bitmap thumb = (Bitmap) mThumbs.get(imageUri);
-            if (thumb != null) {
-                vh.checkableImage.setImageBitmap(thumb);
+            Uri thumbUri = mThumbsUris.get(imageUri);
+            if (thumbUri != null) {
+                try {                
+                    Bitmap thumb = BitmapLoader.load(mContext, thumbUri, null, null);
+                    vh.checkableImage.setImageBitmap(thumb);
+                } catch (IOException e) {
+                    Log.e(LOG_TAG, "Error : ", e);
+                }
             } else {
                 // If not in cache, add this image uri to the list of
                 // thumbnails to retrieve and display a replacement picture
@@ -440,12 +445,12 @@ public class SelectPictures extends Activity {
          * 
          * @param uri
          *            The Uri of the item.
-         * @param bmp
+         * @param thumbUri
          *            The Bitmap containing the thumbnail.
          */
-        public void updateCache(Uri uri, Bitmap bmp) {
-            if (uri != null && bmp != null) {
-                mThumbs.put(uri, bmp);
+        public void updateCache(Uri uri, Uri thumbUri) {
+            if (uri != null && thumbUri != null) {
+                mThumbsUris.put(uri, thumbUri);
                 mPendingThumbnailRequests.remove(uri);
                 notifyDataSetChanged();
             }
@@ -497,8 +502,8 @@ public class SelectPictures extends Activity {
                     // in
                     // ItemLoader.
                     String strUri = msg.getData().getString("IMAGE_URI");
-                    Bitmap thumb = msg.getData().getParcelable("THUMB");
-                    mImageAdapter.addItem(strUri, thumb);
+                    Uri thumbUri = msg.getData().getParcelable("THUMBURI");
+                    mImageAdapter.addItem(strUri, thumbUri);
                 }
 
             });
