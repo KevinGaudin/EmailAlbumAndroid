@@ -942,17 +942,11 @@ public class ShowPics extends Activity implements OnGestureListener,
      */
     @Override
     public Object onRetainNonConfigurationInstance() {
-        Bitmap[] bitmaps = new Bitmap[3];
-        Drawable draw = mImgViews[curPic].getDrawable();
-        if (draw != null)
-            bitmaps[0] = ((BitmapDrawable) draw).getBitmap();
-        draw = mImgViews[nextPic].getDrawable();
-        if (draw != null)
-            bitmaps[1] = ((BitmapDrawable) draw).getBitmap();
-        draw = mImgViews[prevPic].getDrawable();
-        if (draw != null)
-            bitmaps[2] = ((BitmapDrawable) draw).getBitmap();
-        return bitmaps;
+        SlideshowItem[] data = new SlideshowItem[3];
+        data[0] = mItems[curPic];
+        data[1] = mItems[nextPic];
+        data[2] = mItems[prevPic];
+        return data;
     }
 
     /*
@@ -1308,12 +1302,14 @@ public class ShowPics extends Activity implements OnGestureListener,
         try {
             if (mOldPosition == -1 || mNEMMode) {
                 // First load, initialize all ImageViews from archive
-                Object data = getLastNonConfigurationInstance();
+                SlideshowItem[] data = (SlideshowItem[])getLastNonConfigurationInstance();
                 if (data != null) {
-                    Bitmap[] bitmaps = (Bitmap[]) data;
-                    mImgViews[curPic].setImageBitmap(bitmaps[0]);
-                    mImgViews[nextPic].setImageBitmap(bitmaps[1]);
-                    mImgViews[prevPic].setImageBitmap(bitmaps[2]);
+                    mItems[curPic] = data[0];
+                    mItems[nextPic] = data[1];
+                    mItems[prevPic] = data[2];
+                    mImgViews[curPic].setImageBitmap(data[0].bitmap);
+                    mImgViews[nextPic].setImageBitmap(data[1].bitmap);
+                    mImgViews[prevPic].setImageBitmap(data[2].bitmap);
                 } else {
                     // Load first picture
                     if (mImgViews[curPic].getDrawable() != null) {
