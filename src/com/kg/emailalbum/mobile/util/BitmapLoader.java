@@ -54,8 +54,7 @@ public class BitmapLoader {
      * A cache for storing the latest accessed bitmaps. If another call asks for
      * a larger resolution, we reload it and keep the latest.
      */
-    private static CacheMap<String, Bitmap> bmpCache = new CacheMap<String, Bitmap>(
-            20, 3);
+    private static NewLRUCache<String, Bitmap> bmpCache = new NewLRUCache<String, Bitmap>(200);
     /**
      * A cache for storing real dimensions of all accessed bitmaps. With this
      * the cost of the first pass is reduced when loading a previously accessed
@@ -280,9 +279,12 @@ public class BitmapLoader {
 
         Bitmap cachedBitmap = null;
         Log.d(LOG_TAG, "Check if " + uri.toString() + " is in cache.");
-        if (bmpCache.containsKey(uri.toString())) {
+        cachedBitmap = bmpCache.getEntry(uri.toString());
+        boolean overWriteCache = true;
+        if (cachedBitmap != null) {
+            overWriteCache = false;
             Log.d(LOG_TAG, uri.toString() + " is in cache.");
-            cachedBitmap = bmpCache.get(uri.toString());
+            cachedBitmap = bmpCache.getEntry(uri.toString());
             // We have a Bitmap in cache, but we have to check if its resolution
             // is large enough.
             Log.d(LOG_TAG, (cachedBitmap.getWidth() + 1) + " < "
@@ -293,7 +295,7 @@ public class BitmapLoader {
                     || (cachedBitmap.getHeight() + 1) < fpResult.finalHeight) {
                 // invalidate the existing entry
                 Log.d(LOG_TAG, uri.toString() + " is not big enough !");
-                bmpCache.remove(uri.toString());
+                overWriteCache = true;
                 cachedBitmap = null;
             }
 
@@ -303,8 +305,8 @@ public class BitmapLoader {
 
         // Store the result in cache
         if (cacheResult && result != null
-                && !bmpCache.containsKey(uri.toString())) {
-            bmpCache.put(uri.toString(), result);
+                && overWriteCache) {
+            bmpCache.cacheEntry(uri.toString(), result);
         }
 
         return result;
@@ -362,9 +364,12 @@ public class BitmapLoader {
 
         Bitmap cachedBitmap = null;
         Log.d(LOG_TAG, "Check if " + cacheKey + " is in cache.");
-        if (bmpCache.containsKey(cacheKey)) {
+        boolean overWriteCache = true;
+        cachedBitmap = bmpCache.getEntry(cacheKey);
+        if (cachedBitmap != null) {
+            overWriteCache = false;
             Log.d(LOG_TAG, cacheKey + " is in cache.");
-            cachedBitmap = bmpCache.get(cacheKey);
+            cachedBitmap = bmpCache.getEntry(cacheKey);
             // We have a Bitmap in cache, but we have to check if its resolution
             // is large enough.
             Log.d(LOG_TAG, (cachedBitmap.getWidth() + 1) + " < "
@@ -375,7 +380,7 @@ public class BitmapLoader {
                     || (cachedBitmap.getHeight() + 1) < fpResult.finalHeight) {
                 // invalidate the existing entry
                 Log.d(LOG_TAG, cacheKey + " is not big enough !");
-                bmpCache.remove(cacheKey);
+                overWriteCache = true;
                 cachedBitmap = null;
             }
 
@@ -385,17 +390,10 @@ public class BitmapLoader {
                 cachedBitmap);
 
         // Store the result in cache
-        if (result != null && !bmpCache.containsKey(cacheKey)) {
-            bmpCache.put(cacheKey, result);
+        if (result != null && overWriteCache) {
+            bmpCache.cacheEntry(cacheKey, result);
         }
         return result;
-    }
-
-    /**
-     * Let's free some heavy bitmaps...
-     */
-    public static void onLowMemory() {
-        bmpCache.clear();
     }
 
     /**
