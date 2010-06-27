@@ -35,7 +35,9 @@
 				<Button android:layout_height="wrap_content" android:text="@string/menu_load_album"
 					android:drawableLeft="@android:drawable/ic_menu_gallery"
 					android:layout_width="fill_parent" android:layout_gravity="center_horizontal"
-					android:id="@+id/BtnOpenAlbum" android:drawableRight="@drawable/icon_sdcard_small"></Button>
+					android:id="@+id/BtnOpenAlbum" android:drawableRight="@drawable/icon_sdcard_small"></Button><Button android:layout_height="wrap_content" android:drawableLeft="@android:drawable/ic_menu_gallery"
+					android:layout_width="fill_parent" android:layout_gravity="center_horizontal"
+					android:id="@+id/BtnOpenGallery" android:text="@string/menu_view_gallery"></Button>
 				<Button android:layout_height="wrap_content" android:text="@string/menu_demo"
 					android:drawableLeft="@android:drawable/ic_menu_more"
 					android:layout_width="fill_parent" android:layout_gravity="center_horizontal"

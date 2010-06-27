@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-	package="com.kg.emailalbum.mobile" android:installLocation="auto" android:versionCode="35" android:versionName="3.X">
+	package="com.kg.emailalbum.mobile" android:installLocation="auto" android:versionCode="36" android:versionName="3.X">
 	<uses-sdk android:minSdkVersion="3" android:targetSdkVersion="8" android:debuggable="true"/>
 
 	<application android:icon="@drawable/icon" android:label="@string/app_name"
 		android:name="EmailAlbumApplication">
 
-		<activity android:name="org.acra.CrashReportDialog"  android:theme="@android:style/Theme.Dialog" android:launchMode="singleInstance"/>
-		
+		<activity android:name="org.acra.CrashReportDialog"
+			android:theme="@android:style/Theme.Dialog" android:launchMode="singleInstance" />
+
 		<activity android:name="com.kg.emailalbum.mobile.viewer.EmailAlbumViewer"
 			android:label="@string/app_name">
 			<intent-filter android:icon="@drawable/icon"
@@ -74,8 +75,9 @@
 
 
 		<activity android:name="com.kg.emailalbum.mobile.EmailAlbumPreferences"></activity>
-		
-		<provider android:name="com.kg.oifilemanager.filemanager.FileManagerProvider" android:authorities="com.kg.emailalbum.share"></provider>
+
+		<provider android:name="com.kg.oifilemanager.filemanager.FileManagerProvider"
+			android:authorities="com.kg.emailalbum.share"></provider>
 	</application>
 	<supports-screens android:normalScreens="true"
 		android:anyDensity="true" android:resizeable="true"
