@@ -635,7 +635,6 @@ public class EmailAlbumEditor extends ListActivity implements
 
                     String entryName = "";
                     int itemNumber = 0;
-                    BitmapLoader.onLowMemory();
                     synchronized (mAdapter.mContentModel) {
                         for (AlbumItem item : mAdapter.mContentModel) {
                             ErrorReporter.getInstance().addCustomData(
@@ -1132,17 +1131,6 @@ public class EmailAlbumEditor extends ListActivity implements
         return result;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see android.app.Activity#onLowMemory()
-     */
-    @Override
-    public void onLowMemory() {
-        super.onLowMemory();
-        // The BitmapLoader might have some caches to clear.
-        BitmapLoader.onLowMemory();
-    }
 
     /*
      * (non-Javadoc)

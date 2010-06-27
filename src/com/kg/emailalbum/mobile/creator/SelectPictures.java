@@ -140,7 +140,7 @@ public class SelectPictures extends Activity {
         private static final int THUMBS_CACHE_REVOC_SIZE = 6;
 
         /** Number of Thumbnails to keep in cache */
-        private static final int THUMBS_CACHE_SIZE = 32;;
+        private static final int THUMBS_CACHE_SIZE = 64;
 
         private final String LOG_TAG = MultiSelectImageAdapter.class
                 .getSimpleName();
@@ -198,10 +198,7 @@ public class SelectPictures extends Activity {
         };
 
         /**
-         * We store Bitmaps of the Thumbnails in this cache.
-         * 
-         * TODO: check that this is still necessary now that
-         * {@link BitmapLoader} manages its own cache...
+         * We store Bitmaps Uris of Thumbnails in this cache.
          */
         private CacheMap<Uri, Uri> mThumbsUris = new CacheMap<Uri, Uri>(
                 THUMBS_CACHE_SIZE, THUMBS_CACHE_REVOC_SIZE);

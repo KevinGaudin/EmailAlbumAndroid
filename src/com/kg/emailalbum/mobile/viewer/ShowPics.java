@@ -25,6 +25,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Map;
 
 import org.acra.ErrorReporter;
 
@@ -34,6 +36,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.graphics.PointF;
@@ -71,6 +74,7 @@ import com.kg.emailalbum.mobile.AboutDialog;
 import com.kg.emailalbum.mobile.EmailAlbumPreferences;
 import com.kg.emailalbum.mobile.R;
 import com.kg.emailalbum.mobile.animation.Rotate3dAnimation;
+import com.kg.emailalbum.mobile.gallery.TagsDbAdapter;
 import com.kg.emailalbum.mobile.util.CacheManager;
 import com.kg.emailalbum.mobile.util.Compatibility;
 import com.kg.emailalbum.mobile.util.ScaleGestureDetector;
@@ -98,6 +102,7 @@ public class ShowPics extends Activity implements OnGestureListener,
     private static final int MENU_ABOUT_ID = 6;
     private static final int MENU_SLIDESHOW_ID = 7;
     private static final int MENU_PREFS_ID = 8;
+    private static final int MENU_SET_TAG_ID = 9;
 
     private static final int BACKWARD = -1;
     private static final int FORWARD = 1;
@@ -186,6 +191,8 @@ public class ShowPics extends Activity implements OnGestureListener,
                 @Override
                 public void run() {
                     resetViews();
+                    showCaption();
+                    showTags();
                     mIsFlipping = false;
                 }
             }, 10); // Added 10ms to work around an android bug... without this,
@@ -216,6 +223,7 @@ public class ShowPics extends Activity implements OnGestureListener,
             // NOT USED
         }
     };
+    private TagsDbAdapter mTagsDb;
 
     /**
      * Starts the pictures transition animation.
@@ -549,6 +557,9 @@ public class ShowPics extends Activity implements OnGestureListener,
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // Tags Db init
+        mTagsDb = new TagsDbAdapter(getApplicationContext()).open();
+
         // Get a full-screen window
         final Window win = getWindow();
         win.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
@@ -635,6 +646,10 @@ public class ShowPics extends Activity implements OnGestureListener,
         item.setIcon(android.R.drawable.ic_menu_slideshow);
         item = menu.add(0, MENU_SET_AS_ID, 0, R.string.menu_set_as);
         item.setIcon(android.R.drawable.ic_menu_set_as);
+        if(mSlideshowList.getAlbumUri().toString().startsWith(Media.EXTERNAL_CONTENT_URI.toString())) {
+            item = menu.add(0, MENU_SET_TAG_ID, 0, "SET TAG");
+            item.setIcon(android.R.drawable.ic_menu_set_as);
+        }
         item = menu.add(0, MENU_SEND_ID, 0, R.string.menu_share);
         item.setIcon(android.R.drawable.ic_menu_share);
         item = menu.add(0, MENU_SAVE_ID, 0, R.string.menu_save);
@@ -915,8 +930,36 @@ public class ShowPics extends Activity implements OnGestureListener,
                 slideshowCallback.run();
             }
             setWakeLock(mSlideshow);
+            return true;
+        case MENU_SET_TAG_ID:
+            setTag();
+            return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void setTag() {
+        
+        Map<String, Long> allTags = mTagsDb.getAllTags();
+        Long tagId = null;
+        String tagName = "MonBeauTag";
+        if(allTags.size() == 0) {
+            tagId = mTagsDb.createTag(tagName);
+        } else {
+            tagId = allTags.get(tagName);
+        }
+        mTagsDb.setTag(tagId, Uri.parse(mItems[curPic].name));
+    }
+
+    /* (non-Javadoc)
+     * @see android.app.Activity#onPause()
+     */
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if(mTagsDb != null) {
+            mTagsDb.close();
+        }
     }
 
     /*
@@ -933,6 +976,18 @@ public class ShowPics extends Activity implements OnGestureListener,
             item.setTitle(R.string.start_slideshow);
         }
         return super.onPrepareOptionsMenu(menu);
+    }
+
+    /* (non-Javadoc)
+     * @see android.app.Activity#onResume()
+     */
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Tags Db init
+        if(mTagsDb == null) {
+            mTagsDb = new TagsDbAdapter(getApplicationContext()).open();
+        }
     }
 
     /*
@@ -1341,6 +1396,8 @@ public class ShowPics extends Activity implements OnGestureListener,
                         }
                     }
                 }
+                showCaption();
+                showTags();
             } else if (mOldPosition < mPosition
                     || ((mOldPosition == mSlideshowList.size() - 1) && mPosition == 0)) {
                 // Going forward
@@ -1353,7 +1410,6 @@ public class ShowPics extends Activity implements OnGestureListener,
             mImgViews[curPic].setZoomState(mZoomControl.getZoomState().reset());
             mZoomControl.setAspectQuotient(mImgViews[curPic]
                     .getAspectQuotient());
-            showCaption();
         } catch (Exception e) {
             Log.e(this.getClass().getName(), "showPicture() exception", e);
             Toast.makeText(this, e.getLocalizedMessage(), Toast.LENGTH_SHORT)
@@ -1376,6 +1432,21 @@ public class ShowPics extends Activity implements OnGestureListener,
         // In slideshow mode, post the next slide action
         if (mSlideshow) {
             mHandler.postDelayed(slideshowCallback, mSlideshowPeriod);
+        }
+    }
+
+    private void showTags() {
+        
+        
+        ArrayList<Long> tags = mTagsDb.getTags(Uri.parse(mItems[curPic].name));
+        if(tags != null && tags.size() > 0) {
+            String tagsList = "";
+            for (Long tagId : tags) {
+                tagsList += mTagsDb.getTagName(tagId) + ",";
+            }
+            Toast.makeText(getApplicationContext(), tagsList.toString(), Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(getApplicationContext(), "NO_TAG", Toast.LENGTH_SHORT).show();
         }
     }
 
