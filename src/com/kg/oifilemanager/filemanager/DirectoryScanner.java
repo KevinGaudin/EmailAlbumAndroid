@@ -134,13 +134,11 @@ public class DirectoryScanner extends Thread {
                             currentIcon));
                 }
             } else {
-                String fileName = currentFile.getName();
-                String lcFileName = fileName.toLowerCase();
-                if (lcFileName.endsWith(".jar") || lcFileName.endsWith(".zip")) {
+                if (FileUtils.canEmailAlbumOpen(currentFile)) {
                     currentIcon = emailalbumIcon;
                 } else {
 
-                    String mimetype = mMimeTypes.getMimeType(fileName);
+                    String mimetype = mMimeTypes.getMimeType(currentFile.getName());
 
                     currentIcon = getDrawableForMimetype(currentFile, mimetype);
                     if (currentIcon == null) {

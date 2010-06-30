@@ -68,7 +68,7 @@ public class IconifiedText implements Comparable<IconifiedText>{
      
      public int compareTo(IconifiedText other) { 
           if(this.mText != null) 
-               return this.mText.compareTo(other.getText()); 
+               return this.mText.toLowerCase().compareTo(other.getText().toLowerCase()); 
           else 
                throw new IllegalArgumentException(); 
      } 

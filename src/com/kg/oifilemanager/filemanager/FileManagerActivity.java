@@ -153,7 +153,7 @@ public class FileManagerActivity extends ListActivity {
      static final public int MESSAGE_SET_PROGRESS = 501;	// Set progress bar, arg1 = current value, arg2 = max value
      static final public int MESSAGE_ICON_CHANGED = 502;	// View needs to be redrawn, obj = IconifiedText
 
-	private static final String FILES_FILTER = ".*\\.(jar|zip)$";
+	private static final String FILES_FILTER = ".*\\.(jar|zip|cbz)$";
      
      /** Called when the activity is first created. */ 
      @Override 

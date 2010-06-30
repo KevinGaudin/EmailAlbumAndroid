@@ -41,6 +41,7 @@
 	<string name="select_directory">Choisissez le dossier de destination...
 	</string>
 	<string name="btn_select_directory">Celui-là !</string>
+	<string name="open_comic_archive">Lire Bande Dessinée</string>
 	<string name="menu_set_as">Définir comme...</string>
 	<string name="menu_load_album">Regarder un album</string>
 	<string name="menu_share">Partager</string>
@@ -93,19 +94,13 @@
 		\n
 	</string>
 	<string name="changelog">
-		Corrigé en version 2.6.2 :\n
-		- Affichage d\'un message en cas de mémoire insuffisante pour la rotatation dans la visionneuse.\n
-		- Ajout d\'une Permission pour l\'ouverture de pièces jointes e-mail (Droid).\n
-		- Divers correctifs.\n
-		Corrigé en 2.6.1 :\n
-		- La visionneuse pouvait s\'arrêter lors de changement d\'orientation (android 2.1)\n
-		- Quelques erreurs lors de la génération de l\'album\n
-		- L\'insertion des images dans GMail devrait maintenant respecter l\'ordre de l\'album\n
-		Nouveautés version 2.6.0 :\n
-		- Possibilité de zoomer dans la visionneuse d\'albums. Vous pouvez utiliser un appui long (toutes versions), un double tap
-		(toutes versions), ou le fameux zoom multitouch (android 2.0 ou plus).\n
-		- Ajustement du geste de rotation dans la visionneuse d\'album, devrait être plus intuitif.\n
-		- Divers correctifs\n	</string>
+		Nouveautés version 2.7.0:\n
+		- Ajout de la lecture d\'archives bande dessinées .cbz. Tout simplement parce que je me suis rendu compte que c\'était déjà possible !\n
+		- Prévention d\'un crash lors de la rotation d\'images dans l\'éditeur d\'album en l\'absence de miniature (ce que je ne comprends pas... ajouté des traces aux rapports d\'erreur pour comprendre ce cas)\n
+		- Prévention d\'un cas rare de crash lors de la visionneuse.\n
+		- Mise à jour de la gestion du multitouch.\n 
+		- Gestionnaire de fichiers ne prend plus en compte la casse dans son tri.\n 
+	</string>
 	<string name="url_donate">
 		https://www.paypal.com/cgi-bin/webscr?cmd=_donations&amp;business=DT9H5GSCL9U76&amp;lc=FR&amp;item_name=EmailAlbum%20Viewer&amp;currency_code=EUR&amp;bn=PP-DonationsBF:btn_donateCC_LG.gif:NonHosted</string>
 	<string name="alert_filemanager_missing">OI File Manager est nécessaire pour ouvrir des albums et enregistrer des images depuis/vers la SD Card. Voulez-vous l\'installer ? (C\'est gratuit)</string>

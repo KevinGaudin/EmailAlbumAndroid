@@ -170,4 +170,11 @@ public class FileUtils {
 	public static File getFile(File curdir, String file) {
 		return getFile(curdir.getAbsolutePath(), file);
 	}
+	
+	public static boolean canEmailAlbumOpen(File file) {
+        String fileName = file.getName();
+        String lcFileName = fileName.toLowerCase();
+
+	    return lcFileName.endsWith(".jar") || lcFileName.endsWith(".zip") || lcFileName.endsWith(".cbz");
+	}
 }

@@ -2,7 +2,7 @@
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
 	package="com.kg.emailalbum.mobile" android:installLocation="auto"
-	android:versionName="2.6.3" android:versionCode="35">
+	android:versionName="2.7.0" android:versionCode="36">
 	<uses-sdk android:minSdkVersion="3" android:targetSdkVersion="8"
 		android:debuggable="true" />
 
@@ -25,6 +25,15 @@
 				<data android:mimeType="application/x-java-archive" />
 				<data android:mimeType="application/x-jar" />
 				<data android:mimeType="application/zip" />
+			</intent-filter>
+			<intent-filter android:icon="@drawable/icon"
+				android:label="@string/open_comic_archive">
+				<action android:name="android.intent.action.VIEW" />
+				<category android:name="android.intent.category.DEFAULT" />
+				<category android:name="android.intent.category.BROWSABLE"></category>
+				<category android:name="android.intent.category.ALTERNATIVE" />
+				<category android:name="android.intent.category.SELECTED_ALTERNATIVE" />
+				<data android:mimeType="application/x-cbz" />
 			</intent-filter>
 		</activity>
 		<activity android:name="com.kg.emailalbum.mobile.viewer.ShowPics" />
