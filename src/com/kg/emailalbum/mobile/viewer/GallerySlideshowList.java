@@ -21,7 +21,8 @@ import com.kg.emailalbum.mobile.util.BitmapLoader;
 
 public class GallerySlideshowList extends SlideshowList {
 
-    private static final String LOG_TAG = GallerySlideshowList.class.getSimpleName();
+    private static final String LOG_TAG = GallerySlideshowList.class
+            .getSimpleName();
 
     private Context mContext = null;
 
@@ -34,23 +35,24 @@ public class GallerySlideshowList extends SlideshowList {
         mTargetSize = targetSize;
 
         String[] projection = { ImageColumns.BUCKET_DISPLAY_NAME,
-                ImageColumns.DATE_TAKEN, ImageColumns.TITLE,
-                ImageColumns._ID,
+                ImageColumns.DATE_TAKEN, ImageColumns.TITLE, ImageColumns._ID,
                 ImageColumns.DATA, ImageColumns.BUCKET_ID };
 
         Cursor cursor = mContext.getContentResolver().query(
                 Media.EXTERNAL_CONTENT_URI, projection, null, null,
                 MediaStore.Images.ImageColumns.DATE_TAKEN + " DESC");
-        cursor.moveToFirst();
+        if (cursor != null) {
+            cursor.moveToFirst();
 
-        // Iterate over all images
-        while (!cursor.isAfterLast()) {
-            Uri imageUri = Uri.withAppendedPath(Media.EXTERNAL_CONTENT_URI,
-                    cursor.getString(cursor
-                            .getColumnIndexOrThrow(ImageColumns._ID)));
-            mUris.add(imageUri);
+            // Iterate over all images
+            while (!cursor.isAfterLast()) {
+                Uri imageUri = Uri.withAppendedPath(Media.EXTERNAL_CONTENT_URI,
+                        cursor.getString(cursor
+                                .getColumnIndexOrThrow(ImageColumns._ID)));
+                mUris.add(imageUri);
 
-            cursor.moveToNext();
+                cursor.moveToNext();
+            }
         }
 
     }
@@ -73,8 +75,9 @@ public class GallerySlideshowList extends SlideshowList {
         result.caption = "";
         if (mTargetSize > 0) {
             try {
-                result.bitmap = BitmapLoader.load(mContext, mUris.get(location),
-                        mTargetSize, mTargetSize, Config.RGB_565, false);
+                result.bitmap = BitmapLoader.load(mContext,
+                        mUris.get(location), mTargetSize, mTargetSize,
+                        Config.RGB_565, false);
             } catch (IOException e) {
                 // TODO Auto-generated catch block
                 Log.e(LOG_TAG, "Error : ", e);
