@@ -70,6 +70,7 @@
 	</string>
 	<string name="error_out_of_mem_rotate">Not enough memory to apply rotation.
 	</string>
+	<string name="album_creation_image_error">An error occured while loading a picture. Skipped.</string>
 	<string name="error_saving">An error occurred while saving.</string>
 	<string name="enter_nemmode">Let\'s try to display them one by one...
 	</string>

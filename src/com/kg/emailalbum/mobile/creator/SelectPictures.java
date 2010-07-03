@@ -123,7 +123,7 @@ public class SelectPictures extends Activity {
                     mThmGetter.execute(mPendingThumbnailRequests.poll());
 
                 }
-                
+
             }
         }
 
@@ -290,7 +290,11 @@ public class SelectPictures extends Activity {
          */
         @Override
         public Object getItem(int position) {
-            return mImagesUris.get(position);
+            if(mImagesUris.size() > 0) {
+                return mImagesUris.get(position);
+            } else {
+                return null;
+            }
         }
 
         /*
@@ -300,8 +304,12 @@ public class SelectPictures extends Activity {
          */
         @Override
         public long getItemId(int position) {
-            return Long.parseLong(mImagesUris.get(position)
-                    .getLastPathSegment());
+            if (mImagesUris.size() > 0) {
+                return Long.parseLong(mImagesUris.get(position)
+                        .getLastPathSegment());
+            } else {
+                return 0;
+            }
         }
 
         /*
@@ -357,8 +365,9 @@ public class SelectPictures extends Activity {
             // Try to retrieve the thumbnail from cache
             Uri thumbUri = mThumbsUris.get(imageUri);
             if (thumbUri != null) {
-                try {                
-                    Bitmap thumb = BitmapLoader.load(mContext, thumbUri, null, null);
+                try {
+                    Bitmap thumb = BitmapLoader.load(mContext, thumbUri, null,
+                            null);
                     vh.checkableImage.setImageBitmap(thumb);
                 } catch (IOException e) {
                     Log.e(LOG_TAG, "Error : ", e);
@@ -451,7 +460,7 @@ public class SelectPictures extends Activity {
                 mPendingThumbnailRequests.remove(uri);
                 notifyDataSetChanged();
             }
-            if(mPendingThumbnailRequests.isEmpty()) {
+            if (mPendingThumbnailRequests.isEmpty()) {
                 mHandler.sendEmptyMessage(MSG_HIDE_INDETERMINATE_PROGRESS);
             }
         }
@@ -565,7 +574,7 @@ public class SelectPictures extends Activity {
         Cursor cursor = MediaStore.Images.Media.query(cr,
                 MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection);
 
-        if(cursor != null) {
+        if (cursor != null) {
             cursor.moveToFirst();
             while (!cursor.isLast() && !cursor.isAfterLast()) {
                 // Store all the buckets labels in a Set
@@ -575,8 +584,9 @@ public class SelectPictures extends Activity {
         }
         Log.d(getClass().getSimpleName(), "Buckets : " + mBuckets.toString());
 
-        if(mBuckets.size() == 0) {
-            Toast.makeText(getApplicationContext(), R.string.no_files_error, Toast.LENGTH_LONG).show();
+        if (mBuckets.size() == 0) {
+            Toast.makeText(getApplicationContext(), R.string.no_files_error,
+                    Toast.LENGTH_LONG).show();
             this.finish();
         }
         // Prepare the adapter for the spinner
