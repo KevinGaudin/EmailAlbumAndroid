@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge
+  xmlns:android="http://schemas.android.com/apk/res/android">
+  <com.kg.emailalbum.mobile.viewer.ImageZoomView android:id="@+id/pic0"
+		android:adjustViewBounds="true"
+		android:scaleType="fitCenter"
+		android:layout_height="fill_parent"
+		android:layout_width="fill_parent"
+		android:background="@android:color/transparent"/>
+	<com.kg.emailalbum.mobile.viewer.ImageZoomView android:id="@+id/pic1"
+		android:adjustViewBounds="true"
+		android:scaleType="fitCenter"
+		android:layout_height="fill_parent"
+		android:layout_width="fill_parent"
+		android:background="@android:color/transparent"/>
+	<com.kg.emailalbum.mobile.viewer.ImageZoomView android:id="@+id/pic2"
+		android:adjustViewBounds="true"
+		android:scaleType="fitCenter"
+		android:layout_height="fill_parent"
+		android:layout_width="fill_parent"
+		android:background="@android:color/transparent"/>
+</merge>

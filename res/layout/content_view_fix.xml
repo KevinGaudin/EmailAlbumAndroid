@@ -17,27 +17,16 @@
 	You should have received a copy of the GNU General Public License
 	along with EmailAlbum.  If not, see <http://www.gnu.org/licenses/>.
  -->
-<com.kg.emailalbum.mobile.util.MyViewFlipper xmlns:android="http://schemas.android.com/apk/res/android" 
-android:id="@+id/flipper"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:id="@+id/slideshow_root"
 	android:layout_width="fill_parent"
-	android:layout_height="fill_parent"
-	android:background="@android:color/black">
-	<com.kg.emailalbum.mobile.viewer.ImageZoomView android:id="@+id/pic0"
-		android:adjustViewBounds="true"
-		android:scaleType="fitCenter"
-		android:layout_height="fill_parent"
+	android:layout_height="fill_parent">
+	<com.kg.emailalbum.mobile.util.MyViewFlipper  
+		android:id="@+id/flipper"
 		android:layout_width="fill_parent"
-		android:background="@android:color/transparent"/>
-	<com.kg.emailalbum.mobile.viewer.ImageZoomView android:id="@+id/pic1"
-		android:adjustViewBounds="true"
-		android:scaleType="fitCenter"
 		android:layout_height="fill_parent"
-		android:layout_width="fill_parent"
-		android:background="@android:color/transparent"/>
-	<com.kg.emailalbum.mobile.viewer.ImageZoomView android:id="@+id/pic2"
-		android:adjustViewBounds="true"
-		android:scaleType="fitCenter"
-		android:layout_height="fill_parent"
-		android:layout_width="fill_parent"
-		android:background="@android:color/transparent"/>
-</com.kg.emailalbum.mobile.util.MyViewFlipper>
+		android:background="@android:color/black">
+		<include layout="@layout/slideshow_flipper_views"/>
+	</com.kg.emailalbum.mobile.util.MyViewFlipper>
+	<include layout="@layout/slideshow_tags_bar"/>
+</FrameLayout>
