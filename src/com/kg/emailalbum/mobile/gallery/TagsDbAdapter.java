@@ -2,6 +2,7 @@ package com.kg.emailalbum.mobile.gallery;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import android.content.ContentValues;
@@ -125,11 +126,11 @@ public class TagsDbAdapter {
         
     }
 
-    public ArrayList<Long> getTags(Uri uri) {
+    public List<Long> getTags(Uri uri) {
         Log.d(LOG_TAG, "Retrieve tags for Uri " + uri.toString());
         String[] selArgs = {uri.toString()};
-        
-        Cursor tagsCursor = mDb.query(TAG_URI_TABLE_NAME, null, KEY_URI + "=?"
+        String[] proj = { KEY_TAG_ID };
+        Cursor tagsCursor = mDb.query(TAG_URI_TABLE_NAME, proj, KEY_URI + "=?"
                  , selArgs, null, null, null);
         ArrayList<Long> tags = new ArrayList<Long>();
         int colIdId = tagsCursor.getColumnIndex(KEY_TAG_ID);
@@ -149,7 +150,8 @@ public class TagsDbAdapter {
     public String getTagName(long tagId)  {
         String result = null;
         String[] selArgs = { Long.toString(tagId) };
-        Cursor tagsCursor = mDb.query(TAGS_TABLE_NAME, null, KEY_TAG_ID+ "=?", selArgs, null, null, null);
+        String[] proj = { KEY_TAG_NAME } ;
+        Cursor tagsCursor = mDb.query(TAGS_TABLE_NAME, proj, KEY_TAG_ID+ "=?", selArgs, null, null, null);
         int colNameId = tagsCursor.getColumnIndex(KEY_TAG_NAME);
         if (tagsCursor.getCount() > 0) {
             while (tagsCursor.moveToNext()) {
@@ -157,6 +159,37 @@ public class TagsDbAdapter {
             }
         }
         tagsCursor.close();
+        return result;
+    }
+    
+    public List<Uri> getUrisFromAllTagIds(Long ... tagIds){
+        ArrayList<Uri> result = new ArrayList<Uri>();
+//        SELECT b.*
+//        FROM tagmap bt, bookmark b, tag t
+//        WHERE bt.tag_id = t.tag_id
+//        AND (t.name IN ('bookmark', 'webservice', 'semweb'))
+//        AND b.id = bt.bookmark_id
+//        GROUP BY b.id
+//        HAVING COUNT( b.id )=3
+        StringBuilder selArgsBldr = new StringBuilder();
+        String[] selArgsValues = new String[tagIds.length];
+        for(int i = 0; i < tagIds.length; i++) {
+            selArgsValues[i] = tagIds[i].toString();
+            selArgsBldr.append('?');
+            if(i < tagIds.length - 1) {
+                selArgsBldr.append(',');
+            }
+        }
+        String[] proj = { KEY_URI };
+        Cursor urisCursor = mDb.query(true, TAG_URI_TABLE_NAME, proj, KEY_TAG_ID + " IN ( " + selArgsBldr.toString() + ")", selArgsValues, null, null, null, null);
+        int colNameId = urisCursor.getColumnIndex(KEY_URI);
+        if (urisCursor.getCount() > 0) {
+            while (urisCursor.moveToNext()) {
+                result.add(Uri.parse(urisCursor.getString(colNameId)));
+            }
+        }
+        urisCursor.close();
+        
         return result;
     }
 }

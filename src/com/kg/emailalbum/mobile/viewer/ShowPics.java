@@ -25,7 +25,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.acra.ErrorReporter;
@@ -36,7 +36,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.graphics.PointF;
@@ -52,6 +51,8 @@ import android.provider.MediaStore.Images.Media;
 import android.util.Log;
 import android.view.Display;
 import android.view.GestureDetector;
+import android.view.GestureDetector.OnDoubleTapListener;
+import android.view.GestureDetector.OnGestureListener;
 import android.view.HapticFeedbackConstants;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -60,8 +61,6 @@ import android.view.MotionEvent;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.GestureDetector.OnDoubleTapListener;
-import android.view.GestureDetector.OnGestureListener;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -1438,7 +1437,7 @@ public class ShowPics extends Activity implements OnGestureListener,
     private void showTags() {
         
         
-        ArrayList<Long> tags = mTagsDb.getTags(Uri.parse(mItems[curPic].name));
+        List<Long> tags = mTagsDb.getTags(Uri.parse(mItems[curPic].name));
         if(tags != null && tags.size() > 0) {
             String tagsList = "";
             for (Long tagId : tags) {
@@ -1446,7 +1445,7 @@ public class ShowPics extends Activity implements OnGestureListener,
             }
             Toast.makeText(getApplicationContext(), tagsList.toString(), Toast.LENGTH_SHORT).show();
         } else {
-            Toast.makeText(getApplicationContext(), "NO_TAG", Toast.LENGTH_SHORT).show();
+//            Toast.makeText(getApplicationContext(), "NO_TAG", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -1541,4 +1540,5 @@ public class ShowPics extends Activity implements OnGestureListener,
         mMTZoomMode = false;
     }
 
+    
 }

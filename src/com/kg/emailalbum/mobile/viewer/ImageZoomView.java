@@ -68,53 +68,57 @@ public class ImageZoomView extends ImageView implements Observer {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        if (mZoomState != null && getDrawable() != null && getDrawable() instanceof BitmapDrawable) {
-            Bitmap bitmap = ((BitmapDrawable) getDrawable()).getBitmap();
-            if (bitmap != null) {
-                final int viewWidth = getWidth();
-                final int viewHeight = getHeight();
-                final int bitmapWidth = bitmap.getWidth();
-                final int bitmapHeight = bitmap.getHeight();
+        if (getDrawable() != null && getDrawable() instanceof BitmapDrawable) {
+            if (mZoomState != null) {
+                Bitmap bitmap = ((BitmapDrawable) getDrawable()).getBitmap();
+                if (bitmap != null) {
+                    final int viewWidth = getWidth();
+                    final int viewHeight = getHeight();
+                    final int bitmapWidth = bitmap.getWidth();
+                    final int bitmapHeight = bitmap.getHeight();
 
-                final float panX = mZoomState.getPanX();
-                final float panY = mZoomState.getPanY();
-                final float zoomX = mZoomState.getZoomX(mAspectQuotient.get())
-                        * viewWidth / bitmapWidth;
-                final float zoomY = mZoomState.getZoomY(mAspectQuotient.get())
-                        * viewHeight / bitmapHeight;
+                    final float panX = mZoomState.getPanX();
+                    final float panY = mZoomState.getPanY();
+                    final float zoomX = mZoomState.getZoomX(mAspectQuotient
+                            .get()) * viewWidth / bitmapWidth;
+                    final float zoomY = mZoomState.getZoomY(mAspectQuotient
+                            .get()) * viewHeight / bitmapHeight;
 
-                // Setup source and destination rectangles
-                mRectSrc.left = (int) (panX * bitmapWidth - viewWidth
-                        / (zoomX * 2));
-                mRectSrc.top = (int) (panY * bitmapHeight - viewHeight
-                        / (zoomY * 2));
-                mRectSrc.right = (int) (mRectSrc.left + viewWidth / zoomX);
-                mRectSrc.bottom = (int) (mRectSrc.top + viewHeight / zoomY);
-                mRectDst.left = getLeft();
-                mRectDst.top = getTop();
-                mRectDst.right = getRight();
-                mRectDst.bottom = getBottom();
+                    // Setup source and destination rectangles
+                    mRectSrc.left = (int) (panX * bitmapWidth - viewWidth
+                            / (zoomX * 2));
+                    mRectSrc.top = (int) (panY * bitmapHeight - viewHeight
+                            / (zoomY * 2));
+                    mRectSrc.right = (int) (mRectSrc.left + viewWidth / zoomX);
+                    mRectSrc.bottom = (int) (mRectSrc.top + viewHeight / zoomY);
+                    mRectDst.left = getLeft();
+                    mRectDst.top = getTop();
+                    mRectDst.right = getRight();
+                    mRectDst.bottom = getBottom();
 
-                // Adjust source rectangle so that it fits within the source
-                // image.
-                if (mRectSrc.left < 0) {
-                    mRectDst.left += -mRectSrc.left * zoomX;
-                    mRectSrc.left = 0;
-                }
-                if (mRectSrc.right > bitmapWidth) {
-                    mRectDst.right -= (mRectSrc.right - bitmapWidth) * zoomX;
-                    mRectSrc.right = bitmapWidth;
-                }
-                if (mRectSrc.top < 0) {
-                    mRectDst.top += -mRectSrc.top * zoomY;
-                    mRectSrc.top = 0;
-                }
-                if (mRectSrc.bottom > bitmapHeight) {
-                    mRectDst.bottom -= (mRectSrc.bottom - bitmapHeight) * zoomY;
-                    mRectSrc.bottom = bitmapHeight;
-                }
+                    // Adjust source rectangle so that it fits within the source
+                    // image.
+                    if (mRectSrc.left < 0) {
+                        mRectDst.left += -mRectSrc.left * zoomX;
+                        mRectSrc.left = 0;
+                    }
+                    if (mRectSrc.right > bitmapWidth) {
+                        mRectDst.right -= (mRectSrc.right - bitmapWidth)
+                                * zoomX;
+                        mRectSrc.right = bitmapWidth;
+                    }
+                    if (mRectSrc.top < 0) {
+                        mRectDst.top += -mRectSrc.top * zoomY;
+                        mRectSrc.top = 0;
+                    }
+                    if (mRectSrc.bottom > bitmapHeight) {
+                        mRectDst.bottom -= (mRectSrc.bottom - bitmapHeight)
+                                * zoomY;
+                        mRectSrc.bottom = bitmapHeight;
+                    }
 
-                canvas.drawBitmap(bitmap, mRectSrc, mRectDst, mPaint);
+                    canvas.drawBitmap(bitmap, mRectSrc, mRectDst, mPaint);
+                }
             }
         } else {
             super.draw(canvas);

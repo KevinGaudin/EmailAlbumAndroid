@@ -24,6 +24,15 @@
 				<data android:mimeType="application/x-jar" />
 				<data android:mimeType="application/zip" />
 			</intent-filter>
+			<intent-filter android:icon="@drawable/icon"
+				android:label="@string/open_comic_archive">
+				<action android:name="android.intent.action.VIEW" />
+				<category android:name="android.intent.category.DEFAULT" />
+				<category android:name="android.intent.category.BROWSABLE"></category>
+				<category android:name="android.intent.category.ALTERNATIVE" />
+				<category android:name="android.intent.category.SELECTED_ALTERNATIVE" />
+				<data android:mimeType="application/x-cbz" />
+			</intent-filter>
 		</activity>
 		<activity android:name="com.kg.emailalbum.mobile.viewer.ShowPics" />
 
