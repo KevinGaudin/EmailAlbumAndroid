@@ -28,5 +28,5 @@
 		android:background="@android:color/black">
 		<include layout="@layout/slideshow_flipper_views"/>
 	</com.kg.emailalbum.mobile.util.MyViewFlipper>
-	<include layout="@layout/slideshow_tags_bar"/>
+	<include layout="@layout/slideshow_tags_bar" />
 </FrameLayout>

@@ -9,7 +9,6 @@ import org.acra.ErrorReporter;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.database.DatabaseUtils;
 import android.graphics.Bitmap.Config;
 import android.net.Uri;
 import android.provider.MediaStore;

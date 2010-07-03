@@ -1,32 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
-<HorizontalScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
+<ImageButton
+    android:id="@+id/TagsTabOpen"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@drawable/tagtab"
+    android:layout_gravity="bottom|left">
+</ImageButton>
+<HorizontalScrollView 
 	android:layout_width="fill_parent"
 	android:layout_height="wrap_content"
-	android:layout_gravity="bottom"
-	android:background="#77000000">
-	<LinearLayout 
+	android:layout_gravity="bottom">
+	<LinearLayout
+		android:id="@+id/TagsBar"
 		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
 		android:layout_gravity="bottom">
-		<Button android:text="+" android:layout_width="wrap_content"
-			android:layout_height="wrap_content"></Button>
-		<Button android:text="Tag2 pouet" android:layout_width="wrap_content"
-			android:layout_height="wrap_content"></Button>
-		<Button android:text="Tag1" android:layout_width="wrap_content"
-			android:layout_height="wrap_content"></Button>
-		<Button android:text="Tag2 pouet" android:layout_width="wrap_content"
-			android:layout_height="wrap_content"></Button>
-		<Button android:text="Tag1" android:layout_width="wrap_content"
-			android:layout_height="wrap_content"></Button>
-		<Button android:text="Tag2 pouet" android:layout_width="wrap_content"
-			android:layout_height="wrap_content"></Button>
-		<Button android:text="Tag1" android:layout_width="wrap_content"
-			android:layout_height="wrap_content"></Button>
-		<Button android:text="Tag2 pouet" android:layout_width="wrap_content"
-			android:layout_height="wrap_content"></Button>
-		<Button android:text="Tag1" android:layout_width="wrap_content"
-			android:layout_height="wrap_content"></Button>
-		<Button android:text="Tag2 pouet" android:layout_width="wrap_content"
-			android:layout_height="wrap_content"></Button>
+		<LinearLayout 
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_gravity="bottom"
+			android:background="@drawable/tagstrip">
+			<Button android:text="+" android:layout_width="wrap_content"
+				android:layout_height="wrap_content" android:background="@android:color/transparent" android:padding="5dip" android:shadowDx="1" android:shadowDy="1" android:shadowRadius="2" android:textColor="#FFFFFF"></Button>
+			<Button android:text="Tag2 pouet" android:layout_width="wrap_content"
+				android:layout_height="wrap_content" android:background="@android:color/transparent" android:padding="5dip" android:shadowDx="1" android:shadowDy="1" android:shadowRadius="2" android:textColor="#FFFFFF"></Button>
+			<Button android:text="Tag1" android:layout_width="wrap_content"
+				android:layout_height="wrap_content" android:background="@android:color/transparent" android:padding="5dip" android:shadowDx="1" android:shadowDy="1" android:shadowRadius="2" android:textColor="#FFFFFF"></Button>
+			<Button android:text="Tag2 pouet" android:layout_width="wrap_content"
+				android:layout_height="wrap_content" android:background="@android:color/transparent" android:padding="5dip" android:shadowDx="1" android:shadowDy="1" android:shadowRadius="2" android:textColor="#FFFFFF"></Button>
+			<Button android:text="Tag1" android:layout_width="wrap_content"
+				android:layout_height="wrap_content" android:background="@android:color/transparent" android:padding="5dip" android:shadowDx="1" android:shadowDy="1" android:shadowRadius="2" android:textColor="#FFFFFF"></Button>
+			<Button android:text="Tag2 pouet" android:layout_width="wrap_content"
+				android:layout_height="wrap_content" android:background="@android:color/transparent" android:padding="5dip" android:shadowDx="1" android:shadowDy="1" android:shadowRadius="2" android:textColor="#FFFFFF"></Button>
+			<Button android:text="Tag1" android:layout_width="wrap_content"
+				android:layout_height="wrap_content" android:background="@android:color/transparent" android:padding="5dip" android:shadowDx="1" android:shadowDy="1" android:shadowRadius="2" android:textColor="#FFFFFF"></Button>
+			<Button android:text="Tag2 pouet" android:layout_width="wrap_content"
+				android:layout_height="wrap_content" android:background="@android:color/transparent" android:padding="5dip" android:shadowDx="1" android:shadowDy="1" android:shadowRadius="2" android:textColor="#FFFFFF"></Button>
+			<Button android:text="Tag1" android:layout_width="wrap_content"
+				android:layout_height="wrap_content" android:background="@android:color/transparent" android:padding="5dip" android:shadowDx="1" android:shadowDy="1" android:shadowRadius="2" android:textColor="#FFFFFF"></Button>
+			<Button android:text="Tag2 pouet" android:layout_width="wrap_content"
+				android:layout_height="wrap_content" android:background="@android:color/transparent" android:padding="5dip" android:shadowDx="1" android:shadowDy="1" android:shadowRadius="2" android:textColor="#FFFFFF"></Button>
+		</LinearLayout>
+		<ImageButton
+		    android:id="@+id/TagsTabClose"
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:background="@drawable/tagtab"
+		    android:layout_gravity="bottom|right">
+		</ImageButton>
 	</LinearLayout>
 </HorizontalScrollView>
+</merge>

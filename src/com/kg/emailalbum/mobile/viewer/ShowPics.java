@@ -58,11 +58,14 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
+import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Animation;
+import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
@@ -223,6 +226,9 @@ public class ShowPics extends Activity implements OnGestureListener,
         }
     };
     private TagsDbAdapter mTagsDb;
+    private View mTagsBar;
+    private View mTagsTabOpen;
+    private View mTagsTabClose;
 
     /**
      * Starts the pictures transition animation.
@@ -565,7 +571,7 @@ public class ShowPics extends Activity implements OnGestureListener,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
 
-        setContentView(Compatibility.getShowPicsLayout());
+        initContentViews();
 
         // Prevent device from sleeping during slideshow
         PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
@@ -630,6 +636,59 @@ public class ShowPics extends Activity implements OnGestureListener,
             finish();
         }
         showPicture();
+    }
+
+    /**
+     * 
+     */
+    private void initContentViews() {
+        setContentView(Compatibility.getShowPicsLayout());
+        mTagsBar = findViewById(R.id.TagsBar);
+        mTagsBar.setVisibility(View.GONE);
+        mTagsTabOpen = findViewById(R.id.TagsTabOpen);
+        mTagsTabOpen.setOnClickListener(new OnClickListener() {
+            
+            @Override
+            public void onClick(View v) {
+                mTagsBar.setAnimation(AnimationUtils.loadAnimation(getApplicationContext(),
+                        R.anim.push_right_in));
+                mTagsBar.setVisibility(View.VISIBLE);
+            }
+        });
+        mTagsTabClose = findViewById(R.id.TagsTabClose);
+        mTagsTabClose.setOnClickListener(new OnClickListener() {
+            
+            @Override
+            public void onClick(View v) {
+                Animation animOut = AnimationUtils.loadAnimation(getApplicationContext(),
+                        R.anim.push_left_out);
+                animOut.setAnimationListener(new AnimationListener() {
+                    
+                    @Override
+                    public void onAnimationStart(Animation animation) {
+                        // TODO Auto-generated method stub
+                        
+                    }
+                    
+                    @Override
+                    public void onAnimationRepeat(Animation animation) {
+                        // TODO Auto-generated method stub
+                        
+                    }
+                    
+                    @Override
+                    public void onAnimationEnd(Animation animation) {
+                        // TODO Auto-generated method stub
+                        mTagsBar.setVisibility(View.GONE);
+                    }
+                });
+                mTagsBar.setAnimation(animOut);
+                
+                mTagsBar.setVisibility(View.INVISIBLE);
+                
+            }
+        });
+
     }
 
     /*

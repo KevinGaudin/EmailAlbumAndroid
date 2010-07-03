@@ -184,7 +184,7 @@ public class EmailAlbumViewer extends ListActivity {
 
             if (convertView == null) {
                 // No view to reuse, create a new one
-                convertView = getLayoutInflater().inflate(R.layout.content_row,
+                convertView = getLayoutInflater().inflate(R.layout.album_viewer_line,
                         null, false);
                 holder = new ViewHolder();
                 // Retrieve and store components references
@@ -513,7 +513,7 @@ public class EmailAlbumViewer extends ListActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_PROGRESS);
-        setContentView(R.layout.content_list);
+        setContentView(R.layout.album_viewer);
 
         // Dither the background for pre 2.0 devices
         findViewById(R.id.album_viewer_root).getBackground().setDither(true);

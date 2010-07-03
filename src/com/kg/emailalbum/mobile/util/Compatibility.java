@@ -97,9 +97,9 @@ public class Compatibility {
         }
         
         if(apiLevel >= 7) {
-            return com.kg.emailalbum.mobile.R.layout.content_view_fix;
+            return com.kg.emailalbum.mobile.R.layout.slideshow_fix;
         } else {
-            return com.kg.emailalbum.mobile.R.layout.content_view;
+            return com.kg.emailalbum.mobile.R.layout.slideshow;
         }
     }
 }
