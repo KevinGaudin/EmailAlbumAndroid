@@ -62,6 +62,7 @@
 		!</string>
 	<string name="error_out_of_mem_rotate">Mémoire insuffisante pour appliquer la rotation.</string>
 	<string name="error_saving">Erreur lors de la sauvegarde.</string>
+	<string name="album_creation_image_error">Une erreur est survenue au chargement d\'une image. Image ignorée.</string>
 	<string name="enter_nemmode">Essayons une par une...
 	</string>
 	<string name="about_go_web">Faire un don avec PayPal</string>

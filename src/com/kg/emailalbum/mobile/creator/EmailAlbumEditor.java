@@ -474,7 +474,7 @@ public class EmailAlbumEditor extends ListActivity implements
                 ErrorReporter.getInstance().addCustomData("AlbumItem.uri", uri.toString());
                 ErrorReporter.getInstance().addCustomData("AlbumItem.caption", this.caption);
                 ErrorReporter.getInstance().addCustomData("AlbumItem.rotation", ""+this.rotation);
-                ErrorReporter.getInstance().addCustomData("AlbumItem.thumbUri", this.thumbUri.toString());
+                ErrorReporter.getInstance().addCustomData("AlbumItem.thumbUri", "null");
                 ErrorReporter.getInstance().handleException(new Exception("Rotating an AlbumItem without a thumbUri !!!"));
             }
         }
@@ -566,29 +566,36 @@ public class EmailAlbumEditor extends ListActivity implements
                                     mPictureSize.getWidth(),
                                     mPictureSize.getHeight(),
                                     Bitmap.Config.ARGB_8888, false);
-
-                            ErrorReporter.getInstance().addCustomData(
-                                    "Apply rotation ?",
-                                    "" + (item.rotation % 360 != 0));
-                            if (item.rotation % 360 != 0) {
-                                // Apply the user specified rotation
-                                bmp = BitmapUtil.rotate(bmp, item.rotation);
+                            if(bmp != null) {
+                                ErrorReporter.getInstance().addCustomData(
+                                        "Apply rotation ?",
+                                        "" + (item.rotation % 360 != 0));
+                                if (item.rotation % 360 != 0) {
+                                    // Apply the user specified rotation
+                                    bmp = BitmapUtil.rotate(bmp, item.rotation);
+                                }
+    
+                                OutputStream out = new FileOutputStream(new File(
+                                        album, picName));
+    
+                                // Write the picture to the temp dir
+                                ErrorReporter.getInstance().addCustomData(
+                                        "bmp is null ?", "" + (bmp == null));
+                                bmp.compress(CompressFormat.JPEG, mPictureQuality,
+                                        out);
+    
+                                mContentFileBuilder.put(picName, item.caption);
+    
+                                // Get rid of the bitmap to avoid memory leaks
+                                bmp.recycle();
+                                out.close();
+                            } else {
+                                ErrorReporter.getInstance().addCustomData("item.uri", item.uri.toString());
+                                ErrorReporter.getInstance().addCustomData("mPictureSize.getWidth()", ""+mPictureSize.getWidth());
+                                ErrorReporter.getInstance().addCustomData("mPictureSize.getHeight()", ""+mPictureSize.getHeight());
+                                ErrorReporter.getInstance().handleException(new Exception("Could not load image while creating archive! (BitmapLoader result is null)"));
+                                Toast.makeText(EmailAlbumEditor.this, R.string.album_creation_image_error, Toast.LENGTH_SHORT).show();
                             }
-
-                            OutputStream out = new FileOutputStream(new File(
-                                    album, picName));
-
-                            // Write the picture to the temp dir
-                            ErrorReporter.getInstance().addCustomData(
-                                    "bmp is null ?", "" + (bmp == null));
-                            bmp.compress(CompressFormat.JPEG, mPictureQuality,
-                                    out);
-
-                            mContentFileBuilder.put(picName, item.caption);
-
-                            // Get rid of the bitmap to avoid memory leaks
-                            bmp.recycle();
-                            out.close();
                             itemNumber++;
                             publishProgress((int) (((float) itemNumber / (float) count) * 100));
                             System.gc();
@@ -681,23 +688,30 @@ public class EmailAlbumEditor extends ListActivity implements
                                     mPictureSize.getWidth(),
                                     mPictureSize.getHeight(),
                                     Bitmap.Config.ARGB_8888, false);
-
-                            ErrorReporter.getInstance().addCustomData(
-                                    "Apply rotation ?",
-                                    "" + (item.rotation % 360 != 0));
-                            if (item.rotation % 360 != 0) {
-                                // Apply the user specified rotation
-                                bmp = BitmapUtil.rotate(bmp, item.rotation);
+                            if(bmp != null) {
+                                ErrorReporter.getInstance().addCustomData(
+                                        "Apply rotation ?",
+                                        "" + (item.rotation % 360 != 0));
+                                if (item.rotation % 360 != 0) {
+                                    // Apply the user specified rotation
+                                    bmp = BitmapUtil.rotate(bmp, item.rotation);
+                                }
+                                out.putNextEntry(entry);
+                                // Write the picture to the album
+                                ErrorReporter.getInstance().addCustomData(
+                                        "bmp is null ?", "" + (bmp == null));
+                                bmp.compress(CompressFormat.JPEG, mPictureQuality,
+                                        out);
+                                // Get rid of the bitmap to avoid memory leaks
+                                bmp.recycle();
+                                out.closeEntry();
+                            } else {
+                                ErrorReporter.getInstance().addCustomData("item.uri", item.uri.toString());
+                                ErrorReporter.getInstance().addCustomData("mPictureSize.getWidth()", ""+mPictureSize.getWidth());
+                                ErrorReporter.getInstance().addCustomData("mPictureSize.getHeight()", ""+mPictureSize.getHeight());
+                                ErrorReporter.getInstance().handleException(new Exception("Could not load image while creating archive! (BitmapLoader result is null)"));
+                                Toast.makeText(EmailAlbumEditor.this, R.string.album_creation_image_error, Toast.LENGTH_SHORT).show();
                             }
-                            out.putNextEntry(entry);
-                            // Write the picture to the album
-                            ErrorReporter.getInstance().addCustomData(
-                                    "bmp is null ?", "" + (bmp == null));
-                            bmp.compress(CompressFormat.JPEG, mPictureQuality,
-                                    out);
-                            // Get rid of the bitmap to avoid memory leaks
-                            bmp.recycle();
-                            out.closeEntry();
                             itemNumber++;
                             publishProgress((int) (((float) (entryNumber + itemNumber) / (float) count) * 100));
                             System.gc();
