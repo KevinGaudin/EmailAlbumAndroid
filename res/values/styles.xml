@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<style name="Tag">
+		<item name="android:layout_width">wrap_content</item>
+		<item name="android:layout_height">wrap_content</item>
+		<item name="android:layout_gravity">center_vertical</item>
+		<item name="android:layout_margin">5sp</item>
+		<item name="android:background">@drawable/tag_gradient</item>
+		<item name="android:padding">5sp</item>
+		<item name="android:shadowDx">1.0</item>
+		<item name="android:shadowDy">1.0</item>
+		<item name="android:shadowRadius">1</item>
+		<item name="android:shadowColor">@android:color/background_dark</item>
+		<item name="android:textColor">#FFFFFF</item>
+
+	</style>
+</resources>

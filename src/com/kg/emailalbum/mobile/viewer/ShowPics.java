@@ -625,7 +625,8 @@ public class ShowPics extends Activity implements OnGestureListener,
 
         if (albumUri != null) {
             if (albumUri.equals(Media.EXTERNAL_CONTENT_URI)) {
-                mSlideshowList = new GallerySlideshowList(getApplicationContext(), 900);
+                mSlideshowList = new GallerySlideshowList(
+                        getApplicationContext(), 900);
             } else {
                 mSlideshowList = new ArchiveSlideshowList(
                         getApplicationContext(), albumUri, 900);
@@ -646,46 +647,65 @@ public class ShowPics extends Activity implements OnGestureListener,
         mTagsBar = findViewById(R.id.TagsBar);
         mTagsBar.setVisibility(View.GONE);
         mTagsTabOpen = findViewById(R.id.TagsTabOpen);
-        mTagsTabOpen.setOnClickListener(new OnClickListener() {
-            
+        final Animation animOpenTagsBar = AnimationUtils.loadAnimation(
+                getApplicationContext(), R.anim.open_tags_bar);
+        final Animation animTagTabOut = AnimationUtils.loadAnimation(
+                getApplicationContext(), R.anim.push_left_out);
+        animTagTabOut.setAnimationListener(new AnimationListener() {
             @Override
-            public void onClick(View v) {
-                mTagsBar.setAnimation(AnimationUtils.loadAnimation(getApplicationContext(),
-                        R.anim.push_right_in));
+            public void onAnimationStart(Animation animation) {
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                animOpenTagsBar.reset();
+                mTagsBar.startAnimation(animOpenTagsBar);
                 mTagsBar.setVisibility(View.VISIBLE);
             }
         });
-        mTagsTabClose = findViewById(R.id.TagsTabClose);
-        mTagsTabClose.setOnClickListener(new OnClickListener() {
-            
+        mTagsTabOpen.setOnClickListener(new OnClickListener() {
+
             @Override
             public void onClick(View v) {
-                Animation animOut = AnimationUtils.loadAnimation(getApplicationContext(),
-                        R.anim.push_left_out);
-                animOut.setAnimationListener(new AnimationListener() {
-                    
-                    @Override
-                    public void onAnimationStart(Animation animation) {
-                        // TODO Auto-generated method stub
-                        
-                    }
-                    
-                    @Override
-                    public void onAnimationRepeat(Animation animation) {
-                        // TODO Auto-generated method stub
-                        
-                    }
-                    
-                    @Override
-                    public void onAnimationEnd(Animation animation) {
-                        // TODO Auto-generated method stub
-                        mTagsBar.setVisibility(View.GONE);
-                    }
-                });
-                mTagsBar.setAnimation(animOut);
-                
+                animTagTabOut.reset();
+                mTagsTabOpen.startAnimation(animTagTabOut);
+                mTagsTabOpen.setVisibility(View.INVISIBLE);
+            }
+        });
+
+        mTagsTabClose = findViewById(R.id.TagsTabClose);
+        final Animation animTagTabIn = AnimationUtils.loadAnimation(
+                getApplicationContext(), R.anim.push_right_in);
+        final Animation animTagsBarOut = AnimationUtils.loadAnimation(
+                getApplicationContext(), R.anim.close_tags_bar);
+        animTagsBarOut.setAnimationListener(new AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                mTagsBar.setVisibility(View.GONE);
+                animTagTabIn.reset();
+                mTagsTabOpen.startAnimation(animTagTabIn);
+                mTagsTabOpen.setVisibility(View.VISIBLE);
+            }
+        });
+        mTagsTabClose.setOnClickListener(new OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                animTagsBarOut.reset();
+                mTagsBar.startAnimation(animTagsBarOut);
                 mTagsBar.setVisibility(View.INVISIBLE);
-                
             }
         });
 
@@ -704,7 +724,8 @@ public class ShowPics extends Activity implements OnGestureListener,
         item.setIcon(android.R.drawable.ic_menu_slideshow);
         item = menu.add(0, MENU_SET_AS_ID, 0, R.string.menu_set_as);
         item.setIcon(android.R.drawable.ic_menu_set_as);
-        if(mSlideshowList.getAlbumUri().toString().startsWith(Media.EXTERNAL_CONTENT_URI.toString())) {
+        if (mSlideshowList.getAlbumUri().toString()
+                .startsWith(Media.EXTERNAL_CONTENT_URI.toString())) {
             item = menu.add(0, MENU_SET_TAG_ID, 0, "SET TAG");
             item.setIcon(android.R.drawable.ic_menu_set_as);
         }
@@ -959,7 +980,8 @@ public class ShowPics extends Activity implements OnGestureListener,
         case MENU_OPEN_WITH_ID:
             try {
                 Uri fileUri = Uri.withAppendedPath(
-                        FileManagerProvider.CONTENT_URI, saveTmpPicture(
+                        FileManagerProvider.CONTENT_URI,
+                        saveTmpPicture(
                                 new CacheManager(getApplicationContext())
                                         .getCacheDir("viewer"))
                                 .getAbsolutePath());
@@ -997,11 +1019,11 @@ public class ShowPics extends Activity implements OnGestureListener,
     }
 
     private void setTag() {
-        
+
         Map<String, Long> allTags = mTagsDb.getAllTags();
         Long tagId = null;
         String tagName = "MonBeauTag";
-        if(allTags.size() == 0) {
+        if (allTags.size() == 0) {
             tagId = mTagsDb.createTag(tagName);
         } else {
             tagId = allTags.get(tagName);
@@ -1009,13 +1031,15 @@ public class ShowPics extends Activity implements OnGestureListener,
         mTagsDb.setTag(tagId, Uri.parse(mItems[curPic].name));
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see android.app.Activity#onPause()
      */
     @Override
     protected void onPause() {
         super.onPause();
-        if(mTagsDb != null) {
+        if (mTagsDb != null) {
             mTagsDb.close();
         }
     }
@@ -1036,14 +1060,16 @@ public class ShowPics extends Activity implements OnGestureListener,
         return super.onPrepareOptionsMenu(menu);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see android.app.Activity#onResume()
      */
     @Override
     protected void onResume() {
         super.onResume();
         // Tags Db init
-        if(mTagsDb == null) {
+        if (mTagsDb == null) {
             mTagsDb = new TagsDbAdapter(getApplicationContext()).open();
         }
     }
@@ -1207,27 +1233,27 @@ public class ShowPics extends Activity implements OnGestureListener,
                 curPic = (curPic + 1) % 3;
                 nextPic = (nextPic + 1) % 3;
                 if (mPosition + 1 < mSlideshowList.size()) {
-//                    if (mImgViews[nextPic].getDrawable() != null) {
-//                        if (((BitmapDrawable) mImgViews[nextPic].getDrawable())
-//                                .getBitmap() != null) {
-//                            // nextPic currently contains the picture previous
-//                            // to the previous picture. Discard it.
-//                            ((BitmapDrawable) mImgViews[nextPic].getDrawable())
-//                                    .getBitmap().recycle();
-//                        }
-//                    }
+                    // if (mImgViews[nextPic].getDrawable() != null) {
+                    // if (((BitmapDrawable) mImgViews[nextPic].getDrawable())
+                    // .getBitmap() != null) {
+                    // // nextPic currently contains the picture previous
+                    // // to the previous picture. Discard it.
+                    // ((BitmapDrawable) mImgViews[nextPic].getDrawable())
+                    // .getBitmap().recycle();
+                    // }
+                    // }
                     // Preload next picture
                     mItems[nextPic] = loadPicture(mPosition + 1);
                     mImgViews[nextPic].setImageBitmap(mItems[nextPic].bitmap);
                 } else if (mSlideshowLoop) {
                     // prepare for looping
-//                    if (mImgViews[nextPic].getDrawable() != null) {
-//                        if (((BitmapDrawable) mImgViews[nextPic].getDrawable())
-//                                .getBitmap() != null) {
-//                            ((BitmapDrawable) mImgViews[nextPic].getDrawable())
-//                                    .getBitmap().recycle();
-//                        }
-//                    }
+                    // if (mImgViews[nextPic].getDrawable() != null) {
+                    // if (((BitmapDrawable) mImgViews[nextPic].getDrawable())
+                    // .getBitmap() != null) {
+                    // ((BitmapDrawable) mImgViews[nextPic].getDrawable())
+                    // .getBitmap().recycle();
+                    // }
+                    // }
                     // We are at the end of the slideshow, just before looping.
                     // Preload the first picture to prepare looping.
                     mItems[nextPic] = loadPicture(0);
@@ -1239,16 +1265,16 @@ public class ShowPics extends Activity implements OnGestureListener,
                 curPic = (curPic == 0) ? 2 : curPic - 1;
                 nextPic = (nextPic == 0) ? 2 : nextPic - 1;
                 if (mPosition - 1 >= 0) {
-//                    if (mImgViews[prevPic].getDrawable() != null) {
-//                        if (((BitmapDrawable) mImgViews[prevPic].getDrawable())
-//                                .getBitmap() != null) {
-//                            // prevPic now contains the picture next to the next
-//                            // picture.
-//                            // Discard it.
-//                            ((BitmapDrawable) mImgViews[prevPic].getDrawable())
-//                                    .getBitmap().recycle();
-//                        }
-//                    }
+                    // if (mImgViews[prevPic].getDrawable() != null) {
+                    // if (((BitmapDrawable) mImgViews[prevPic].getDrawable())
+                    // .getBitmap() != null) {
+                    // // prevPic now contains the picture next to the next
+                    // // picture.
+                    // // Discard it.
+                    // ((BitmapDrawable) mImgViews[prevPic].getDrawable())
+                    // .getBitmap().recycle();
+                    // }
+                    // }
                     // Preload previous picture.
                     mItems[prevPic] = loadPicture(mPosition - 1);
                     mImgViews[prevPic].setImageBitmap(mItems[prevPic].bitmap);
@@ -1269,8 +1295,7 @@ public class ShowPics extends Activity implements OnGestureListener,
                 imgView.getDrawable().setDither(true);
                 imgView.getDrawable().setFilterBitmap(true);
                 imgView.setDrawingCacheEnabled(true);
-                imgView
-                        .setDrawingCacheQuality(ImageView.DRAWING_CACHE_QUALITY_HIGH);
+                imgView.setDrawingCacheQuality(ImageView.DRAWING_CACHE_QUALITY_HIGH);
             }
         }
         mZoomControl.getZoomState().reset();
@@ -1296,7 +1321,7 @@ public class ShowPics extends Activity implements OnGestureListener,
                     Bitmap dst = Bitmap.createBitmap(src, 0, 0, src.getWidth(),
                             src.getHeight(), rotMat, false);
                     mImgViews[curPic].setImageBitmap(dst);
-                    //src.recycle();
+                    // src.recycle();
                 }
             }
         } catch (OutOfMemoryError e) {
@@ -1415,7 +1440,7 @@ public class ShowPics extends Activity implements OnGestureListener,
         try {
             if (mOldPosition == -1 || mNEMMode) {
                 // First load, initialize all ImageViews from archive
-                SlideshowItem[] data = (SlideshowItem[])getLastNonConfigurationInstance();
+                SlideshowItem[] data = (SlideshowItem[]) getLastNonConfigurationInstance();
                 if (data != null) {
                     mItems[curPic] = data[0];
                     mItems[nextPic] = data[1];
@@ -1427,11 +1452,12 @@ public class ShowPics extends Activity implements OnGestureListener,
                     // Load first picture
                     if (mImgViews[curPic].getDrawable() != null) {
                         mImgViews[curPic].getDrawable().setCallback(null);
-//                        Bitmap toRecycle = ((BitmapDrawable) mImgViews[curPic]
-//                                .getDrawable()).getBitmap();
-//                        if (toRecycle != null) {
-//                            toRecycle.recycle();
-//                        }
+                        // Bitmap toRecycle = ((BitmapDrawable)
+                        // mImgViews[curPic]
+                        // .getDrawable()).getBitmap();
+                        // if (toRecycle != null) {
+                        // toRecycle.recycle();
+                        // }
 
                     }
                     mItems[curPic] = loadPicture(mPosition);
@@ -1480,9 +1506,8 @@ public class ShowPics extends Activity implements OnGestureListener,
                     && ((BitmapDrawable) mImgViews[curPic].getDrawable())
                             .getBitmap() != null) {
                 mNEMMode = true;
-                Toast
-                        .makeText(this, R.string.enter_nemmode,
-                                Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.enter_nemmode, Toast.LENGTH_SHORT)
+                        .show();
             } else {
                 finish();
             }
@@ -1494,17 +1519,18 @@ public class ShowPics extends Activity implements OnGestureListener,
     }
 
     private void showTags() {
-        
-        
+
         List<Long> tags = mTagsDb.getTags(Uri.parse(mItems[curPic].name));
-        if(tags != null && tags.size() > 0) {
+        if (tags != null && tags.size() > 0) {
             String tagsList = "";
             for (Long tagId : tags) {
                 tagsList += mTagsDb.getTagName(tagId) + ",";
             }
-            Toast.makeText(getApplicationContext(), tagsList.toString(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), tagsList.toString(),
+                    Toast.LENGTH_SHORT).show();
         } else {
-//            Toast.makeText(getApplicationContext(), "NO_TAG", Toast.LENGTH_SHORT).show();
+            // Toast.makeText(getApplicationContext(), "NO_TAG",
+            // Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -1599,5 +1625,4 @@ public class ShowPics extends Activity implements OnGestureListener,
         mMTZoomMode = false;
     }
 
-    
 }
