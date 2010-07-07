@@ -35,7 +35,7 @@ import android.os.SystemClock;
 
 import com.kg.emailalbum.mobile.util.SpringDynamics;
 
-public class BasicZoomControl implements Observer {
+public class ZoomControl implements Observer {
 
     private static final int FPS = 50;
 
@@ -84,7 +84,7 @@ public class BasicZoomControl implements Observer {
         }
     };
 
-    public BasicZoomControl() {
+    public ZoomControl() {
         mPanDynamicsX.setFriction(2f);
         mPanDynamicsY.setFriction(2f);
         mPanDynamicsX.setSpring(50f, 1f);

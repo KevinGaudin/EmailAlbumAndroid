@@ -152,8 +152,8 @@ public class ShowPics extends Activity implements OnGestureListener,
     private boolean mZoomMode = false;
     private boolean mMTZoomMode = false;
     private boolean mPanMode = false;
-    private SimpleZoomListener mZoomListener = null;
-    private BasicZoomControl mZoomControl = new BasicZoomControl();
+    private ZoomListener mZoomListener = null;
+    private ZoomControl mZoomControl = new ZoomControl();
     Handler mHandler = new Handler();
     private PointF mDownPoint = new PointF(0, 0);
     private PointF mLatestPoint = new PointF(0, 0);
@@ -556,7 +556,7 @@ public class ShowPics extends Activity implements OnGestureListener,
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mZoomListener = new SimpleZoomListener(getApplicationContext());
+        mZoomListener = new ZoomListener(getApplicationContext());
         
         // Get a full-screen window
         final Window win = getWindow();
@@ -811,7 +811,7 @@ public class ShowPics extends Activity implements OnGestureListener,
 
     private void setPanMode(boolean enable) {
         if (!mPanMode && enable) {
-            mZoomListener.setControlType(SimpleZoomListener.ControlType.PAN);
+            mZoomListener.setControlType(ZoomListener.ControlType.PAN);
             mPanMode = true;
             mZoomMode = false;
         } else if (mPanMode && !enable) {
@@ -822,7 +822,7 @@ public class ShowPics extends Activity implements OnGestureListener,
     private void setZoomMode(boolean enable) {
 
         if (!mZoomMode && enable) {
-            mZoomListener.setControlType(SimpleZoomListener.ControlType.ZOOM);
+            mZoomListener.setControlType(ZoomListener.ControlType.ZOOM);
             mZoomMode = true;
             setPanMode(false);
         } else if (mZoomMode && !enable) {

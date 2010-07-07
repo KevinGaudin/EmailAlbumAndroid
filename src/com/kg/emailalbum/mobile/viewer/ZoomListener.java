@@ -33,40 +33,30 @@ import android.view.View;
 
 import com.kg.emailalbum.mobile.util.Compatibility;
 
-public class SimpleZoomListener implements View.OnTouchListener {
+public class ZoomListener implements View.OnTouchListener {
 
     public enum ControlType {
-        PAN, ZOOM, UNDEFINED
+        PAN, UNDEFINED, ZOOM
     }
 
     private ControlType mControlType = ControlType.ZOOM;
 
-    private VelocityTracker mVelocityTracker;
+    /** X-coordinate of latest down event */
+    private float mDownX;
+    /** Y-coordinate of latest down event */
+    private float mDownY;
     private final int mScaledMaximumFlingVelocity;
+    private VelocityTracker mVelocityTracker;
+
     private float mX;
+
     private float mY;
 
     /** Zoom control to manipulate */
-    private BasicZoomControl mZoomControl;
+    private ZoomControl mZoomControl;
 
-    /** X-coordinate of latest down event */
-    private float mDownX;
-
-    /** Y-coordinate of latest down event */
-    private float mDownY;
-
-    /**
-     * Sets the zoom control to manipulate
-     * 
-     * @param control
-     *            Zoom control
-     */
-    public void setZoomControl(BasicZoomControl control) {
-        mZoomControl = control;
-    }
-
-    public void setControlType(ControlType controlType) {
-        mControlType = controlType;
+    public ZoomListener(Context context) {
+        mScaledMaximumFlingVelocity = Compatibility.getScaledMaximumFlingVelocity(context);
     }
 
     public ControlType getControlType() {
@@ -134,7 +124,17 @@ public class SimpleZoomListener implements View.OnTouchListener {
         return true;
     }
 
-    public SimpleZoomListener(Context context) {
-        mScaledMaximumFlingVelocity = Compatibility.getScaledMaximumFlingVelocity(context);
+    public void setControlType(ControlType controlType) {
+        mControlType = controlType;
+    }
+
+    /**
+     * Sets the zoom control to manipulate
+     * 
+     * @param control
+     *            Zoom control
+     */
+    public void setZoomControl(ZoomControl control) {
+        mZoomControl = control;
     }
 }
