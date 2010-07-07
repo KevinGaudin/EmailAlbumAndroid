@@ -33,6 +33,8 @@ public class TagsDbAdapter {
 
     private static final String LOG_TAG = TagsDbAdapter.class.getSimpleName();
 
+    private Map<String, Long> mTagsCache = null;
+
     Context mContext = null;
     TagDbOpenHelper mDbOpenHelper;
     SQLiteDatabase mDb;
@@ -75,22 +77,25 @@ public class TagsDbAdapter {
         ContentValues values = new ContentValues();
         values.put(KEY_TAG_NAME, tagName);
         long result = mDb.insert(TAGS_TABLE_NAME, null, values);
+        mTagsCache.put(tagName, result);
         return result;
     }
 
     public boolean renameTag(long tagId, String tagName) {
         ContentValues values = new ContentValues();
         values.put(KEY_TAG_NAME, tagName);
-        boolean result = mDb.update(TAGS_TABLE_NAME, values, KEY_TAG_ID + "=" + tagId,
-                null) > 0;
+        boolean result = mDb.update(TAGS_TABLE_NAME, values, KEY_TAG_ID + "="
+                + tagId, null) > 0;
+        mTagsCache = null;
         return result;
     }
 
     public boolean deleteTag(long tagId) {
-        boolean result = (mDb.delete(TAG_URI_TABLE_NAME, KEY_TAG_ID + "=" + tagId, null) > 0)
+        boolean result = (mDb.delete(TAG_URI_TABLE_NAME, KEY_TAG_ID + "="
+                + tagId, null) > 0)
                 && (mDb.delete(TAGS_TABLE_NAME, KEY_TAG_ID + "=" + tagId, null) > 0);
+        mTagsCache = null;
         return result;
-
     }
 
     public boolean setTag(long tagId, Uri uri) {
@@ -102,55 +107,64 @@ public class TagsDbAdapter {
     }
 
     public boolean unsetTag(long tagId, Uri uri) {
-        boolean result = mDb.delete(TAG_URI_TABLE_NAME, KEY_TAG_ID + "=" + tagId
-                + " AND " + KEY_URI + "='" + uri.toString() + "'", null) > 0;
+        boolean result = mDb
+                .delete(TAG_URI_TABLE_NAME, KEY_TAG_ID + "=" + tagId + " AND "
+                        + KEY_URI + "='" + uri.toString() + "'", null) > 0;
         return result;
     }
 
     public Map<String, Long> getAllTags() {
-        Map<String, Long> result = new HashMap<String, Long>();
-        
-        Cursor tagsCursor = mDb.query(TAGS_TABLE_NAME, null, null, null, null, null,
-                KEY_TAG_NAME);
+        if (mTagsCache == null) {
+            mTagsCache = new HashMap<String, Long>();
 
-        int colNameId = tagsCursor.getColumnIndex(KEY_TAG_NAME);
-        int colIdId = tagsCursor.getColumnIndex(KEY_TAG_ID);
-        if (tagsCursor.getCount() > 0) {
-            while (tagsCursor.moveToNext()) {
-                result.put(tagsCursor.getString(colNameId), tagsCursor.getLong(colIdId));
+            Cursor tagsCursor = mDb.query(TAGS_TABLE_NAME, null, null, null,
+                    null, null, KEY_TAG_NAME);
+
+            int colNameId = tagsCursor.getColumnIndex(KEY_TAG_NAME);
+            int colIdId = tagsCursor.getColumnIndex(KEY_TAG_ID);
+            if (tagsCursor.getCount() > 0) {
+                while (tagsCursor.moveToNext()) {
+                    mTagsCache.put(tagsCursor.getString(colNameId),
+                            tagsCursor.getLong(colIdId));
+                }
             }
+            tagsCursor.close();
         }
-        tagsCursor.close();
-        return result;
-        
+        return mTagsCache;
+
     }
 
     public List<Long> getTags(Uri uri) {
         Log.d(LOG_TAG, "Retrieve tags for Uri " + uri.toString());
-        String[] selArgs = {uri.toString()};
+        String[] selArgs = { uri.toString() };
         String[] proj = { KEY_TAG_ID };
-        Cursor tagsCursor = mDb.query(TAG_URI_TABLE_NAME, proj, KEY_URI + "=?"
-                 , selArgs, null, null, null);
+        Cursor tagsCursor = mDb.query(TAG_URI_TABLE_NAME, proj, KEY_URI + "=?",
+                selArgs, null, null, null);
         ArrayList<Long> tags = new ArrayList<Long>();
         int colIdId = tagsCursor.getColumnIndex(KEY_TAG_ID);
         if (tagsCursor.getCount() > 0) {
-            Log.d(LOG_TAG, "Retrieved tags for Uri " + uri.toString() + ": " + tagsCursor.getCount());            
+            Log.d(LOG_TAG, "Retrieved tags for Uri " + uri.toString() + ": "
+                    + tagsCursor.getCount());
             while (tagsCursor.moveToNext()) {
-                Log.d(LOG_TAG, "Retrieved tags for Uri " + uri.toString() + ": adding " + tagsCursor.getLong(colIdId));            
-                
+                Log.d(LOG_TAG, "Retrieved tags for Uri " + uri.toString()
+                        + ": adding " + tagsCursor.getLong(colIdId));
+
                 tags.add(tagsCursor.getLong(colIdId));
             }
         }
         tagsCursor.close();
-        Log.d(LOG_TAG, "Retrieved tags for Uri " + uri.toString() + ": " + tags.toString());
+        Log.d(LOG_TAG,
+                "Retrieved tags for Uri " + uri.toString() + ": "
+                        + tags.toString());
         return tags;
     }
-    
-    public String getTagName(long tagId)  {
+
+    public String getTagName(long tagId) {
         String result = null;
         String[] selArgs = { Long.toString(tagId) };
-        String[] proj = { KEY_TAG_NAME } ;
-        Cursor tagsCursor = mDb.query(TAGS_TABLE_NAME, proj, KEY_TAG_ID+ "=?", selArgs, null, null, null);
+        String[] proj = { KEY_TAG_NAME };
+        Cursor tagsCursor = mDb.query(TAGS_TABLE_NAME, proj, KEY_TAG_ID + "=?",
+                selArgs, null, null, null);
         int colNameId = tagsCursor.getColumnIndex(KEY_TAG_NAME);
         if (tagsCursor.getCount() > 0) {
             while (tagsCursor.moveToNext()) {
@@ -160,27 +174,29 @@ public class TagsDbAdapter {
         tagsCursor.close();
         return result;
     }
-    
-    public List<Uri> getUrisFromAllTagIds(Long ... tagIds){
+
+    public List<Uri> getUrisFromAllTagIds(Long... tagIds) {
         ArrayList<Uri> result = new ArrayList<Uri>();
-//        SELECT b.*
-//        FROM tagmap bt, bookmark b, tag t
-//        WHERE bt.tag_id = t.tag_id
-//        AND (t.name IN ('bookmark', 'webservice', 'semweb'))
-//        AND b.id = bt.bookmark_id
-//        GROUP BY b.id
-//        HAVING COUNT( b.id )=3
+        // SELECT b.*
+        // FROM tagmap bt, bookmark b, tag t
+        // WHERE bt.tag_id = t.tag_id
+        // AND (t.name IN ('bookmark', 'webservice', 'semweb'))
+        // AND b.id = bt.bookmark_id
+        // GROUP BY b.id
+        // HAVING COUNT( b.id )=3
         StringBuilder selArgsBldr = new StringBuilder();
         String[] selArgsValues = new String[tagIds.length];
-        for(int i = 0; i < tagIds.length; i++) {
+        for (int i = 0; i < tagIds.length; i++) {
             selArgsValues[i] = tagIds[i].toString();
             selArgsBldr.append('?');
-            if(i < tagIds.length - 1) {
+            if (i < tagIds.length - 1) {
                 selArgsBldr.append(',');
             }
         }
         String[] proj = { KEY_URI };
-        Cursor urisCursor = mDb.query(true, TAG_URI_TABLE_NAME, proj, KEY_TAG_ID + " IN ( " + selArgsBldr.toString() + ")", selArgsValues, null, null, null, null);
+        Cursor urisCursor = mDb.query(true, TAG_URI_TABLE_NAME, proj,
+                KEY_TAG_ID + " IN ( " + selArgsBldr.toString() + ")",
+                selArgsValues, null, null, null, null);
         int colNameId = urisCursor.getColumnIndex(KEY_URI);
         if (urisCursor.getCount() > 0) {
             while (urisCursor.moveToNext()) {
@@ -188,7 +204,11 @@ public class TagsDbAdapter {
             }
         }
         urisCursor.close();
-        
+
         return result;
+    }
+
+    public long getTagId(String tagName) {
+        return getAllTags().get(tagName);
     }
 }

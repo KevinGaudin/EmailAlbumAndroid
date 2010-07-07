@@ -104,6 +104,8 @@
 	<string name="alert_editor">Ouverture de l\'image dans un éditeur. Si Photoshop, le résultat sera ajouté à la Galerie.</string>
 	<string name="start_slideshow">Démarrer Diaporama</string>
 	<string name="stop_slideshow">Arrêter Diaporama</string>
+	<string name="dialog_pick_tag">Choisir un libellé</string>
+	<string name="dialog_btn_new_tag">Nouveau libellé</string>
 	
 	<string name="number_files_deleted">%1$d fichier(s) effacés</string>
 	<string name="prefcat_cache">Fichiers temporaires</string>

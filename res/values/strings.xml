@@ -116,6 +116,8 @@
 	<string name="directory_error">Error creating directory</string>
 	<string name="start_slideshow">Start slideshow</string>
 	<string name="stop_slideshow">Stop slideshow</string>
+	<string name="dialog_pick_tag">Pick a Tag</string>
+	<string name="dialog_btn_new_tag">New Tag</string>
 
 	<string name="number_files_deleted">%1$d file(s) deleted</string>
 	<string name="prefcat_cache">Cache Files</string>

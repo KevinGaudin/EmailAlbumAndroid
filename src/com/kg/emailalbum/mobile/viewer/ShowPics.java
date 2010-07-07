@@ -27,12 +27,15 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.acra.ErrorReporter;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
@@ -68,7 +71,9 @@ import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
 
@@ -227,6 +232,7 @@ public class ShowPics extends Activity implements OnGestureListener,
     };
     private TagsDbAdapter mTagsDb;
     private View mTagsBar;
+    private ViewGroup mTagsContainer;
     private View mTagsTabOpen;
     private View mTagsTabClose;
 
@@ -640,11 +646,13 @@ public class ShowPics extends Activity implements OnGestureListener,
     }
 
     /**
-     * 
+     * Init UI elements
      */
     private void initContentViews() {
         setContentView(Compatibility.getShowPicsLayout());
+
         mTagsBar = findViewById(R.id.TagsBar);
+        mTagsContainer = (ViewGroup) mTagsBar.findViewById(R.id.TagsContainer);
         mTagsBar.setVisibility(View.GONE);
         mTagsTabOpen = findViewById(R.id.TagsTabOpen);
         final Animation animOpenTagsBar = AnimationUtils.loadAnimation(
@@ -709,6 +717,55 @@ public class ShowPics extends Activity implements OnGestureListener,
             }
         });
 
+        Button btnAddTag = (Button) mTagsBar.findViewById(R.id.BtnAddTag);
+        btnAddTag.setOnClickListener(new OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                addTag();
+            }
+        });
+
+    }
+
+    private void addTag() {
+        // TODO: Display an AlertDialog allowing to select multiple existing
+        // tags, with Buttons OK, New Tag, [Cancel](??)
+        buildTagPicker().show();
+    }
+
+    private AlertDialog buildTagPicker() {
+        Set<String> tags = mTagsDb.getAllTags().keySet();
+        String[] items = new String[tags.size()];
+        final String[] dialogItems = tags.toArray(items);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.dialog_pick_tag)
+                .setPositiveButton(R.string.dialog_btn_new_tag,
+                        new DialogInterface.OnClickListener() {
+
+                            @Override
+                            public void onClick(DialogInterface dialog,
+                                    int which) {
+                                dialog.dismiss();
+                            }
+                        })
+                .setNegativeButton(android.R.string.cancel,
+                        new DialogInterface.OnClickListener() {
+
+                            @Override
+                            public void onClick(DialogInterface dialog,
+                                    int which) {
+                                dialog.dismiss();
+                            }
+                        })
+                .setItems(dialogItems, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int item) {
+                        setTag(dialogItems[item]);
+                        dialog.dismiss();
+                    }
+                });
+        return builder.create();
     }
 
     /*
@@ -1012,23 +1069,29 @@ public class ShowPics extends Activity implements OnGestureListener,
             setWakeLock(mSlideshow);
             return true;
         case MENU_SET_TAG_ID:
-            setTag();
+            setTag("MonBeauTag");
             return true;
         }
         return super.onOptionsItemSelected(item);
     }
 
-    private void setTag() {
+    private void setTag(String tagName) {
 
         Map<String, Long> allTags = mTagsDb.getAllTags();
         Long tagId = null;
-        String tagName = "MonBeauTag";
         if (allTags.size() == 0) {
             tagId = mTagsDb.createTag(tagName);
         } else {
             tagId = allTags.get(tagName);
         }
         mTagsDb.setTag(tagId, Uri.parse(mItems[curPic].name));
+        showTags();
+    }
+    
+    private void unsetTag(String tagName) {
+        long tagId = mTagsDb.getTagId(tagName);
+        mTagsDb.unsetTag(tagId, Uri.parse(mItems[curPic].name));
+        showTags();
     }
 
     /*
@@ -1519,19 +1582,36 @@ public class ShowPics extends Activity implements OnGestureListener,
     }
 
     private void showTags() {
-
+        emptyTagsBar();
+        // TODO : get Tags when loading next/previous image
         List<Long> tags = mTagsDb.getTags(Uri.parse(mItems[curPic].name));
         if (tags != null && tags.size() > 0) {
-            String tagsList = "";
             for (Long tagId : tags) {
-                tagsList += mTagsDb.getTagName(tagId) + ",";
+                addTagToTagsBar(tagId);
             }
-            Toast.makeText(getApplicationContext(), tagsList.toString(),
-                    Toast.LENGTH_SHORT).show();
-        } else {
-            // Toast.makeText(getApplicationContext(), "NO_TAG",
-            // Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void addTagToTagsBar(Long tagId) {
+        Button btnTag = (Button) getLayoutInflater().inflate(
+                R.layout.slideshow_tag, mTagsContainer, false);
+        btnTag.setText(mTagsDb.getTagName(tagId));
+        btnTag.setOnClickListener(new OnClickListener() {
+            
+            @Override
+            public void onClick(View v) {
+                unsetTag(((Button)v).getText().toString());
+            }
+        });
+        mTagsContainer.addView(btnTag);
+    }
+
+    private void emptyTagsBar() {
+        // Set i to 1 to skip the first child which is the (+) Button
+        for (int i = 1; i < mTagsContainer.getChildCount(); i++) {
+            mTagsContainer.removeViewAt(i);
+        }
+
     }
 
     /**

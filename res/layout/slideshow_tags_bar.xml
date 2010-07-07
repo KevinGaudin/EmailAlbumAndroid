@@ -18,21 +18,16 @@
 		android:layout_height="wrap_content"
 		android:layout_gravity="bottom">
 		<LinearLayout 
+			android:id="@+id/TagsContainer"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:layout_gravity="bottom"
 			android:background="@drawable/tagstrip">
-			<Button android:text="+" style="@style/Tag"></Button>
-			<Button android:text="Tag2 pouet" style="@style/Tag"></Button><!--
-			<Button android:text="Tag1" style="@style/Tag"></Button>
-			<Button android:text="Tag2 pouet" style="@style/Tag"></Button>
-			<Button android:text="Tag1" style="@style/Tag"></Button>
-			<Button android:text="Tag2 pouet" style="@style/Tag"></Button>
-			<Button android:text="Tag1" style="@style/Tag"></Button>
-			<Button android:text="Tag2 pouet" style="@style/Tag"></Button>
-			<Button android:text="Tag1" style="@style/Tag"></Button>
-			<Button android:text="Tag2 pouet" style="@style/Tag"></Button>
-		--></LinearLayout>
+			<Button
+				android:id="@+id/BtnAddTag"
+				android:text="+"
+				style="@style/Tag"></Button>
+		</LinearLayout>
 		<ImageButton
 		    android:id="@+id/TagsTabClose"
 		    android:layout_width="wrap_content"
