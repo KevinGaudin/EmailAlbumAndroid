@@ -30,15 +30,66 @@ package com.kg.emailalbum.mobile.viewer;
 import java.util.Observable;
 import java.util.Observer;
 
+import android.os.Handler;
+import android.os.SystemClock;
+
+import com.kg.emailalbum.mobile.util.SpringDynamics;
+
 public class BasicZoomControl implements Observer {
+
+    private static final int FPS = 50;
 
     private static final float MAX_ZOOM = 16;
 
     private static final float MIN_ZOOM = 1;
 
+    private static final float PAN_OUTSIDE_SNAP_FACTOR = .4f;
+
+    private static final float REST_POSITION_TOLERANCE = 0.01f;
+    private static final float REST_VELOCITY_TOLERANCE = 0.004f;
+
     private AspectQuotient mAspectQuotient;
 
+    private final Handler mHandler = new Handler();
+
+    private final SpringDynamics mPanDynamicsX = new SpringDynamics();
+
+    private final SpringDynamics mPanDynamicsY = new SpringDynamics();
+
+    private float mPanMaxX;
+    private float mPanMaxY;
+    private float mPanMinX;
+    private float mPanMinY;
     private final ZoomState mState = new ZoomState();
+
+    private final Runnable mUpdateRunnable = new Runnable() {
+        public void run() {
+            final long startTime = SystemClock.uptimeMillis();
+            mPanDynamicsX.update(startTime);
+            mPanDynamicsY.update(startTime);
+            final boolean isAtRest = mPanDynamicsX.isAtRest(
+                    REST_VELOCITY_TOLERANCE, REST_POSITION_TOLERANCE)
+                    && mPanDynamicsY.isAtRest(REST_VELOCITY_TOLERANCE,
+                            REST_POSITION_TOLERANCE);
+            mState.setPanX(mPanDynamicsX.getPosition());
+            mState.setPanY(mPanDynamicsY.getPosition());
+
+            if (!isAtRest) {
+                final long stopTime = SystemClock.uptimeMillis();
+                mHandler.postDelayed(mUpdateRunnable, 1000 / FPS
+                        - (stopTime - startTime));
+            }
+
+            mState.notifyObservers();
+        }
+    };
+
+    public BasicZoomControl() {
+        mPanDynamicsX.setFriction(2f);
+        mPanDynamicsY.setFriction(2f);
+        mPanDynamicsX.setSpring(50f, 1f);
+        mPanDynamicsY.setSpring(50f, 1f);
+    }
 
     private float getMaxPanDelta(float zoom) {
         return Math.max(0f, .5f * ((zoom - 1) / zoom));
@@ -48,52 +99,41 @@ public class BasicZoomControl implements Observer {
         return mState;
     }
 
-    private void limitPan() {
-        final float aspectQuotient = mAspectQuotient.get();
-
-        final float zoomX = mState.getZoomX(aspectQuotient);
-        final float zoomY = mState.getZoomY(aspectQuotient);
-
-        final float panMinX = .5f - getMaxPanDelta(zoomX);
-        final float panMaxX = .5f + getMaxPanDelta(zoomX);
-        final float panMinY = .5f - getMaxPanDelta(zoomY);
-        final float panMaxY = .5f + getMaxPanDelta(zoomY);
-
-        if (mState.getPanX() > panMaxX) {
-            mState.setPanX(panMaxX);
-        }
-        
-        if (mState.getPanX() < panMinX) {
-            mState.setPanX(panMinX);
-        }
-        
-        if (mState.getPanY() > panMaxY) {
-            mState.setPanY(panMaxY);
-        }
-
-        if (mState.getPanY() < panMinY) {
-            mState.setPanY(panMinY);
-        }
+    public boolean isZoomed() {
+        return mState.isZoomed();
     }
 
     private void limitZoom() {
         if (mState.getZoom() > MAX_ZOOM) {
             mState.setZoom(MAX_ZOOM);
         }
-        
+
         if (mState.getZoom() < MIN_ZOOM) {
             mState.setZoom(MIN_ZOOM);
         }
-        
+
     }
 
     public void pan(float dx, float dy) {
         final float aspectQuotient = mAspectQuotient.get();
 
-        mState.setPanX(mState.getPanX() + dx / mState.getZoomX(aspectQuotient));
-        mState.setPanY(mState.getPanY() + dy / mState.getZoomY(aspectQuotient));
+        dx /= mState.getZoomX(aspectQuotient);
+        dy /= mState.getZoomY(aspectQuotient);
 
-        limitPan();
+        if (mState.getPanX() > mPanMaxX && dx > 0
+                || mState.getPanX() < mPanMinX && dx < 0) {
+            dx *= PAN_OUTSIDE_SNAP_FACTOR;
+        }
+        if (mState.getPanY() > mPanMaxY && dy > 0
+                || mState.getPanY() < mPanMinY && dy < 0) {
+            dy *= PAN_OUTSIDE_SNAP_FACTOR;
+        }
+
+        final float newPanX = mState.getPanX() + dx;
+        final float newPanY = mState.getPanY() + dy;
+
+        mState.setPanX(newPanX);
+        mState.setPanY(newPanY);
 
         mState.notifyObservers();
     }
@@ -107,9 +147,39 @@ public class BasicZoomControl implements Observer {
         mAspectQuotient.addObserver(this);
     }
 
+    public void startFling(float vx, float vy) {
+        final float aspectQuotient = mAspectQuotient.get();
+        final long now = SystemClock.uptimeMillis();
+
+        mPanDynamicsX.setState(mState.getPanX(),
+                vx / mState.getZoomX(aspectQuotient), now);
+        mPanDynamicsY.setState(mState.getPanY(),
+                vy / mState.getZoomY(aspectQuotient), now);
+
+        mPanDynamicsX.setMinPosition(mPanMinX);
+        mPanDynamicsX.setMaxPosition(mPanMaxX);
+        mPanDynamicsY.setMinPosition(mPanMinY);
+        mPanDynamicsY.setMaxPosition(mPanMaxY);
+
+        mHandler.post(mUpdateRunnable);
+    }
+    public void stopFling() {
+        mHandler.removeCallbacks(mUpdateRunnable);
+    }
     public void update(Observable observable, Object data) {
         limitZoom();
-        limitPan();
+    }
+
+    private void updatePanLimits() {
+        final float aspectQuotient = mAspectQuotient.get();
+
+        final float zoomX = mState.getZoomX(aspectQuotient);
+        final float zoomY = mState.getZoomY(aspectQuotient);
+
+        mPanMinX = .5f - getMaxPanDelta(zoomX);
+        mPanMaxX = .5f + getMaxPanDelta(zoomX);
+        mPanMinY = .5f - getMaxPanDelta(zoomY);
+        mPanMaxY = .5f + getMaxPanDelta(zoomY);
     }
 
     public void zoom(float f, float x, float y) {
@@ -129,13 +199,8 @@ public class BasicZoomControl implements Observer {
         mState.setPanY(mState.getPanY() + (y - .5f)
                 * (1f / prevZoomY - 1f / newZoomY));
 
-        limitPan();
+        updatePanLimits();
 
         mState.notifyObservers();
     }
-    
-    public boolean isZoomed() {
-        return mState.isZoomed();
-    }
-
 }

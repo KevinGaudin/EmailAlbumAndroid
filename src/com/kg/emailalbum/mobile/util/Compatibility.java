@@ -1,19 +1,22 @@
 package com.kg.emailalbum.mobile.util;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.List;
 
-import android.R;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
 import android.os.Build;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.MotionEvent;
-import android.view.View;
+import android.view.ViewConfiguration;
 
 public class Compatibility {
     private static final String LOG_TAG = Compatibility.class.getSimpleName();
+    private static final int MAXIMUM_FLING_VELOCITY = 4000;
 
     public static String getActionSendMultiple() {
         try {
@@ -79,6 +82,21 @@ public class Compatibility {
      */
     public static int getShowPicsLayout() {
         int apiLevel = 0;
+        apiLevel = getAPILevel();
+
+        if (apiLevel >= 7) {
+            return com.kg.emailalbum.mobile.R.layout.content_view_fix;
+        } else {
+            return com.kg.emailalbum.mobile.R.layout.content_view;
+        }
+    }
+
+    /**
+     * @param apiLevel
+     * @return
+     */
+    private static int getAPILevel() {
+        int apiLevel;
         try {
             Field SDK_INT = Build.VERSION.class.getField("SDK_INT");
             apiLevel = SDK_INT.getInt(null);
@@ -95,11 +113,35 @@ public class Compatibility {
             Log.e(LOG_TAG, "Error : ", e);
             apiLevel = Integer.parseInt(Build.VERSION.SDK);
         }
-        
-        if(apiLevel >= 7) {
-            return com.kg.emailalbum.mobile.R.layout.content_view_fix;
-        } else {
-            return com.kg.emailalbum.mobile.R.layout.content_view;
-        }
+        return apiLevel;
+    }
+
+    public static int getScaledMaximumFlingVelocity(Context context) {
+
+            try {
+                Method getScaledMaximumFlingVelocity = ViewConfiguration.class.getMethod("getScaledMaximumFlingVelocity",  (Class[])null);
+                return (Integer) getScaledMaximumFlingVelocity.invoke(ViewConfiguration.get(context), (Object[])null);
+
+            } catch (SecurityException e) {
+                return computeScaledMaximumFlingVelocity(context);
+            } catch (NoSuchMethodException e) {
+                return computeScaledMaximumFlingVelocity(context);
+            } catch (IllegalArgumentException e) {
+                return computeScaledMaximumFlingVelocity(context);
+            } catch (IllegalAccessException e) {
+                return computeScaledMaximumFlingVelocity(context);
+            } catch (InvocationTargetException e) {
+                return computeScaledMaximumFlingVelocity(context);
+            }
+
+            
+            
+
+    }
+    
+    private static int computeScaledMaximumFlingVelocity(Context context) {
+        final DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+        final float density = metrics.density;
+        return (int) (density * MAXIMUM_FLING_VELOCITY + 0.5f);
     }
 }

@@ -152,7 +152,7 @@ public class ShowPics extends Activity implements OnGestureListener,
     private boolean mZoomMode = false;
     private boolean mMTZoomMode = false;
     private boolean mPanMode = false;
-    private SimpleZoomListener mZoomListener = new SimpleZoomListener();
+    private SimpleZoomListener mZoomListener = null;
     private BasicZoomControl mZoomControl = new BasicZoomControl();
     Handler mHandler = new Handler();
     private PointF mDownPoint = new PointF(0, 0);
@@ -556,6 +556,8 @@ public class ShowPics extends Activity implements OnGestureListener,
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        mZoomListener = new SimpleZoomListener(getApplicationContext());
+        
         // Get a full-screen window
         final Window win = getWindow();
         win.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
@@ -1058,6 +1060,7 @@ public class ShowPics extends Activity implements OnGestureListener,
         if ((mZoomMode || mPanMode) && me.getAction() == MotionEvent.ACTION_UP) {
             // We disable zoom mode when the user stops touching
             // the screen
+            mZoomListener.onTouch(mImgViews[curPic], me);
             setZoomMode(false);
             setPanMode(false);
             return mGestureScanner.onTouchEvent(me);
