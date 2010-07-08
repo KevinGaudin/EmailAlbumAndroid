@@ -26,42 +26,37 @@
  */
 package com.kg.emailalbum.mobile.viewer;
 
+import android.content.Context;
 import android.view.MotionEvent;
+import android.view.VelocityTracker;
 import android.view.View;
 
-public class SimpleZoomListener implements View.OnTouchListener {
+import com.kg.emailalbum.mobile.util.Compatibility;
+
+public class ZoomListener implements View.OnTouchListener {
 
     public enum ControlType {
-        PAN, ZOOM
+        PAN, UNDEFINED, ZOOM
     }
-
 
     private ControlType mControlType = ControlType.ZOOM;
 
+    /** X-coordinate of latest down event */
+    private float mDownX;
+    /** Y-coordinate of latest down event */
+    private float mDownY;
+    private final int mScaledMaximumFlingVelocity;
+    private VelocityTracker mVelocityTracker;
+
     private float mX;
+
     private float mY;
 
     /** Zoom control to manipulate */
-    private BasicZoomControl mZoomControl;
+    private ZoomControl mZoomControl;
 
-    /** X-coordinate of latest down event */
-    private float mDownX;
-
-    /** Y-coordinate of latest down event */
-    private float mDownY;
-
-    /**
-     * Sets the zoom control to manipulate
-     * 
-     * @param control
-     *            Zoom control
-     */
-    public void setZoomControl(BasicZoomControl control) {
-        mZoomControl = control;
-    }
-
-    public void setControlType(ControlType controlType) {
-        mControlType = controlType;
+    public ZoomListener(Context context) {
+        mScaledMaximumFlingVelocity = Compatibility.getScaledMaximumFlingVelocity(context);
     }
 
     public ControlType getControlType() {
@@ -73,8 +68,14 @@ public class SimpleZoomListener implements View.OnTouchListener {
         final float x = event.getX();
         final float y = event.getY();
 
+        if (mVelocityTracker == null) {
+            mVelocityTracker = VelocityTracker.obtain();
+        }
+        mVelocityTracker.addMovement(event);
+
         switch (action) {
         case MotionEvent.ACTION_DOWN:
+            mZoomControl.stopFling();
             mDownX = x;
             mDownY = y;
             mX = x;
@@ -86,8 +87,8 @@ public class SimpleZoomListener implements View.OnTouchListener {
             final float dy = (y - mY) / v.getHeight();
 
             if (mControlType == ControlType.ZOOM) {
-                mZoomControl.zoom((float) Math.pow(20, -dy), mDownX
-                        / v.getWidth(), mDownY / v.getHeight());
+                mZoomControl.zoom((float) Math.pow(20, -dy),
+                        mDownX / v.getWidth(), mDownY / v.getHeight());
             } else {
                 mZoomControl.pan(-dx, -dy);
             }
@@ -97,11 +98,43 @@ public class SimpleZoomListener implements View.OnTouchListener {
             break;
         }
 
+        case MotionEvent.ACTION_UP:
+            if (mControlType == ControlType.PAN) {
+                mVelocityTracker.computeCurrentVelocity(1000,
+                        mScaledMaximumFlingVelocity);
+                mZoomControl.startFling(
+                        -mVelocityTracker.getXVelocity() / v.getWidth(),
+                        -mVelocityTracker.getYVelocity() / v.getHeight());
+            } else {
+                mZoomControl.startFling(0, 0);
+            }
+            mVelocityTracker.recycle();
+            mVelocityTracker = null;
+            mControlType = ControlType.UNDEFINED;
+            break;
+
+        default:
+            mVelocityTracker.recycle();
+            mVelocityTracker = null;
+            mControlType = ControlType.UNDEFINED;
+            break;
+
         }
 
         return true;
     }
 
+    public void setControlType(ControlType controlType) {
+        mControlType = controlType;
+    }
 
-
+    /**
+     * Sets the zoom control to manipulate
+     * 
+     * @param control
+     *            Zoom control
+     */
+    public void setZoomControl(ZoomControl control) {
+        mZoomControl = control;
+    }
 }

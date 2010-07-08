@@ -72,8 +72,8 @@ import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationUtils;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
 
@@ -109,7 +109,6 @@ public class ShowPics extends Activity implements OnGestureListener,
     private static final int MENU_ABOUT_ID = 6;
     private static final int MENU_SLIDESHOW_ID = 7;
     private static final int MENU_PREFS_ID = 8;
-    private static final int MENU_SET_TAG_ID = 9;
 
     private static final int BACKWARD = -1;
     private static final int FORWARD = 1;
@@ -160,8 +159,8 @@ public class ShowPics extends Activity implements OnGestureListener,
     private boolean mZoomMode = false;
     private boolean mMTZoomMode = false;
     private boolean mPanMode = false;
-    private SimpleZoomListener mZoomListener = new SimpleZoomListener();
-    private BasicZoomControl mZoomControl = new BasicZoomControl();
+    private ZoomListener mZoomListener = null;
+    private ZoomControl mZoomControl = new ZoomControl();
     Handler mHandler = new Handler();
     private PointF mDownPoint = new PointF(0, 0);
     private PointF mLatestPoint = new PointF(0, 0);
@@ -235,6 +234,7 @@ public class ShowPics extends Activity implements OnGestureListener,
     private ViewGroup mTagsContainer;
     private View mTagsTabOpen;
     private View mTagsTabClose;
+    private AlertDialog mTagCreator = null;
 
     /**
      * Starts the pictures transition animation.
@@ -571,6 +571,8 @@ public class ShowPics extends Activity implements OnGestureListener,
         // Tags Db init
         mTagsDb = new TagsDbAdapter(getApplicationContext()).open();
 
+        mZoomListener = new ZoomListener(getApplicationContext());
+        
         // Get a full-screen window
         final Window win = getWindow();
         win.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
@@ -729,12 +731,10 @@ public class ShowPics extends Activity implements OnGestureListener,
     }
 
     private void addTag() {
-        // TODO: Display an AlertDialog allowing to select multiple existing
-        // tags, with Buttons OK, New Tag, [Cancel](??)
-        buildTagPicker().show();
+        getTagPicker().show();
     }
 
-    private AlertDialog buildTagPicker() {
+    private AlertDialog getTagPicker() {
         Set<String> tags = mTagsDb.getAllTags().keySet();
         String[] items = new String[tags.size()];
         final String[] dialogItems = tags.toArray(items);
@@ -748,6 +748,7 @@ public class ShowPics extends Activity implements OnGestureListener,
                             public void onClick(DialogInterface dialog,
                                     int which) {
                                 dialog.dismiss();
+                                getTagCreator().show();
                             }
                         })
                 .setNegativeButton(android.R.string.cancel,
@@ -768,6 +769,36 @@ public class ShowPics extends Activity implements OnGestureListener,
         return builder.create();
     }
 
+    private AlertDialog getTagCreator() {
+        if (mTagCreator == null) {
+            AlertDialog.Builder bldr = new AlertDialog.Builder(this);
+            final EditText edtTag = new EditText(this);
+            bldr.setTitle(R.string.dialog_create_tag)
+                    .setView(edtTag)
+                    .setPositiveButton(android.R.string.ok,
+                            new DialogInterface.OnClickListener() {
+
+                                @Override
+                                public void onClick(DialogInterface dialog,
+                                        int which) {
+                                    setTag(edtTag.getText().toString());
+                                    dialog.dismiss();
+                                }
+                            })
+                    .setNegativeButton(android.R.string.cancel,
+                            new DialogInterface.OnClickListener() {
+
+                                @Override
+                                public void onClick(DialogInterface dialog,
+                                        int which) {
+                                    dialog.dismiss();
+                                }
+                            });
+            mTagCreator = bldr.create();
+        }
+        return mTagCreator;
+    }
+
     /*
      * (non-Javadoc)
      * 
@@ -781,11 +812,6 @@ public class ShowPics extends Activity implements OnGestureListener,
         item.setIcon(android.R.drawable.ic_menu_slideshow);
         item = menu.add(0, MENU_SET_AS_ID, 0, R.string.menu_set_as);
         item.setIcon(android.R.drawable.ic_menu_set_as);
-        if (mSlideshowList.getAlbumUri().toString()
-                .startsWith(Media.EXTERNAL_CONTENT_URI.toString())) {
-            item = menu.add(0, MENU_SET_TAG_ID, 0, "SET TAG");
-            item.setIcon(android.R.drawable.ic_menu_set_as);
-        }
         item = menu.add(0, MENU_SEND_ID, 0, R.string.menu_share);
         item.setIcon(android.R.drawable.ic_menu_share);
         item = menu.add(0, MENU_SAVE_ID, 0, R.string.menu_save);
@@ -949,7 +975,7 @@ public class ShowPics extends Activity implements OnGestureListener,
 
     private void setPanMode(boolean enable) {
         if (!mPanMode && enable) {
-            mZoomListener.setControlType(SimpleZoomListener.ControlType.PAN);
+            mZoomListener.setControlType(ZoomListener.ControlType.PAN);
             mPanMode = true;
             mZoomMode = false;
         } else if (mPanMode && !enable) {
@@ -960,7 +986,7 @@ public class ShowPics extends Activity implements OnGestureListener,
     private void setZoomMode(boolean enable) {
 
         if (!mZoomMode && enable) {
-            mZoomListener.setControlType(SimpleZoomListener.ControlType.ZOOM);
+            mZoomListener.setControlType(ZoomListener.ControlType.ZOOM);
             mZoomMode = true;
             setPanMode(false);
         } else if (mZoomMode && !enable) {
@@ -1068,9 +1094,6 @@ public class ShowPics extends Activity implements OnGestureListener,
             }
             setWakeLock(mSlideshow);
             return true;
-        case MENU_SET_TAG_ID:
-            setTag("MonBeauTag");
-            return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -1079,7 +1102,7 @@ public class ShowPics extends Activity implements OnGestureListener,
 
         Map<String, Long> allTags = mTagsDb.getAllTags();
         Long tagId = null;
-        if (allTags.size() == 0) {
+        if (!allTags.containsKey(tagName)) {
             tagId = mTagsDb.createTag(tagName);
         } else {
             tagId = allTags.get(tagName);
@@ -1087,7 +1110,7 @@ public class ShowPics extends Activity implements OnGestureListener,
         mTagsDb.setTag(tagId, Uri.parse(mItems[curPic].name));
         showTags();
     }
-    
+
     private void unsetTag(String tagName) {
         long tagId = mTagsDb.getTagId(tagName);
         mTagsDb.unsetTag(tagId, Uri.parse(mItems[curPic].name));
@@ -1241,6 +1264,7 @@ public class ShowPics extends Activity implements OnGestureListener,
         if ((mZoomMode || mPanMode) && me.getAction() == MotionEvent.ACTION_UP) {
             // We disable zoom mode when the user stops touching
             // the screen
+            mZoomListener.onTouch(mImgViews[curPic], me);
             setZoomMode(false);
             setPanMode(false);
             return mGestureScanner.onTouchEvent(me);
@@ -1597,10 +1621,10 @@ public class ShowPics extends Activity implements OnGestureListener,
                 R.layout.slideshow_tag, mTagsContainer, false);
         btnTag.setText(mTagsDb.getTagName(tagId));
         btnTag.setOnClickListener(new OnClickListener() {
-            
+
             @Override
             public void onClick(View v) {
-                unsetTag(((Button)v).getText().toString());
+                unsetTag(((Button) v).getText().toString());
             }
         });
         mTagsContainer.addView(btnTag);
