@@ -1631,11 +1631,9 @@ public class ShowPics extends Activity implements OnGestureListener,
     }
 
     private void emptyTagsBar() {
-        // Set i to 1 to skip the first child which is the (+) Button
-        for (int i = 1; i < mTagsContainer.getChildCount(); i++) {
-            mTagsContainer.removeViewAt(i);
-        }
-
+        View btnAddTag = mTagsContainer.getChildAt(0);
+        mTagsContainer.removeAllViews();
+        mTagsContainer.addView(btnAddTag);
     }
 
     /**
