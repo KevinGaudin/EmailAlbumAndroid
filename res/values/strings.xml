@@ -102,12 +102,10 @@
 		managed with ACRA : http://acra.googlecode.com\n
 	</string>
 	<string name="changelog">
-		New in version 2.7.0:\n
-		- Added support to read Comic Book archive .cbz files. Just because I figured out that it was already possible !\n
-		- Prevent crash when rotating picture in album editor without a thumbnail (don\'t know how this could happen... added some traces in crash reports to figure this out)\n
-		- Prevent a rare crash in album viewer.\n
-		- Multitouch management update.\n
-		- File browser does not consider upper/lower case for sorting directory content anymore.\n 
+		New in version 2.8.0:\n
+		- Added dynamic behaviours to slideshow zooming/panning\n
+		- Better handling of bitmap loading errors while creating album. Images are skipped and album generation should continue.
+		- Fix crash with empty gallery 
 	</string>
 	<string name="url_donate">https://www.paypal.com/cgi-bin/webscr?cmd=_donations&amp;business=DT9H5GSCL9U76&amp;lc=EN&amp;item_name=EmailAlbum%20Viewer&amp;currency_code=EUR&amp;bn=PP-DonationsBF:btn_donateCC_LG.gif:NonHosted</string>
 	<string name="alert_filemanager_missing">OI File Manager is required for both opening albums and saving pictures from/to SD Card. Do you want to install it ? (It is free)</string>

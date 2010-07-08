@@ -95,12 +95,10 @@
 		\n
 	</string>
 	<string name="changelog">
-		Nouveautés version 2.7.0:\n
-		- Ajout de la lecture d\'archives bande dessinées .cbz. Tout simplement parce que je me suis rendu compte que c\'était déjà possible !\n
-		- Prévention d\'un crash lors de la rotation d\'images dans l\'éditeur d\'album en l\'absence de miniature (ce que je ne comprends pas... ajouté des traces aux rapports d\'erreur pour comprendre ce cas)\n
-		- Prévention d\'un cas rare de crash lors de la visionneuse.\n
-		- Mise à jour de la gestion du multitouch.\n 
-		- Gestionnaire de fichiers ne prend plus en compte la casse dans son tri.\n 
+		Nouveautés version 2.8.0:\n
+		- Ajout de comportements dynamiques sur les déplacements en mode zoom de la visionneuse.\n
+		- Meilleure gestion des erreurs de chargement d\'images à la génération d\'album. Les images en erreur sont ignorées et l\'album est tout de même généré.\n
+		- Correction d\'un plantage en cas de gallerie vide.\n
 	</string>
 	<string name="url_donate">
 		https://www.paypal.com/cgi-bin/webscr?cmd=_donations&amp;business=DT9H5GSCL9U76&amp;lc=FR&amp;item_name=EmailAlbum%20Viewer&amp;currency_code=EUR&amp;bn=PP-DonationsBF:btn_donateCC_LG.gif:NonHosted</string>
