@@ -100,11 +100,14 @@ public class ZoomListener implements View.OnTouchListener {
 
         case MotionEvent.ACTION_UP:
             if (mControlType == ControlType.PAN) {
-                mVelocityTracker.computeCurrentVelocity(1000,
-                        mScaledMaximumFlingVelocity);
+                mVelocityTracker.computeCurrentVelocity(1000);
+                float xVel = mVelocityTracker.getXVelocity();
+                xVel = xVel < 0.0f ? Math.max(xVel, -mScaledMaximumFlingVelocity) : Math.min(xVel, mScaledMaximumFlingVelocity);
+                float yVel = mVelocityTracker.getYVelocity();
+                yVel = yVel < 0.0f ? Math.max(yVel, -mScaledMaximumFlingVelocity) : Math.min(yVel, mScaledMaximumFlingVelocity);
                 mZoomControl.startFling(
-                        -mVelocityTracker.getXVelocity() / v.getWidth(),
-                        -mVelocityTracker.getYVelocity() / v.getHeight());
+                        -xVel / v.getWidth(),
+                        -yVel / v.getHeight());
             } else {
                 mZoomControl.startFling(0, 0);
             }
