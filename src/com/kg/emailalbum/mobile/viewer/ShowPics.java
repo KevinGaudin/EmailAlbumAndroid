@@ -90,7 +90,7 @@ import com.kg.oifilemanager.filemanager.FileManagerProvider;
 import com.kg.oifilemanager.intents.FileManagerIntents;
 
 /**
- * A slideshow of pictures taken from an archive (zip or jar).
+ * A slideshow of pictures.
  * 
  * @author Kevin Gaudin
  * 
@@ -528,6 +528,7 @@ public class ShowPics extends Activity implements OnGestureListener,
      */
     private SlideshowItem loadPicture(int position) {
         SlideshowItem result = mSlideshowList.get(position);
+        result.tags = mTagsDb.getTags(Uri.parse(result.name));
         return result;
     }
 
@@ -1107,13 +1108,17 @@ public class ShowPics extends Activity implements OnGestureListener,
         } else {
             tagId = allTags.get(tagName);
         }
-        mTagsDb.setTag(tagId, Uri.parse(mItems[curPic].name));
+        Uri uri = Uri.parse(mItems[curPic].name);
+        mTagsDb.setTag(tagId, uri);
+        mItems[curPic].tags = mTagsDb.getTags(uri);
         showTags();
     }
 
     private void unsetTag(String tagName) {
         long tagId = mTagsDb.getTagId(tagName);
-        mTagsDb.unsetTag(tagId, Uri.parse(mItems[curPic].name));
+        Uri uri = Uri.parse(mItems[curPic].name);
+        mTagsDb.unsetTag(tagId, uri);
+        mItems[curPic].tags = mTagsDb.getTags(uri);
         showTags();
     }
 
@@ -1127,6 +1132,7 @@ public class ShowPics extends Activity implements OnGestureListener,
         super.onPause();
         if (mTagsDb != null) {
             mTagsDb.close();
+            mTagsDb = null;
         }
     }
 
@@ -1607,8 +1613,7 @@ public class ShowPics extends Activity implements OnGestureListener,
 
     private void showTags() {
         emptyTagsBar();
-        // TODO : get Tags when loading next/previous image
-        List<Long> tags = mTagsDb.getTags(Uri.parse(mItems[curPic].name));
+        Set<Long> tags = mItems[curPic].tags;
         if (tags != null && tags.size() > 0) {
             for (Long tagId : tags) {
                 addTagToTagsBar(tagId);

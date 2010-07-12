@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -134,13 +136,13 @@ public class TagsDbAdapter {
 
     }
 
-    public List<Long> getTags(Uri uri) {
+    public Set<Long> getTags(Uri uri) {
         Log.d(LOG_TAG, "Retrieve tags for Uri " + uri.toString());
         String[] selArgs = { uri.toString() };
         String[] proj = { KEY_TAG_ID };
         Cursor tagsCursor = mDb.query(TAG_URI_TABLE_NAME, proj, KEY_URI + "=?",
                 selArgs, null, null, null);
-        ArrayList<Long> tags = new ArrayList<Long>();
+        TreeSet<Long> tags = new TreeSet<Long>();
         int colIdId = tagsCursor.getColumnIndex(KEY_TAG_ID);
         if (tagsCursor.getCount() > 0) {
             Log.d(LOG_TAG, "Retrieved tags for Uri " + uri.toString() + ": "

@@ -48,11 +48,7 @@ public class FileManagerProvider extends ContentProvider {
         try {
             mMimeTypes = mtp.fromXmlResource(in);
         } catch (XmlPullParserException e) {
-            Log
-                    .e(
-                            TAG,
-                            "PreselectedChannelsActivity: XmlPullParserException",
-                            e);
+            Log.e(TAG, "PreselectedChannelsActivity: XmlPullParserException", e);
             throw new RuntimeException(
                     "PreselectedChannelsActivity: XmlPullParserException");
         } catch (IOException e) {
@@ -98,13 +94,6 @@ public class FileManagerProvider extends ContentProvider {
     public ParcelFileDescriptor openFile(Uri uri, String mode)
             throws FileNotFoundException {
         if (uri.toString().startsWith(CONTENT_URI_STRING)) {
-//            String archivePath = "";
-//            for (String pathSeg : uri.getPathSegments()) {
-//                String lcPathSeg = pathSeg.toLowerCase();
-//                if (lcPathSeg.contains(".jar") || lcPathSeg.contains(".zip")) {
-//
-//                }
-//            }
             int m = ParcelFileDescriptor.MODE_READ_ONLY;
             if (mode.equalsIgnoreCase("rw"))
                 m = ParcelFileDescriptor.MODE_READ_WRITE;
@@ -126,7 +115,12 @@ public class FileManagerProvider extends ContentProvider {
     }
 
     public static Uri getContentUri(File file) {
-        return Uri.withAppendedPath(FileManagerProvider.CONTENT_URI, file
-                .getAbsolutePath());
+        return FileManagerProvider.CONTENT_URI.buildUpon()
+                .encodedPath(file.getAbsolutePath()).build();
+    }
+
+    public static Uri getContentUri(String archive, String entry) {
+        return FileManagerProvider.CONTENT_URI.buildUpon().encodedPath(archive)
+                .encodedFragment(entry).build();
     }
 }

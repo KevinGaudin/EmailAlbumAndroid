@@ -15,6 +15,7 @@ import android.util.Log;
 
 import com.kg.emailalbum.mobile.util.BitmapLoader;
 import com.kg.emailalbum.mobile.util.ZipUtil;
+import com.kg.oifilemanager.filemanager.FileManagerProvider;
 
 public class ArchiveSlideshowList extends SlideshowList {
 
@@ -56,7 +57,7 @@ public class ArchiveSlideshowList extends SlideshowList {
             String shortName = mItemNames.get(position).substring(
                     mItemNames.get(position).lastIndexOf('/') + 1);
             result.caption = mCaptions.getString(shortName);
-            result.name = mItemNames.get(position);
+            result.name = FileManagerProvider.getContentUri(mArchive.getName(), mItemNames.get(position)).toString();
         } catch (IOException e) {
             Log.e(LOG_TAG, "Error : ", e);
             ErrorReporter.getInstance().handleException(e);

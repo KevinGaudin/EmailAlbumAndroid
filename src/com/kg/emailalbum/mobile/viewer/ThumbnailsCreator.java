@@ -35,6 +35,7 @@ import java.util.zip.ZipFile;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -126,7 +127,6 @@ public class ThumbnailsCreator extends Thread {
                 File thumbFile = null;
                 while (mContinueCreation && iPictures.hasNext()) {
                     entryName = iPictures.next();
-                    entry = mArchive.getEntry(entryName);
                     // Build the thumbnail file name
                     String thumbName = THUMBS_PREFIX
                             + entryName
@@ -134,7 +134,8 @@ public class ThumbnailsCreator extends Thread {
                     thumbFile = new File(mCacheDir, thumbName);
                     // Create the file only if it doesn't already exist
                     if (!files.contains(thumbName)) {
-                        thumb = BitmapLoader.load(mContext, mArchive, entry,
+                        Log.d(this.getClass().getSimpleName(), "LOAD BMP : " + mArchive.getName() + entryName);
+                        thumb = BitmapLoader.load(mContext, Uri.parse(entryName),
                                 mThumbWidth, null);
 
                         if (thumb != null) {
