@@ -244,7 +244,8 @@ public class BitmapLoader {
             colorConfig = Bitmap.Config.RGB_565;
         }
 
-        InputStream input = context.getContentResolver().openInputStream(uri);
+        Log.d(LOG_TAG, "Open Uri" + uri.toString());
+        InputStream input = CustomContentResolver.openInputStream(context, uri);
 
         if (input == null)
             return null;
@@ -274,7 +275,7 @@ public class BitmapLoader {
         } else {
             // The original input stream has been consumed for the first pass.
             // Get a new one.
-            fpInput = context.getContentResolver().openInputStream(uri);
+            fpInput = CustomContentResolver.openInputStream(context, uri);
         }
 
         Bitmap cachedBitmap = null;

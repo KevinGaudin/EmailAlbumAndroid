@@ -43,12 +43,12 @@ public class ArchiveSlideshowList extends SlideshowList {
 
     @Override
     public SlideshowItem get(int position) {
-        Log.d(this.getClass().getName(), "Get SlideshowItem "
+        Log.d(LOG_TAG, "Get SlideshowItem "
                 + mItemNames.get(position));
         SlideshowItem result = new SlideshowItem();
         try {
             if (mTargetSize > 0) {
-                Log.d(this.getClass().getName(), "Load image "
+                Log.d(LOG_TAG, "Load image "
                         + mItemNames.get(position));
                 result.bitmap = BitmapLoader.load(mContext, mArchive, mArchive
                         .getEntry(mItemNames.get(position)), mTargetSize,
@@ -56,7 +56,9 @@ public class ArchiveSlideshowList extends SlideshowList {
             }
             String shortName = mItemNames.get(position).substring(
                     mItemNames.get(position).lastIndexOf('/') + 1);
-            result.caption = mCaptions.getString(shortName);
+            if(mCaptions != null) {
+                result.caption = mCaptions.getString(shortName);
+            }
             result.name = FileManagerProvider.getContentUri(mArchive.getName(), mItemNames.get(position)).toString();
         } catch (IOException e) {
             Log.e(LOG_TAG, "Error : ", e);

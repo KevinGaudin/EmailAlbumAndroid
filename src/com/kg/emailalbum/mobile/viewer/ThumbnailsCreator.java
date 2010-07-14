@@ -134,7 +134,7 @@ public class ThumbnailsCreator extends Thread {
                     thumbFile = new File(mCacheDir, thumbName);
                     // Create the file only if it doesn't already exist
                     if (!files.contains(thumbName)) {
-                        Log.d(this.getClass().getSimpleName(), "LOAD BMP : " + mArchive.getName() + entryName);
+                        Log.d(this.getClass().getSimpleName(), "LOAD BMP : archive " + mArchive.getName() + " entryName :"+ entryName);
                         thumb = BitmapLoader.load(mContext, Uri.parse(entryName),
                                 mThumbWidth, null);
 

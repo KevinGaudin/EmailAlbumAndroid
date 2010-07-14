@@ -202,6 +202,7 @@ public class EmailAlbumViewer extends ListActivity {
 
             if (position < mThumbnailsNames.size()) {
                 String thumbName = mThumbnailsNames.get(position);
+                Log.d(LOG_TAG, "Let's load " + thumbName);
                 if (thumbName != null) {
                     try {
                         holder.image

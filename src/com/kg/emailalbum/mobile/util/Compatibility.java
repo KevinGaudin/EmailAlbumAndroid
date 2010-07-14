@@ -96,7 +96,7 @@ public class Compatibility {
      * @param apiLevel
      * @return
      */
-    private static int getAPILevel() {
+    public static int getAPILevel() {
         int apiLevel;
         try {
             Field SDK_INT = Build.VERSION.class.getField("SDK_INT");

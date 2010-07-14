@@ -47,18 +47,27 @@ public class ZipUtil {
     public static InputStream getInputStream(ZipFile archive, ZipEntry entry)
             throws IOException {
         if (archive.getEntry("META-INF/MANIFEST.MF") != null
-                || Integer.parseInt(android.os.Build.VERSION.SDK) >= 5) {
-            return archive.getInputStream(entry);
+                || Compatibility.getAPILevel() >= 5) {
+            InputStream is = archive.getInputStream(entry);
+            return is;
         }
 
         File zipFile = new File(archive.getName());
         ZipInputStream zio = new ZipInputStream(new FileInputStream(zipFile));
-        boolean found = false;
+        boolean found = false, hasMoreEntries = true;
         String currentEntryName = null;
-        while ((zio.available() > 0) && !found) {
+        ZipEntry currentEntry = null;
+        while (!found && hasMoreEntries) {
 
             try {
-                currentEntryName = zio.getNextEntry().getName();
+                currentEntry = zio.getNextEntry();
+                if (currentEntry == null) {
+                    currentEntryName = null;
+                    hasMoreEntries = false;
+                } else {
+                    currentEntryName = currentEntry.getName();
+                }
+
                 Log.d(LOG_TAG, "Examining entry : " + currentEntryName);
             } catch (Exception e) {
                 // Might be a wrong character encoding... file won't be read
@@ -75,6 +84,7 @@ public class ZipUtil {
         if (found) {
             return zio;
         } else {
+            Log.d(LOG_TAG, "Entry not found !");
             return null;
         }
     }
