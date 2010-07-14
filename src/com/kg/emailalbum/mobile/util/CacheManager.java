@@ -129,4 +129,51 @@ public class CacheManager {
         }
         return nbDeleted;
     }
+    
+    public File getInboxDir() {
+        String subdir = "received";
+        // Default root is the application context internal files dir.
+        File result = new File(mContext.getFilesDir(), subdir);
+
+        if (Environment.getExternalStorageState().equals(
+                Environment.MEDIA_MOUNTED)) {
+            // If an external storage is available, use it as it will prevent
+            // from overloading the internal memory.
+            result = new File(Environment.getExternalStorageDirectory(),
+                    "data/EmailAlbum/" + subdir);
+        }
+
+        // Physically create the directory (and its parents) if it does not
+        // exist.
+        if (!result.exists()) {
+            result.mkdirs();
+        }
+
+        // Log.i(LOG_TAG, "Using dir " + result + " for cache");
+        return result;
+    }
+
+    public File getOutboxDir() {
+        String subdir = "created";
+        // Default root is the application context internal files dir.
+        File result = new File(mContext.getFilesDir(), subdir);
+
+        if (Environment.getExternalStorageState().equals(
+                Environment.MEDIA_MOUNTED)) {
+            // If an external storage is available, use it as it will prevent
+            // from overloading the internal memory.
+            result = new File(Environment.getExternalStorageDirectory(),
+                    "data/EmailAlbum/" + subdir);
+        }
+
+        // Physically create the directory (and its parents) if it does not
+        // exist.
+        if (!result.exists()) {
+            result.mkdirs();
+        }
+
+        // Log.i(LOG_TAG, "Using dir " + result + " for cache");
+        return result;
+    }
+
 }
