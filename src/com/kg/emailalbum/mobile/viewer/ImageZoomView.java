@@ -120,8 +120,6 @@ public class ImageZoomView extends ImageView implements Observer {
                     canvas.drawBitmap(bitmap, mRectSrc, mRectDst, mPaint);
                 }
             }
-        } else {
-            super.draw(canvas);
         }
     }
 

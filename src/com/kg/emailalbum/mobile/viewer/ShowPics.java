@@ -98,6 +98,7 @@ import com.kg.oifilemanager.intents.FileManagerIntents;
 public class ShowPics extends Activity implements OnGestureListener,
         OnSharedPreferenceChangeListener, OnDoubleTapListener,
         OnScaleGestureListener {
+    private static final int MAX_BITMAP_DIM = 1024;
     private static final float DOUBLE_TAP_ZOOM_FACTOR = 2.0f;
     private static final double ACTIVATE_ZOOM_THRESHOLD = 10.0;
     private static final float Z_TRANSLATE_3D = 1000.0f;
@@ -635,10 +636,10 @@ public class ShowPics extends Activity implements OnGestureListener,
         if (albumUri != null) {
             if (albumUri.equals(Media.EXTERNAL_CONTENT_URI)) {
                 mSlideshowList = new GallerySlideshowList(
-                        getApplicationContext(), 900);
+                        getApplicationContext(), MAX_BITMAP_DIM);
             } else {
                 mSlideshowList = new ArchiveSlideshowList(
-                        getApplicationContext(), albumUri, 900);
+                        getApplicationContext(), albumUri, MAX_BITMAP_DIM);
             }
         } else {
             ErrorReporter.getInstance().handleException(
