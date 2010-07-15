@@ -1539,9 +1539,15 @@ public class ShowPics extends Activity implements OnGestureListener,
                     mItems[curPic] = data[0];
                     mItems[nextPic] = data[1];
                     mItems[prevPic] = data[2];
-                    mImgViews[curPic].setImageBitmap(data[0].bitmap);
-                    mImgViews[nextPic].setImageBitmap(data[1].bitmap);
-                    mImgViews[prevPic].setImageBitmap(data[2].bitmap);
+                    if(data[0] != null) {
+                        mImgViews[curPic].setImageBitmap(data[0].bitmap);
+                    }
+                    if(data[1] != null) {
+                        mImgViews[nextPic].setImageBitmap(data[1].bitmap);
+                    }
+                    if(data[2] != null) {
+                        mImgViews[prevPic].setImageBitmap(data[2].bitmap);
+                    }
                 } else {
                     // Load first picture
                     if (mImgViews[curPic].getDrawable() != null) {
