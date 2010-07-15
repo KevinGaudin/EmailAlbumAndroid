@@ -177,4 +177,20 @@ public class FileUtils {
 
 	    return lcFileName.endsWith(".jar") || lcFileName.endsWith(".zip") || lcFileName.endsWith(".cbz");
 	}
+	
+	public static String getExtensionForMimeType(String mimeType) {
+	    if(mimeType.equals("application/java-archive")
+	            || mimeType.equals("application/x-java-archive")
+	            || mimeType.equals("application/x-jar")) {
+	        return ".jar";
+        } else if (mimeType.equals("application/zip")) {
+            return ".zip";
+	    } else if (mimeType.equals("application/x-cbz")) {
+	        return ".cbz";
+        } else if (mimeType.equals("application/x-cb7")) {
+            return ".cb7";
+	    } else {
+	        return "";
+	    }
+	}
 }

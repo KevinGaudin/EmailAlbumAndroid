@@ -68,6 +68,7 @@ import com.kg.emailalbum.mobile.util.CacheManager;
 import com.kg.emailalbum.mobile.util.Compatibility;
 import com.kg.emailalbum.mobile.util.IntentHelper;
 import com.kg.oifilemanager.filemanager.FileManagerProvider;
+import com.kg.oifilemanager.filemanager.util.FileUtils;
 import com.kg.oifilemanager.intents.FileManagerIntents;
 
 /**
@@ -95,11 +96,12 @@ public class EmailAlbumViewer extends ListActivity {
                 // random access
                 Random generator = new Random();
                 int random = generator.nextInt(99999);
+                Log.d(LOG_TAG, "Opening " + mAlbumFileUri.toString());
                 InputStream intentInputStream = getContentResolver()
                         .openInputStream(mAlbumFileUri);
                 File tempArchive = new File(new CacheManager(
-                        getApplicationContext()).getCacheDir("viewer"),
-                        "emailalbum" + random + ".zip");
+                        getApplicationContext()).getInboxDir(),
+                        "emailalbum" + random + FileUtils.getExtensionForMimeType(getIntent().getType()));
                 OutputStream tempOS = new FileOutputStream(tempArchive);
                 Log.d(LOG_TAG, "Write retrieved archive : "
                         + tempArchive.getAbsolutePath());
@@ -259,11 +261,8 @@ public class EmailAlbumViewer extends ListActivity {
     private static final int ACTIVITY_PICK_DIRECTORY_TO_SAVE_SELECTED = 3;
     private static final int ACTIVITY_PICK_FILE = 1;
 
-    private static final String KEY_FULLNAME = "imageName";
-    private static final String KEY_SHORTNAME = "imageShortName";
     public static final String KEY_THMBCREAT_ENTRY_POSITION = "entryPosition";
     public static final String KEY_THMBCREAT_THUMB_NAME = "thumbName";
-    private static final String KEY_THUMBNAIL = "thumbnail";
 
     private static final String LOG_TAG = EmailAlbumViewer.class
             .getSimpleName();
