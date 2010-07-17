@@ -25,7 +25,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -81,6 +80,8 @@ import com.kg.emailalbum.mobile.AboutDialog;
 import com.kg.emailalbum.mobile.EmailAlbumPreferences;
 import com.kg.emailalbum.mobile.R;
 import com.kg.emailalbum.mobile.animation.Rotate3dAnimation;
+import com.kg.emailalbum.mobile.gallery.Tag;
+import com.kg.emailalbum.mobile.gallery.Tag.TagType;
 import com.kg.emailalbum.mobile.gallery.TagsDbAdapter;
 import com.kg.emailalbum.mobile.util.CacheManager;
 import com.kg.emailalbum.mobile.util.Compatibility;
@@ -574,7 +575,7 @@ public class ShowPics extends Activity implements OnGestureListener,
         mTagsDb = new TagsDbAdapter(getApplicationContext()).open();
 
         mZoomListener = new ZoomListener(getApplicationContext());
-        
+
         // Get a full-screen window
         final Window win = getWindow();
         win.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
@@ -775,6 +776,7 @@ public class ShowPics extends Activity implements OnGestureListener,
         if (mTagCreator == null) {
             AlertDialog.Builder bldr = new AlertDialog.Builder(this);
             final EditText edtTag = new EditText(this);
+            edtTag.setSingleLine();
             bldr.setTitle(R.string.dialog_create_tag)
                     .setView(edtTag)
                     .setPositiveButton(android.R.string.ok,
@@ -784,6 +786,7 @@ public class ShowPics extends Activity implements OnGestureListener,
                                 public void onClick(DialogInterface dialog,
                                         int which) {
                                     setTag(edtTag.getText().toString());
+                                    edtTag.setText("");
                                     dialog.dismiss();
                                 }
                             })
@@ -1101,26 +1104,31 @@ public class ShowPics extends Activity implements OnGestureListener,
     }
 
     private void setTag(String tagName) {
-
-        Map<String, Long> allTags = mTagsDb.getAllTags();
-        Long tagId = null;
-        if (!allTags.containsKey(tagName)) {
-            tagId = mTagsDb.createTag(tagName);
+        Map<String, Tag> allTags = mTagsDb.getAllTags();
+        Tag tag = null;
+        if (allTags.containsKey(tagName)) {
+            tag = allTags.get(tagName);
         } else {
-            tagId = allTags.get(tagName);
+            tag = mTagsDb.createTag(tagName, TagType.USER);
         }
         Uri uri = Uri.parse(mItems[curPic].name);
-        mTagsDb.setTag(tagId, uri);
+        mTagsDb.setTag(tag, uri);
         mItems[curPic].tags = mTagsDb.getTags(uri);
         showTags();
     }
 
     private void unsetTag(String tagName) {
-        long tagId = mTagsDb.getTagId(tagName);
-        Uri uri = Uri.parse(mItems[curPic].name);
-        mTagsDb.unsetTag(tagId, uri);
-        mItems[curPic].tags = mTagsDb.getTags(uri);
-        showTags();
+        Map<String, Tag> allTags = mTagsDb.getAllTags();
+        Tag tag = null;
+        if (allTags.containsKey(tagName)) {
+            tag = allTags.get(tagName);
+        }
+        if (tag != null) {
+            Uri uri = Uri.parse(mItems[curPic].name);
+            mTagsDb.unsetTag(tag, uri);
+            mItems[curPic].tags = mTagsDb.getTags(uri);
+            showTags();
+        }
     }
 
     /*
@@ -1539,13 +1547,13 @@ public class ShowPics extends Activity implements OnGestureListener,
                     mItems[curPic] = data[0];
                     mItems[nextPic] = data[1];
                     mItems[prevPic] = data[2];
-                    if(data[0] != null) {
+                    if (data[0] != null) {
                         mImgViews[curPic].setImageBitmap(data[0].bitmap);
                     }
-                    if(data[1] != null) {
+                    if (data[1] != null) {
                         mImgViews[nextPic].setImageBitmap(data[1].bitmap);
                     }
-                    if(data[2] != null) {
+                    if (data[2] != null) {
                         mImgViews[prevPic].setImageBitmap(data[2].bitmap);
                     }
                 } else {
@@ -1620,18 +1628,19 @@ public class ShowPics extends Activity implements OnGestureListener,
 
     private void showTags() {
         emptyTagsBar();
-        Set<Long> tags = mItems[curPic].tags;
+        Set<Tag> tags = mItems[curPic].tags;
         if (tags != null && tags.size() > 0) {
-            for (Long tagId : tags) {
-                addTagToTagsBar(tagId);
+            for (Tag tag : tags) {
+                addTagToTagsBar(tag);
             }
         }
     }
 
-    private void addTagToTagsBar(Long tagId) {
+    private void addTagToTagsBar(Tag tag) {
         Button btnTag = (Button) getLayoutInflater().inflate(
                 R.layout.slideshow_tag, mTagsContainer, false);
-        btnTag.setText(mTagsDb.getTagName(tagId));
+        btnTag.setText(tag.label);
+        btnTag.setTag(tag);
         btnTag.setOnClickListener(new OnClickListener() {
 
             @Override
