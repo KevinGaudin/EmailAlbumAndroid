@@ -29,7 +29,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import android.content.Context;
@@ -47,7 +46,7 @@ import com.kg.emailalbum.mobile.util.BitmapLoader;
 import com.kg.emailalbum.mobile.util.CacheManager;
 
 /**
- * Creates Thumbnails from pictures contained in a zip archive.
+ * Creates Thumbnails from pictures.
  * 
  * @author Kevin Gaudin
  * 
@@ -55,10 +54,9 @@ import com.kg.emailalbum.mobile.util.CacheManager;
 public class ThumbnailsCreator extends Thread {
     private int mThumbWidth = 80;
     private static final String THUMBS_PREFIX = "thm_";
-    private ArrayList<String> mPictures;
+    private ArrayList<Uri> mPictures;
     private HashMap<String, String> mThumbnails = new HashMap<String, String>();
     private Handler mHandler;
-    private ZipFile mArchive;
     private Context mContext;
     private boolean mClearThumbnails;
     private boolean mContinueCreation = true;
@@ -78,10 +76,9 @@ public class ThumbnailsCreator extends Thread {
      * @param clearThumbnails
      *            True to clear all existing thumbnails before starting.
      */
-    public ThumbnailsCreator(Context c, ZipFile archive,
-            ArrayList<String> pictures, Handler handler, boolean clearThumbnails) {
+    public ThumbnailsCreator(Context c, ArrayList<Uri> pictures,
+            Handler handler, boolean clearThumbnails) {
         mContext = c;
-        mArchive = archive;
         mPictures = pictures;
         mHandler = handler;
         mClearThumbnails = clearThumbnails;
@@ -108,65 +105,63 @@ public class ThumbnailsCreator extends Thread {
     @Override
     public void run() {
 
-        if (mArchive == null) {
-            Log.e(this.getClass().getSimpleName(), "Archive is null");
-            sendError(new FileNotFoundException("Archive not found."));
-        } else {
-            try {
-                ZipEntry entry = null;
-                String entryName = null;
-                if (mClearThumbnails) {
-                    clearFiles();
-                }
-                Iterator<String> iPictures = mPictures.iterator();
-                int pos = 0;
-
-                List<String> files = Arrays.asList(mCacheDir.list());
-                Bitmap thumb = null;
-                OutputStream thumbOS = null;
-                File thumbFile = null;
-                while (mContinueCreation && iPictures.hasNext()) {
-                    entryName = iPictures.next();
-                    // Build the thumbnail file name
-                    String thumbName = THUMBS_PREFIX
-                            + entryName
-                                    .substring(entryName.lastIndexOf('/') + 1);
-                    thumbFile = new File(mCacheDir, thumbName);
-                    // Create the file only if it doesn't already exist
-                    if (!files.contains(thumbName)) {
-                        Log.d(this.getClass().getSimpleName(), "LOAD BMP : archive " + mArchive.getName() + " entryName :"+ entryName);
-                        thumb = BitmapLoader.load(mContext, Uri.parse(entryName),
-                                mThumbWidth, null);
-
-                        if (thumb != null) {
-                            thumbOS = new FileOutputStream(thumbFile);
-
-                            thumb.compress(CompressFormat.JPEG, 75, thumbOS);
-
-                            thumbOS.flush();
-                            thumbOS.close();
-                            thumb.recycle();
-                        } else {
-                            sendError(new IOException(
-                                    "This archive is corrupt or contains bad character encoding."));
-                            stopCreation();
-                        }
-                    }
-
-                    // Provide the UI with the filename of the generated
-                    // thumbnail
-                    mThumbnails.put(entryName, thumbFile.getAbsolutePath());
-                    sendThumbnail(pos);
-                    pos++;
-                }
-            } catch (Exception e) {
-                Log.e(this.getClass().getSimpleName(),
-                        "Error while creating thumbnail.", e);
-                sendError(e);
-            } catch (OutOfMemoryError e) {
-                Log.e(this.getClass().getSimpleName(), "mem error", e);
-                sendError(e);
+        try {
+            Uri imageUri = null;
+            if (mClearThumbnails) {
+                clearFiles();
             }
+            Iterator<Uri> iPictures = mPictures.iterator();
+            int pos = 0;
+
+            List<String> files = Arrays.asList(mCacheDir.list());
+            Bitmap thumb = null;
+            OutputStream thumbOS = null;
+            File thumbFile = null;
+            while (mContinueCreation && iPictures.hasNext()) {
+                imageUri = iPictures.next();
+                String imgUriStr = imageUri.toString();
+                // Build the thumbnail file name
+                String thumbName = THUMBS_PREFIX
+                        + imgUriStr.substring(imgUriStr.lastIndexOf('/') + 1);
+                thumbFile = new File(mCacheDir, thumbName);
+                // Create the file only if it doesn't already exist
+                if (!files.contains(thumbName)) {
+                    Log.d(this.getClass().getSimpleName(), "LOAD BMP :"
+                            + imageUri);
+                    thumb = BitmapLoader.load(mContext, imageUri, mThumbWidth,
+                            null);
+
+                    if (thumb != null) {
+                        Log.d("ThumbnailsCreator", "Writing thumbnail file "
+                                + thumbFile.getAbsolutePath());
+                        thumbOS = new FileOutputStream(thumbFile);
+
+                        thumb.compress(CompressFormat.JPEG, 75, thumbOS);
+
+                        thumbOS.flush();
+                        thumbOS.close();
+                        thumb.recycle();
+                    } else {
+                        Log.d("ThumbnailsCreator", "Read Bitmap is null !");
+                        sendError(new IOException(
+                                "This archive is corrupt or contains bad character encoding."));
+                        stopCreation();
+                    }
+                }
+
+                // Provide the UI with the filename of the generated
+                // thumbnail
+                mThumbnails.put(imgUriStr, thumbFile.getAbsolutePath());
+                sendThumbnail(pos);
+                pos++;
+            }
+        } catch (Exception e) {
+            Log.e(this.getClass().getSimpleName(),
+                    "Error while creating thumbnail.", e);
+            sendError(e);
+        } catch (OutOfMemoryError e) {
+            Log.e(this.getClass().getSimpleName(), "mem error", e);
+            sendError(e);
         }
     }
 
@@ -180,7 +175,7 @@ public class ThumbnailsCreator extends Thread {
             public boolean accept(File dir, String filename) {
                 return filename.endsWith(".jpg") || filename.endsWith(".JPG");
             }
-            
+
         })) {
             file.delete();
         }
@@ -197,8 +192,8 @@ public class ThumbnailsCreator extends Thread {
         Bundle data = new Bundle();
         msg.arg1 = 0;
         data.putInt(EmailAlbumViewer.KEY_THMBCREAT_ENTRY_POSITION, pos);
-        data.putString(EmailAlbumViewer.KEY_THMBCREAT_THUMB_NAME, mThumbnails
-                .get(mPictures.get(pos)));
+        data.putString(EmailAlbumViewer.KEY_THMBCREAT_THUMB_NAME,
+                mThumbnails.get(mPictures.get(pos).toString()));
         msg.setData(data);
         mHandler.sendMessage(msg);
     }

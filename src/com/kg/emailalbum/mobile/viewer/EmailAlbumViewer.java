@@ -100,11 +100,14 @@ public class EmailAlbumViewer extends ListActivity {
                 InputStream intentInputStream = getContentResolver()
                         .openInputStream(mAlbumFileUri);
                 File tempArchive = new File(new CacheManager(
-                        getApplicationContext()).getInboxDir(),
-                        "emailalbum" + random + FileUtils.getExtensionForMimeType(getIntent().getType()));
+                        getApplicationContext()).getInboxDir(), "emailalbum"
+                        + random
+                        + FileUtils.getExtensionForMimeType(getIntent()
+                                .getType()));
                 OutputStream tempOS = new FileOutputStream(tempArchive);
-                Log.d(LOG_TAG, "Write retrieved archive : "
-                        + tempArchive.getAbsolutePath());
+                Log.d(LOG_TAG,
+                        "Write retrieved archive : "
+                                + tempArchive.getAbsolutePath());
 
                 byte[] buffer = new byte[256];
                 int readBytes = -1;
@@ -186,8 +189,8 @@ public class EmailAlbumViewer extends ListActivity {
 
             if (convertView == null) {
                 // No view to reuse, create a new one
-                convertView = getLayoutInflater().inflate(R.layout.album_viewer_line,
-                        null, false);
+                convertView = getLayoutInflater().inflate(
+                        R.layout.album_viewer_line, null, false);
                 holder = new ViewHolder();
                 // Retrieve and store components references
                 holder.image = (ImageView) convertView
@@ -209,8 +212,7 @@ public class EmailAlbumViewer extends ListActivity {
                     try {
                         holder.image
                                 .setImageBitmap(BitmapLoader
-                                        .load(
-                                                getApplicationContext(),
+                                        .load(getApplicationContext(),
                                                 FileManagerProvider
                                                         .getContentUri(new File(
                                                                 thumbName)),
@@ -353,8 +355,8 @@ public class EmailAlbumViewer extends ListActivity {
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
             if (msg.arg1 < 0) {
-                if (msg.getData().getString("EXCEPTION_CLASS").equals(
-                        OutOfMemoryError.class.getSimpleName())) {
+                if (msg.getData().getString("EXCEPTION_CLASS")
+                        .equals(OutOfMemoryError.class.getSimpleName())) {
                     Toast.makeText(context, R.string.error_out_of_mem,
                             Toast.LENGTH_SHORT).show();
                 } else {
@@ -368,6 +370,7 @@ public class EmailAlbumViewer extends ListActivity {
                 String thumbName = msg.getData().getString(
                         KEY_THMBCREAT_THUMB_NAME);
                 setProgress((position + 1) * 10000 / mContentModel.size());
+                Log.d(LOG_TAG, "Received thumbnail update for position : " + position + " uri : " + thumbName);
                 mAdapter.updateThumbnail(position, thumbName);
             }
         }
@@ -384,7 +387,10 @@ public class EmailAlbumViewer extends ListActivity {
         if (mAlbumFileUri != null) {
             if (mAlbumFileUri.toString().startsWith(
                     Media.EXTERNAL_CONTENT_URI.toString())) {
-                mContentModel = new GallerySlideshowList(getApplicationContext(), ThumbnailsCreator.getThumbWidth(getApplicationContext()));
+                mContentModel = new GallerySlideshowList(
+                        getApplicationContext(), null,
+                        ThumbnailsCreator
+                                .getThumbWidth(getApplicationContext()));
                 setTitle("Gallery");
 
                 registerForContextMenu(getListView());
@@ -407,7 +413,7 @@ public class EmailAlbumViewer extends ListActivity {
                             new Exception("No archive file."));
                 } else {
                     try {
-                        mContentModel = new ArchiveSlideshowList(context,
+                        mContentModel = new ArchiveSlideshowList(context, null,
                                 mAlbumFileUri, 0);
 
                         setTitle(mAlbumFileUri.getLastPathSegment());
@@ -465,8 +471,8 @@ public class EmailAlbumViewer extends ListActivity {
                 String dirname = data.getDataString();
                 try {
                     if (requestCode == ACTIVITY_PICK_DIRECTORY_TO_SAVE_SELECTED) {
-                        savePicture(posPictureToSave, new File(Uri.parse(
-                                dirname).getPath()));
+                        savePicture(posPictureToSave,
+                                new File(Uri.parse(dirname).getPath()));
                     } else {
                         saveAllPictures(new File(Uri.parse(dirname).getPath()));
                     }
@@ -868,13 +874,13 @@ public class EmailAlbumViewer extends ListActivity {
      */
     private void startThumbnailsCreation(boolean clearThumbnails) {
         if (mContentModel != null) {
-            ArrayList<String> pictureNames = new ArrayList<String>();
+            ArrayList<Uri> pictureUris = new ArrayList<Uri>();
             Iterator<SlideshowItem> i = mContentModel.iterator();
             while (i.hasNext()) {
                 SlideshowItem entry = i.next();
-                pictureNames.add(entry.name);
+                pictureUris.add(entry.uri);
             }
-            mThmbCreator = new ThumbnailsCreator(this, mArchive, pictureNames,
+            mThmbCreator = new ThumbnailsCreator(this, pictureUris,
                     thumbnailsCreationHandler, clearThumbnails);
             mThmbCreator.start();
         }

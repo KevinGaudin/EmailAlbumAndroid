@@ -13,6 +13,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.kg.emailalbum.mobile.gallery.TagsDbAdapter;
 import com.kg.emailalbum.mobile.util.BitmapLoader;
 import com.kg.emailalbum.mobile.util.ZipUtil;
 import com.kg.oifilemanager.filemanager.FileManagerProvider;
@@ -24,16 +25,18 @@ public class ArchiveSlideshowList extends SlideshowList {
     private ZipFile mArchive;
     private Bundle mCaptions;
     private Context mContext;
+    private TagsDbAdapter mTagsDb;
     private ArrayList<String> mItemNames;
     private int mTargetSize = 900;
 
-    public ArchiveSlideshowList(Context context, Uri archiveUri, int targetSize) {
+    public ArchiveSlideshowList(Context context, TagsDbAdapter tagsDb, Uri archiveUri, int targetSize) {
         try {
             File albumFile = new File(archiveUri.getPath());
             mArchive = new ZipFile(albumFile);
             mItemNames = ZipUtil.getPicturesFilesList(mArchive);
             mCaptions = ZipUtil.loadCaptions(mArchive);
             mContext = context;
+            mTagsDb = tagsDb;
             mTargetSize = targetSize;
         } catch (Exception e) {
             Log.e(LOG_TAG, "Error while opening archive file.", e);
@@ -47,19 +50,23 @@ public class ArchiveSlideshowList extends SlideshowList {
                 + mItemNames.get(position));
         SlideshowItem result = new SlideshowItem();
         try {
+            Uri imageUri = FileManagerProvider.getContentUri(mArchive.getName(), mItemNames.get(position));
             if (mTargetSize > 0) {
                 Log.d(LOG_TAG, "Load image "
                         + mItemNames.get(position));
-                result.bitmap = BitmapLoader.load(mContext, mArchive, mArchive
-                        .getEntry(mItemNames.get(position)), mTargetSize,
+                result.bitmap = BitmapLoader.load(mContext, imageUri, mTargetSize,
                         mTargetSize);
+                if(mTagsDb != null) {
+                    result.tags = mTagsDb.getTags(imageUri);
+                }
             }
             String shortName = mItemNames.get(position).substring(
                     mItemNames.get(position).lastIndexOf('/') + 1);
             if(mCaptions != null) {
                 result.caption = mCaptions.getString(shortName);
             }
-            result.name = FileManagerProvider.getContentUri(mArchive.getName(), mItemNames.get(position)).toString();
+            result.uri = imageUri;
+            result.name = result.uri.toString();
         } catch (IOException e) {
             Log.e(LOG_TAG, "Error : ", e);
             ErrorReporter.getInstance().handleException(e);

@@ -45,24 +45,24 @@ import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Toast;
-import android.widget.CompoundButton.OnCheckedChangeListener;
 
 import com.kg.emailalbum.mobile.R;
 import com.kg.emailalbum.mobile.util.BitmapLoader;
-import com.kg.emailalbum.mobile.util.CacheMap;
+import com.kg.emailalbum.mobile.util.NewLRUCache;
 
 /**
  * Allows the user to select multiple pictures from the Media Library. This
@@ -136,12 +136,6 @@ public class SelectPictures extends Activity {
             CheckBox imageCheck = null;
         }
 
-        /** Number of Thumbnails to wipe from cache when cache is full */
-        private static final int THUMBS_CACHE_REVOC_SIZE = 6;
-
-        /** Number of Thumbnails to keep in cache */
-        private static final int THUMBS_CACHE_SIZE = 64;
-
         private final String LOG_TAG = MultiSelectImageAdapter.class
                 .getSimpleName();
 
@@ -200,8 +194,7 @@ public class SelectPictures extends Activity {
         /**
          * We store Bitmaps Uris of Thumbnails in this cache.
          */
-        private CacheMap<Uri, Uri> mThumbsUris = new CacheMap<Uri, Uri>(
-                THUMBS_CACHE_SIZE, THUMBS_CACHE_REVOC_SIZE);
+        private NewLRUCache<Uri, Uri> mThumbsUris = new NewLRUCache<Uri, Uri>();
 
         /**
          * Create a new adapter with the given context and UI handler. The owner
@@ -238,7 +231,7 @@ public class SelectPictures extends Activity {
                     mImagesUris.add(uri);
                     if (thumbUri != null) {
                         // Store the thumbnail in cache
-                        mThumbsUris.put(uri, thumbUri);
+                        mThumbsUris.cacheEntry(uri, thumbUri);
                     }
                 }
             } else {
@@ -363,7 +356,7 @@ public class SelectPictures extends Activity {
             vh.checkableImage.setTag(imageUri);
 
             // Try to retrieve the thumbnail from cache
-            Uri thumbUri = mThumbsUris.get(imageUri);
+            Uri thumbUri = mThumbsUris.getEntry(imageUri);
             if (thumbUri != null) {
                 try {
                     Bitmap thumb = BitmapLoader.load(mContext, thumbUri, null,
@@ -456,7 +449,7 @@ public class SelectPictures extends Activity {
          */
         public void updateCache(Uri uri, Uri thumbUri) {
             if (uri != null && thumbUri != null) {
-                mThumbsUris.put(uri, thumbUri);
+                mThumbsUris.cacheEntry(uri, thumbUri);
                 mPendingThumbnailRequests.remove(uri);
                 notifyDataSetChanged();
             }

@@ -530,7 +530,6 @@ public class ShowPics extends Activity implements OnGestureListener,
      */
     private SlideshowItem loadPicture(int position) {
         SlideshowItem result = mSlideshowList.get(position);
-        result.tags = mTagsDb.getTags(Uri.parse(result.name));
         return result;
     }
 
@@ -637,10 +636,10 @@ public class ShowPics extends Activity implements OnGestureListener,
         if (albumUri != null) {
             if (albumUri.equals(Media.EXTERNAL_CONTENT_URI)) {
                 mSlideshowList = new GallerySlideshowList(
-                        getApplicationContext(), MAX_BITMAP_DIM);
+                        getApplicationContext(), mTagsDb, MAX_BITMAP_DIM);
             } else {
                 mSlideshowList = new ArchiveSlideshowList(
-                        getApplicationContext(), albumUri, MAX_BITMAP_DIM);
+                        getApplicationContext(), mTagsDb, albumUri, MAX_BITMAP_DIM);
             }
         } else {
             ErrorReporter.getInstance().handleException(
@@ -785,7 +784,7 @@ public class ShowPics extends Activity implements OnGestureListener,
                                 @Override
                                 public void onClick(DialogInterface dialog,
                                         int which) {
-                                    setTag(edtTag.getText().toString());
+                                    setTag(edtTag.getText().toString().trim());
                                     edtTag.setText("");
                                     dialog.dismiss();
                                 }
@@ -1111,7 +1110,7 @@ public class ShowPics extends Activity implements OnGestureListener,
         } else {
             tag = mTagsDb.createTag(tagName, TagType.USER);
         }
-        Uri uri = Uri.parse(mItems[curPic].name);
+        Uri uri = mItems[curPic].uri;
         mTagsDb.setTag(tag, uri);
         mItems[curPic].tags = mTagsDb.getTags(uri);
         showTags();
@@ -1124,7 +1123,7 @@ public class ShowPics extends Activity implements OnGestureListener,
             tag = allTags.get(tagName);
         }
         if (tag != null) {
-            Uri uri = Uri.parse(mItems[curPic].name);
+            Uri uri = mItems[curPic].uri;
             mTagsDb.unsetTag(tag, uri);
             mItems[curPic].tags = mTagsDb.getTags(uri);
             showTags();
@@ -1444,7 +1443,8 @@ public class ShowPics extends Activity implements OnGestureListener,
     private File savePicture(File destDir) throws FileNotFoundException,
             IOException {
         File destFile;
-        String fileName = mItems[curPic].name;
+        // TODO: check that it still works with new uri for archive entries
+        String fileName = mItems[curPic].uri.toString();
         int trailSlashIndex = fileName.lastIndexOf('/');
         if (trailSlashIndex >= 0) {
             fileName = fileName.substring(trailSlashIndex);

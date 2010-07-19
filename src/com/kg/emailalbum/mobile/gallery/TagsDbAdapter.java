@@ -161,8 +161,7 @@ public class TagsDbAdapter {
         Cursor tagsCursor = qryBld.query(mDb, columns, where, whereArgs, null,
                 null, null);
         Set<Tag> tags = new TreeSet<Tag>();
-        int colIdId = tagsCursor.getColumnIndex(TAGS_TABLE_NAME + "."
-                + KEY_TAG_ID);
+        int colIdId = tagsCursor.getColumnIndex(KEY_TAG_ID);
         int colNameId = tagsCursor.getColumnIndex(KEY_TAG_NAME);
         int colTypeId = tagsCursor.getColumnIndex(KEY_TAG_TYPE);
         if (tagsCursor.getCount() > 0) {
