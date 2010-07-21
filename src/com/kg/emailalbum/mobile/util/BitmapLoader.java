@@ -96,7 +96,7 @@ public class BitmapLoader {
             // + cachedDimension[1]);
         } else if (input != null) {
             // Log.d(LOG_TAG, "Fetching size...");
-            BitmapFactory.decodeStream(input, null, fpResult.options);
+            BitmapFactory.decodeStream(new FlushedInputStream(input), null, fpResult.options);
             // Log.d(LOG_TAG, "... size fetched.");
             input.close();
         }
@@ -436,7 +436,7 @@ public class BitmapLoader {
             if (source == null) {
                 Log.d(LOG_TAG, "No cached bitmap to use, loading from stream");
                 // Log.d(LOG_TAG, "Decoding picture..." + fpResult);
-                source = BitmapFactory.decodeStream(input, null,
+                source = BitmapFactory.decodeStream(new FlushedInputStream(input), null,
                         fpResult.options);
                 // Log.d(LOG_TAG, "Picture decoded.");
                 input.close();
