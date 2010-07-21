@@ -89,7 +89,7 @@ public class ZoomState extends Observable {
     }
 
     public boolean isZoomed() {
-        if(getPanX() == 0.5f && getPanY() == 0.5f && getZoom() == 1f) {
+        if(getZoom() == 1f) {
             return false;
         } else {
             return true;
