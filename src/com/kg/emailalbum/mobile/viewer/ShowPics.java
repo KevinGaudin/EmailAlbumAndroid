@@ -232,6 +232,7 @@ public class ShowPics extends Activity implements OnGestureListener,
         }
     };
     private TagsDbAdapter mTagsDb;
+    private View mZoomIndicator;
     private View mTagsBar;
     private ViewGroup mTagsContainer;
     private View mTagsTabOpen;
@@ -655,6 +656,7 @@ public class ShowPics extends Activity implements OnGestureListener,
     private void initContentViews() {
         setContentView(Compatibility.getShowPicsLayout());
 
+        mZoomIndicator = findViewById(R.id.zoom_indicator);
         mTagsBar = findViewById(R.id.TagsBar);
         mTagsContainer = (ViewGroup) mTagsBar.findViewById(R.id.TagsContainer);
         mTagsBar.setVisibility(View.GONE);
@@ -991,10 +993,12 @@ public class ShowPics extends Activity implements OnGestureListener,
 
         if (!mZoomMode && enable) {
             mZoomListener.setControlType(ZoomListener.ControlType.ZOOM);
+            mZoomIndicator.setVisibility(View.VISIBLE);
             mZoomMode = true;
             setPanMode(false);
         } else if (mZoomMode && !enable) {
             mZoomMode = false;
+            mZoomIndicator.setVisibility(View.INVISIBLE);
         }
     }
 
