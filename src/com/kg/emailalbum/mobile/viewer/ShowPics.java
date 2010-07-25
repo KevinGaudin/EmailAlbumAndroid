@@ -571,9 +571,6 @@ public class ShowPics extends Activity implements OnGestureListener,
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Tags Db init
-        mTagsDb = new TagsDbAdapter(getApplicationContext()).open();
-
         mZoomListener = new ZoomListener(getApplicationContext());
 
         // Get a full-screen window
@@ -1173,9 +1170,7 @@ public class ShowPics extends Activity implements OnGestureListener,
     protected void onResume() {
         super.onResume();
         // Tags Db init
-        if (mTagsDb == null) {
-            mTagsDb = new TagsDbAdapter(getApplicationContext()).open();
-        }
+        mTagsDb = new TagsDbAdapter(getApplicationContext()).open();
     }
 
     /*
