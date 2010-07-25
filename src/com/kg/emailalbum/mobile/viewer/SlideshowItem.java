@@ -1,6 +1,7 @@
 package com.kg.emailalbum.mobile.viewer;
 
 import java.util.Set;
+import java.util.TreeSet;
 
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -12,7 +13,7 @@ public class SlideshowItem {
     public Uri uri;
     public String caption;
     public Bitmap bitmap;
-    public Set<Tag> tags;
+    public Set<Tag> tags = new TreeSet<Tag>();
     
     public String getShortName() {
         if(name != null) {

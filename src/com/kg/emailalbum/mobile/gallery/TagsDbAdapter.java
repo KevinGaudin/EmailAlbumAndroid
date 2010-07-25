@@ -173,7 +173,7 @@ public class TagsDbAdapter {
 
                 tags.add(TagProvider.getTag(tagsCursor.getLong(colIdId),
                         tagsCursor.getString(colNameId),
-                        tagsCursor.getString(colTypeId)));
+                        TagType.valueOf(tagsCursor.getString(colTypeId))));
             }
         }
         tagsCursor.close();
@@ -183,21 +183,21 @@ public class TagsDbAdapter {
         return tags;
     }
 
-//    public String getTagName(long tagId) {
-//        String result = null;
-//        String[] selArgs = { Long.toString(tagId) };
-//        String[] proj = { KEY_TAG_NAME };
-//        Cursor tagsCursor = mDb.query(TAGS_TABLE_NAME, proj, KEY_TAG_ID + "=?",
-//                selArgs, null, null, null);
-//        int colNameId = tagsCursor.getColumnIndex(KEY_TAG_NAME);
-//        if (tagsCursor.getCount() > 0) {
-//            while (tagsCursor.moveToNext()) {
-//                result = tagsCursor.getString(colNameId);
-//            }
-//        }
-//        tagsCursor.close();
-//        return result;
-//    }
+    // public String getTagName(long tagId) {
+    // String result = null;
+    // String[] selArgs = { Long.toString(tagId) };
+    // String[] proj = { KEY_TAG_NAME };
+    // Cursor tagsCursor = mDb.query(TAGS_TABLE_NAME, proj, KEY_TAG_ID + "=?",
+    // selArgs, null, null, null);
+    // int colNameId = tagsCursor.getColumnIndex(KEY_TAG_NAME);
+    // if (tagsCursor.getCount() > 0) {
+    // while (tagsCursor.moveToNext()) {
+    // result = tagsCursor.getString(colNameId);
+    // }
+    // }
+    // tagsCursor.close();
+    // return result;
+    // }
 
     public List<Uri> getUrisFromAllTags(Tag... tags) {
         ArrayList<Uri> result = new ArrayList<Uri>();
@@ -232,7 +232,7 @@ public class TagsDbAdapter {
         return result;
     }
 
-//    public long getTagId(String tagName) {
-//        return getAllTags().get(tagName);
-//    }
+    // public long getTagId(String tagName) {
+    // return getAllTags().get(tagName);
+    // }
 }

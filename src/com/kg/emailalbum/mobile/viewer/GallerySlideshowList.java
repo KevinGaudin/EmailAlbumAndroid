@@ -17,9 +17,12 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.provider.MediaStore.Images.ImageColumns;
 import android.provider.MediaStore.Images.Media;
+import android.text.format.Time;
 import android.util.Log;
 
+import com.kg.emailalbum.mobile.gallery.TagProvider;
 import com.kg.emailalbum.mobile.gallery.TagsDbAdapter;
+import com.kg.emailalbum.mobile.gallery.Tag.TagType;
 import com.kg.emailalbum.mobile.util.BitmapLoader;
 
 public class GallerySlideshowList extends SlideshowList {
@@ -64,10 +67,12 @@ public class GallerySlideshowList extends SlideshowList {
                                 .getColumnIndexOrThrow(ImageColumns.BUCKET_DISPLAY_NAME)));
                 metadata.putString(ImageColumns.TITLE, cursor.getString(cursor
                         .getColumnIndexOrThrow(ImageColumns.TITLE)));
-                metadata.putInt(
+                metadata.putLong(
                         ImageColumns.DATE_TAKEN,
-                        cursor.getInt(cursor
+                        cursor.getLong(cursor
                                 .getColumnIndexOrThrow(ImageColumns.DATE_TAKEN)));
+                metadata.putLong(ImageColumns.BUCKET_ID,Long.parseLong(cursor.getString(cursor
+                        .getColumnIndexOrThrow(ImageColumns.BUCKET_ID))));
                 mMetaData.put(imageUri, metadata);
                 cursor.moveToNext();
             }
@@ -101,8 +106,20 @@ public class GallerySlideshowList extends SlideshowList {
                 if(mTagsDb != null) {
                     result.tags = mTagsDb.getTags(imageUri);
                 }
-                Log.d(LOG_TAG, "METADATA : " + mMetaData.get(mUris.get(location)).toString());
 
+                Bundle metadata = mMetaData.get(imageUri);
+                
+                Log.d(LOG_TAG, "METADATA : " + metadata.toString());
+                
+                // Add the BUCKET tag
+                result.tags.add(TagProvider.getTag(metadata.getLong(ImageColumns.BUCKET_ID), metadata.getString(ImageColumns.BUCKET_DISPLAY_NAME), TagType.BUCKET));
+
+                long dateTakenInMillis = metadata.getLong(ImageColumns.DATE_TAKEN);
+                Time dateTaken = new Time();
+                dateTaken.set(dateTakenInMillis);
+                Log.d(LOG_TAG, "Now is " + System.currentTimeMillis() + ", dateTaken is " + dateTakenInMillis);
+                result.tags.add(TagProvider.getTag((long)dateTaken.month, dateTaken.format("%B"), TagType.MONTH));
+                result.tags.add(TagProvider.getTag((long)dateTaken.year, dateTaken.format("%Y"), TagType.YEAR));
             } catch (IOException e) {
                 // TODO Auto-generated catch block
                 Log.e(LOG_TAG, "Error : ", e);

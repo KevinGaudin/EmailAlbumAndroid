@@ -1645,6 +1645,7 @@ public class ShowPics extends Activity implements OnGestureListener,
                 R.layout.slideshow_tag, mTagsContainer, false);
         btnTag.setText(tag.label);
         btnTag.setTag(tag);
+        btnTag.setCompoundDrawables(tag.type.getDrawable(this), null, null, null);
         btnTag.setOnClickListener(new OnClickListener() {
 
             @Override

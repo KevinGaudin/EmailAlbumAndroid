@@ -1,12 +1,105 @@
 package com.kg.emailalbum.mobile.gallery;
 
-public class Tag implements Comparable<Object>{
+import android.content.Context;
+import android.graphics.drawable.Drawable;
+import android.util.DisplayMetrics;
+import android.view.WindowManager;
+
+import com.kg.emailalbum.mobile.R;
+
+public class Tag implements Comparable<Object> {
     public long id;
     public String label;
     public TagType type;
 
     public enum TagType {
-        BUCKET, USER, PEOPLE, MONTH, YEAR;
+        BUCKET {
+            @Override
+            public Drawable getDrawable(Context ctx) {
+                initMetrics(ctx);
+                Drawable bucketDrawable = ctx.getResources().getDrawable(
+                        R.drawable.ic_folder_small);
+                bucketDrawable.setBounds(0, 0,
+                        (int) (TAG_ICON_SIZE * mMetrics.density),
+                        (int) (TAG_ICON_SIZE * mMetrics.density));
+                return bucketDrawable;
+            }
+
+            @Override
+            public Integer getSortOrder() {
+                return 0;
+            }
+        },
+        USER {
+            @Override
+            public Drawable getDrawable(Context ctx) {
+                // TODO Auto-generated method stub
+                initMetrics(ctx);
+                return null;
+            }
+
+            @Override
+            public Integer getSortOrder() {
+                return 1;
+            }
+        },
+        PEOPLE {
+            @Override
+            public Drawable getDrawable(Context ctx) {
+                // TODO Auto-generated method stub
+                initMetrics(ctx);
+                return null;
+            }
+
+            @Override
+            public Integer getSortOrder() {
+                return 2;
+            }
+        },
+        MONTH {
+            @Override
+            public Drawable getDrawable(Context ctx) {
+                // TODO Auto-generated method stub
+                initMetrics(ctx);
+                return null;
+            }
+
+            @Override
+            public Integer getSortOrder() {
+                return 3;
+            }
+        },
+        YEAR {
+            @Override
+            public Drawable getDrawable(Context ctx) {
+                // TODO Auto-generated method stub
+                initMetrics(ctx);
+                return null;
+            }
+
+            @Override
+            public Integer getSortOrder() {
+                return 4;
+            }
+        };
+
+        private static final int TAG_ICON_SIZE = 18;
+        private static DisplayMetrics mMetrics;
+
+        public abstract Drawable getDrawable(Context ctx);
+
+        public abstract Integer getSortOrder();
+
+        /**
+         * @param ctx
+         */
+        private static void initMetrics(Context ctx) {
+            if (mMetrics == null) {
+                mMetrics = new DisplayMetrics();
+                ((WindowManager) ctx.getSystemService(Context.WINDOW_SERVICE))
+                        .getDefaultDisplay().getMetrics(mMetrics);
+            }
+        }
     }
 
     public Tag(long id, String label, TagType type) {
@@ -17,10 +110,16 @@ public class Tag implements Comparable<Object>{
 
     @Override
     public int compareTo(Object another) {
-        return this.label.compareTo(((Tag)another).label);
+        Tag anotherTag = (Tag) another;
+        if(this.type.getSortOrder() != anotherTag.type.getSortOrder()) {
+            return this.type.getSortOrder().compareTo(anotherTag.type.getSortOrder());
+        }
+        return this.label.compareTo(anotherTag.label);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.lang.Object#toString()
      */
     @Override
@@ -29,7 +128,9 @@ public class Tag implements Comparable<Object>{
         return type + "/" + label;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.lang.Object#hashCode()
      */
     @Override
@@ -42,7 +143,9 @@ public class Tag implements Comparable<Object>{
         return result;
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.lang.Object#equals(java.lang.Object)
      */
     @Override
