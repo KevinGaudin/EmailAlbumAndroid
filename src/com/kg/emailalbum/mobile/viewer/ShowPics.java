@@ -25,7 +25,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Map;
 import java.util.Set;
 
 import org.acra.ErrorReporter;
@@ -82,6 +81,7 @@ import com.kg.emailalbum.mobile.R;
 import com.kg.emailalbum.mobile.animation.Rotate3dAnimation;
 import com.kg.emailalbum.mobile.gallery.Tag;
 import com.kg.emailalbum.mobile.gallery.Tag.TagType;
+import com.kg.emailalbum.mobile.gallery.TagProvider;
 import com.kg.emailalbum.mobile.gallery.TagsDbAdapter;
 import com.kg.emailalbum.mobile.util.CacheManager;
 import com.kg.emailalbum.mobile.util.Compatibility;
@@ -238,6 +238,7 @@ public class ShowPics extends Activity implements OnGestureListener,
     private View mTagsTabOpen;
     private View mTagsTabClose;
     private AlertDialog mTagCreator = null;
+    private Uri mAlbumUri;
 
     /**
      * Starts the pictures transition animation.
@@ -617,34 +618,20 @@ public class ShowPics extends Activity implements OnGestureListener,
 
         mOldPosition = -1;
 
-        Uri albumUri = null;
+        mAlbumUri = null;
         if (getIntent() != null) {
             // retrieve all data provided by EmailAlbumViewer
-            albumUri = getIntent().getParcelableExtra("ALBUM");
+            mAlbumUri = getIntent().getParcelableExtra("ALBUM");
             mPosition = getIntent().getIntExtra("POSITION", 0);
         }
 
         if (savedInstanceState != null) {
-            albumUri = (Uri) savedInstanceState.getParcelable("ALBUM");
+            mAlbumUri = (Uri) savedInstanceState.getParcelable("ALBUM");
             mPosition = savedInstanceState.getInt("POSITION");
             mSlideshow = savedInstanceState.getBoolean("SLIDESHOW");
             setWakeLock(mSlideshow);
         }
 
-        if (albumUri != null) {
-            if (albumUri.equals(Media.EXTERNAL_CONTENT_URI)) {
-                mSlideshowList = new GallerySlideshowList(
-                        getApplicationContext(), mTagsDb, MAX_BITMAP_DIM);
-            } else {
-                mSlideshowList = new ArchiveSlideshowList(
-                        getApplicationContext(), mTagsDb, albumUri, MAX_BITMAP_DIM);
-            }
-        } else {
-            ErrorReporter.getInstance().handleException(
-                    new Exception("ShowPics invoked without data."));
-            finish();
-        }
-        showPicture();
     }
 
     /**
@@ -725,20 +712,24 @@ public class ShowPics extends Activity implements OnGestureListener,
 
             @Override
             public void onClick(View v) {
-                addTag();
+                addUserTag();
             }
         });
 
     }
 
-    private void addTag() {
-        getTagPicker().show();
+    private void addUserTag() {
+        getUserTagPicker().show();
     }
 
-    private AlertDialog getTagPicker() {
-        Set<String> tags = mTagsDb.getAllTags().keySet();
-        String[] items = new String[tags.size()];
-        final String[] dialogItems = tags.toArray(items);
+    private AlertDialog getUserTagPicker() {
+        Set<Tag> tags = mTagsDb.getAllTags(TagType.USER);
+        final String[] dialogItems = new String[tags.size()];
+        int i = 0;
+        for (Tag tag : tags) {
+            dialogItems[i] = tag.label;
+            i++;
+        }
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle(R.string.dialog_pick_tag)
@@ -763,7 +754,7 @@ public class ShowPics extends Activity implements OnGestureListener,
                         })
                 .setItems(dialogItems, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int item) {
-                        setTag(dialogItems[item]);
+                        setUserTag(dialogItems[item]);
                         dialog.dismiss();
                     }
                 });
@@ -783,7 +774,8 @@ public class ShowPics extends Activity implements OnGestureListener,
                                 @Override
                                 public void onClick(DialogInterface dialog,
                                         int which) {
-                                    setTag(edtTag.getText().toString().trim());
+                                    setUserTag(edtTag.getText().toString()
+                                            .trim());
                                     edtTag.setText("");
                                     dialog.dismiss();
                                 }
@@ -1103,30 +1095,25 @@ public class ShowPics extends Activity implements OnGestureListener,
         return super.onOptionsItemSelected(item);
     }
 
-    private void setTag(String tagName) {
-        Map<String, Tag> allTags = mTagsDb.getAllTags();
-        Tag tag = null;
-        if (allTags.containsKey(tagName)) {
-            tag = allTags.get(tagName);
-        } else {
+    private void setUserTag(String tagName) {
+
+        Tag tag = TagProvider.getTag(tagName, TagType.USER);
+        if (tag == null) {
             tag = mTagsDb.createTag(tagName, TagType.USER);
         }
         Uri uri = mItems[curPic].uri;
-        mTagsDb.setTag(tag, uri);
-        mItems[curPic].tags = mTagsDb.getTags(uri);
+        if (mTagsDb.setTag(tag, uri)) {
+            mItems[curPic].tags.add(tag);
+        }
         showTags();
     }
 
-    private void unsetTag(String tagName) {
-        Map<String, Tag> allTags = mTagsDb.getAllTags();
-        Tag tag = null;
-        if (allTags.containsKey(tagName)) {
-            tag = allTags.get(tagName);
-        }
-        if (tag != null) {
+    private void unsetTag(Tag tag) {
+        if (tag != null && (tag.type == TagType.USER || tag.type == TagType.PEOPLE)) {
             Uri uri = mItems[curPic].uri;
-            mTagsDb.unsetTag(tag, uri);
-            mItems[curPic].tags = mTagsDb.getTags(uri);
+            if (mTagsDb.unsetTag(tag, uri)) {
+                mItems[curPic].tags.remove(tag);
+            }
             showTags();
         }
     }
@@ -1171,6 +1158,23 @@ public class ShowPics extends Activity implements OnGestureListener,
         super.onResume();
         // Tags Db init
         mTagsDb = new TagsDbAdapter(getApplicationContext()).open();
+
+        if (mAlbumUri != null) {
+            if (mAlbumUri.equals(Media.EXTERNAL_CONTENT_URI)) {
+                mSlideshowList = new GallerySlideshowList(
+                        getApplicationContext(), mTagsDb, MAX_BITMAP_DIM);
+            } else {
+                mSlideshowList = new ArchiveSlideshowList(
+                        getApplicationContext(), mTagsDb, mAlbumUri,
+                        MAX_BITMAP_DIM);
+            }
+        } else {
+            ErrorReporter.getInstance().handleException(
+                    new Exception("ShowPics invoked without data."));
+            finish();
+        }
+
+        showPicture();
     }
 
     /*
@@ -1640,12 +1644,13 @@ public class ShowPics extends Activity implements OnGestureListener,
                 R.layout.slideshow_tag, mTagsContainer, false);
         btnTag.setText(tag.label);
         btnTag.setTag(tag);
-        btnTag.setCompoundDrawables(tag.type.getDrawable(this), null, null, null);
+        btnTag.setCompoundDrawables(tag.type.getDrawable(this), null, null,
+                null);
         btnTag.setOnClickListener(new OnClickListener() {
 
             @Override
             public void onClick(View v) {
-                unsetTag(((Button) v).getText().toString());
+                unsetTag((Tag) v.getTag());
             }
         });
         mTagsContainer.addView(btnTag);

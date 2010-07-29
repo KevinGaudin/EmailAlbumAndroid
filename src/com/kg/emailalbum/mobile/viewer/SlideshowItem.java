@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 
 import com.kg.emailalbum.mobile.gallery.Tag;
+import com.kg.emailalbum.mobile.gallery.Tag.TagType;
 
 public class SlideshowItem {
     public String name;
@@ -19,5 +20,14 @@ public class SlideshowItem {
         if(name != null) {
             return name.substring(name.lastIndexOf('/') + 1);
         } else return "";
+    }
+    
+    public boolean isDateTakenSet() {
+        for(Tag tag : tags) {
+            if(tag.type == TagType.MONTH || tag.type == TagType.YEAR) {
+                return true;
+            }
+        }
+        return false;
     }
 }

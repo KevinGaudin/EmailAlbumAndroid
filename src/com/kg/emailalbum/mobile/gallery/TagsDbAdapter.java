@@ -29,7 +29,9 @@ public class TagsDbAdapter {
     private static final String KEY_TAG_TYPE = "tagType";
     private static final String TAGS_TABLE_CREATE = "CREATE TABLE "
             + TAGS_TABLE_NAME + " (" + KEY_TAG_ID + " INTEGER PRIMARY KEY, "
-            + KEY_TAG_NAME + " TEXT UNIQUE," + KEY_TAG_TYPE + " TEXT);";
+            + KEY_TAG_NAME + " TEXT NOT NULL," + KEY_TAG_TYPE
+            + " TEXT NOT NULL, CONSTRAINT UNI_NAME_TYPE UNIQUE ("
+            + KEY_TAG_NAME + ", " + KEY_TAG_TYPE + "));";
 
     private static final String TAG_URI_TABLE_NAME = "TagUri";
     private static final String KEY_URI = "uri";
@@ -39,7 +41,6 @@ public class TagsDbAdapter {
 
     private static final String LOG_TAG = TagsDbAdapter.class.getSimpleName();
 
-    private Map<String, Tag> mTagsCache = null;
 
     Context mContext = null;
     TagDbOpenHelper mDbOpenHelper;
@@ -69,6 +70,7 @@ public class TagsDbAdapter {
         mContext = ctx;
     }
 
+
     public TagsDbAdapter open() {
         mDbOpenHelper = new TagDbOpenHelper(mContext);
         mDb = mDbOpenHelper.getWritableDatabase();
@@ -84,8 +86,7 @@ public class TagsDbAdapter {
         values.put(KEY_TAG_NAME, tagName);
         values.put(KEY_TAG_TYPE, tagType.toString());
         long tagId = mDb.insert(TAGS_TABLE_NAME, null, values);
-        Tag createdTag = new Tag(tagId, tagName, tagType);
-        mTagsCache.put(tagName, createdTag);
+        Tag createdTag = TagProvider.getTag(tagId, tagName, tagType);
         return createdTag;
     }
 
@@ -94,7 +95,7 @@ public class TagsDbAdapter {
         values.put(KEY_TAG_NAME, tagName);
         boolean result = mDb.update(TAGS_TABLE_NAME, values, KEY_TAG_ID + "="
                 + tagId, null) > 0;
-        mTagsCache = null;
+        // TODO : apply modification to TagProvider
         return result;
     }
 
@@ -102,7 +103,7 @@ public class TagsDbAdapter {
         boolean result = (mDb.delete(TAG_URI_TABLE_NAME, KEY_TAG_ID + "="
                 + tagId, null) > 0)
                 && (mDb.delete(TAGS_TABLE_NAME, KEY_TAG_ID + "=" + tagId, null) > 0);
-        mTagsCache = null;
+        // TODO : apply modification to TagProvider
         return result;
     }
 
@@ -121,28 +122,35 @@ public class TagsDbAdapter {
         return result;
     }
 
-    public Map<String, Tag> getAllTags() {
-        if (mTagsCache == null) {
-            mTagsCache = new HashMap<String, Tag>();
-
-            Cursor tagsCursor = mDb.query(TAGS_TABLE_NAME, null, null, null,
-                    null, null, KEY_TAG_NAME);
-
-            int colNameId = tagsCursor.getColumnIndex(KEY_TAG_NAME);
-            int colIdId = tagsCursor.getColumnIndex(KEY_TAG_ID);
-            int colTypeId = tagsCursor.getColumnIndex(KEY_TAG_TYPE);
-            if (tagsCursor.getCount() > 0) {
-                while (tagsCursor.moveToNext()) {
-                    Tag tag = new Tag(tagsCursor.getLong(colIdId),
-                            tagsCursor.getString(colNameId),
-                            TagType.valueOf(tagsCursor.getString(colTypeId)));
-                    mTagsCache.put(tag.label, tag);
-                }
+    public Set<Tag> getAllTags(TagType... types) {
+        Set<Tag> allTagsSet = new TreeSet<Tag>();
+        StringBuilder where = new StringBuilder();
+        String[] values = new String[types.length];
+        where.append(KEY_TAG_TYPE).append(" IN ( ");
+        for (int i = 0; i < types.length; i++) {
+            where.append('?');
+            values[i] = types[i].name();
+            if (i < types.length - 1) {
+                where.append(", ");
             }
-            tagsCursor.close();
         }
-        return mTagsCache;
+        where.append(')');
+        Cursor tagsCursor = mDb.query(TAGS_TABLE_NAME, null, where.toString(),
+                values, null, null, KEY_TAG_NAME);
 
+        int colNameId = tagsCursor.getColumnIndex(KEY_TAG_NAME);
+        int colIdId = tagsCursor.getColumnIndex(KEY_TAG_ID);
+        int colTypeId = tagsCursor.getColumnIndex(KEY_TAG_TYPE);
+        if (tagsCursor.getCount() > 0) {
+            while (tagsCursor.moveToNext()) {
+                Tag tag = TagProvider.getTag(tagsCursor.getLong(colIdId),
+                        tagsCursor.getString(colNameId),
+                        TagType.valueOf(tagsCursor.getString(colTypeId)));
+                allTagsSet.add(tag);
+            }
+        }
+        tagsCursor.close();
+        return allTagsSet;
     }
 
     public Set<Tag> getTags(Uri uri) {

@@ -26,4 +26,17 @@ public class TagProvider {
         }
         return result;
     }
+    
+    public static Tag getTag(String label, TagType type) {
+        if(type == null) {
+            type = TagType.USER;
+        }
+        Map<Long, Tag> cache = mTagsCache.get(type);
+        for(Tag tag : cache.values()) {
+            if(tag.label.equalsIgnoreCase(label)) {
+                return tag;
+            }
+        }
+        return null;
+    }    
 }

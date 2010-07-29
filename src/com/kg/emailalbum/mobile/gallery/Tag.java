@@ -18,7 +18,7 @@ public class Tag implements Comparable<Object> {
             public Drawable getDrawable(Context ctx) {
                 initMetrics(ctx);
                 Drawable bucketDrawable = ctx.getResources().getDrawable(
-                        R.drawable.ic_folder_small);
+                        R.drawable.ic_folder_camera);
                 bucketDrawable.setBounds(0, 0,
                         (int) (TAG_ICON_SIZE * mMetrics.density),
                         (int) (TAG_ICON_SIZE * mMetrics.density));
@@ -59,9 +59,13 @@ public class Tag implements Comparable<Object> {
         MONTH {
             @Override
             public Drawable getDrawable(Context ctx) {
-                // TODO Auto-generated method stub
                 initMetrics(ctx);
-                return null;
+                Drawable monthDrawable = ctx.getResources().getDrawable(
+                        R.drawable.ic_calendar_view_month);
+                monthDrawable.setBounds(0, 0,
+                        (int) (TAG_ICON_SIZE * mMetrics.density),
+                        (int) (TAG_ICON_SIZE * mMetrics.density));
+                return monthDrawable;
             }
 
             @Override
@@ -72,9 +76,13 @@ public class Tag implements Comparable<Object> {
         YEAR {
             @Override
             public Drawable getDrawable(Context ctx) {
-                // TODO Auto-generated method stub
                 initMetrics(ctx);
-                return null;
+                Drawable yearDrawable = ctx.getResources().getDrawable(
+                        R.drawable.ic_calendar_view_month);
+                yearDrawable.setBounds(0, 0,
+                        (int) (TAG_ICON_SIZE * mMetrics.density),
+                        (int) (TAG_ICON_SIZE * mMetrics.density));
+                return yearDrawable;
             }
 
             @Override
@@ -83,7 +91,7 @@ public class Tag implements Comparable<Object> {
             }
         };
 
-        private static final int TAG_ICON_SIZE = 18;
+        private static final int TAG_ICON_SIZE = 16;
         private static DisplayMetrics mMetrics;
 
         public abstract Drawable getDrawable(Context ctx);
