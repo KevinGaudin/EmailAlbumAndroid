@@ -61,6 +61,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
@@ -1651,6 +1652,32 @@ public class ShowPics extends Activity implements OnGestureListener,
             @Override
             public void onClick(View v) {
                 unsetTag((Tag) v.getTag());
+            }
+        });
+        btnTag.setOnLongClickListener(new OnLongClickListener() {
+            
+            @Override
+            public boolean onLongClick(View v) {
+                final Tag tag = (Tag) v.getTag();
+                int[] labels = { R.string.qa_remove_tag, R.string.qa_rename_tag };
+                Runnable[] tasks = {
+                        new Runnable() {
+                            
+                            @Override
+                            public void run() {
+                                unsetTag(tag);
+                            }
+                        }, new Runnable() {
+                            
+                            @Override
+                            public void run() {
+                                Toast.makeText(getApplicationContext(), getText(R.string.qa_rename_tag), Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                };
+                TagQuickActions tagQA = new TagQuickActions(v, labels, tasks);
+                tagQA.showLikeQuickAction(-5, 5);
+                return true;
             }
         });
         mTagsContainer.addView(btnTag);

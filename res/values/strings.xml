@@ -119,6 +119,8 @@
 	<string name="dialog_pick_tag">Pick a Tag</string>
 	<string name="dialog_btn_new_tag">New Tag</string>
 	<string name="dialog_create_tag">Enter Tag name</string>
+	<string name="qa_rename_tag">Rename</string>
+	<string name="qa_remove_tag">Remove</string>
 
 	<string name="number_files_deleted">%1$d file(s) deleted</string>
 	<string name="prefcat_cache">Cache Files</string>
