@@ -13,7 +13,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.kg.emailalbum.mobile.gallery.TagsDbAdapter;
+import com.kg.emailalbum.mobile.tags.TagsDbAdapter;
 import com.kg.emailalbum.mobile.util.BitmapLoader;
 import com.kg.emailalbum.mobile.util.ZipUtil;
 import com.kg.oifilemanager.filemanager.FileManagerProvider;

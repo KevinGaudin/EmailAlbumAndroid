@@ -80,10 +80,12 @@ import com.kg.emailalbum.mobile.AboutDialog;
 import com.kg.emailalbum.mobile.EmailAlbumPreferences;
 import com.kg.emailalbum.mobile.R;
 import com.kg.emailalbum.mobile.animation.Rotate3dAnimation;
-import com.kg.emailalbum.mobile.gallery.Tag;
-import com.kg.emailalbum.mobile.gallery.Tag.TagType;
-import com.kg.emailalbum.mobile.gallery.TagProvider;
-import com.kg.emailalbum.mobile.gallery.TagsDbAdapter;
+import com.kg.emailalbum.mobile.tags.Tag;
+import com.kg.emailalbum.mobile.tags.TagProvider;
+import com.kg.emailalbum.mobile.tags.TagsDbAdapter;
+import com.kg.emailalbum.mobile.tags.Tag.TagType;
+import com.kg.emailalbum.mobile.ui.ActionItem;
+import com.kg.emailalbum.mobile.ui.QuickAction;
 import com.kg.emailalbum.mobile.util.CacheManager;
 import com.kg.emailalbum.mobile.util.Compatibility;
 import com.kg.emailalbum.mobile.util.ScaleGestureDetector;
@@ -1651,33 +1653,34 @@ public class ShowPics extends Activity implements OnGestureListener,
 
             @Override
             public void onClick(View v) {
-                unsetTag((Tag) v.getTag());
-            }
-        });
-        btnTag.setOnLongClickListener(new OnLongClickListener() {
-            
-            @Override
-            public boolean onLongClick(View v) {
+                QuickAction tagQA = new QuickAction(v);
                 final Tag tag = (Tag) v.getTag();
-                int[] labels = { R.string.qa_remove_tag, R.string.qa_rename_tag };
-                Runnable[] tasks = {
-                        new Runnable() {
-                            
-                            @Override
-                            public void run() {
-                                unsetTag(tag);
-                            }
-                        }, new Runnable() {
-                            
-                            @Override
-                            public void run() {
-                                Toast.makeText(getApplicationContext(), getText(R.string.qa_rename_tag), Toast.LENGTH_SHORT).show();
-                            }
-                        }
-                };
-                TagQuickActions tagQA = new TagQuickActions(v, labels, tasks);
-                tagQA.showLikeQuickAction(-5, 5);
-                return true;
+                
+                ActionItem action = new ActionItem();
+                action.setIcon(getResources().getDrawable(R.drawable.ic_tag_delete));
+                action.setTitle(getString(R.string.qa_remove_tag));
+                action.setOnClickListener(new OnClickListener() {
+                    
+                    @Override
+                    public void onClick(View v) {
+                        unsetTag(tag);
+                    }
+                });
+                tagQA.addActionItem(action);
+
+                action = new ActionItem();
+                action.setIcon(getResources().getDrawable(R.drawable.ic_tag_edit));
+                action.setTitle(getString(R.string.qa_rename_tag));
+                action.setOnClickListener(new OnClickListener() {
+                    
+                    @Override
+                    public void onClick(View v) {
+                        Toast.makeText(getApplicationContext(), "RENAME", Toast.LENGTH_SHORT).show();
+                    }
+                });
+                tagQA.addActionItem(action);
+
+                tagQA.show();
             }
         });
         mTagsContainer.addView(btnTag);

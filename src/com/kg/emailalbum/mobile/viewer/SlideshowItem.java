@@ -6,8 +6,8 @@ import java.util.TreeSet;
 import android.graphics.Bitmap;
 import android.net.Uri;
 
-import com.kg.emailalbum.mobile.gallery.Tag;
-import com.kg.emailalbum.mobile.gallery.Tag.TagType;
+import com.kg.emailalbum.mobile.tags.Tag;
+import com.kg.emailalbum.mobile.tags.Tag.TagType;
 
 public class SlideshowItem {
     public String name;

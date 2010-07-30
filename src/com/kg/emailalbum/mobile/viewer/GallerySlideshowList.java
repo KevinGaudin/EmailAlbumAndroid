@@ -20,9 +20,10 @@ import android.provider.MediaStore.Images.Media;
 import android.text.format.Time;
 import android.util.Log;
 
-import com.kg.emailalbum.mobile.gallery.TagProvider;
-import com.kg.emailalbum.mobile.gallery.TagsDbAdapter;
-import com.kg.emailalbum.mobile.gallery.Tag.TagType;
+import com.kg.emailalbum.mobile.tags.Tag;
+import com.kg.emailalbum.mobile.tags.TagProvider;
+import com.kg.emailalbum.mobile.tags.TagsDbAdapter;
+import com.kg.emailalbum.mobile.tags.Tag.TagType;
 import com.kg.emailalbum.mobile.util.BitmapLoader;
 
 public class GallerySlideshowList extends SlideshowList {
@@ -124,11 +125,12 @@ public class GallerySlideshowList extends SlideshowList {
                     dateTaken.set(dateTakenInMillis);
                     Log.d(LOG_TAG, "Now is " + System.currentTimeMillis()
                             + ", dateTaken is " + dateTakenInMillis);
-                    result.tags.add(TagProvider.getTag((long) dateTaken.month,
-                            dateTaken.format("%B"), TagType.MONTH));
-                    mTagsDb.createTag(dateTaken.format("%B"), TagType.MONTH);
-                    result.tags.add(TagProvider.getTag((long) dateTaken.year,
-                            dateTaken.format("%Y"), TagType.YEAR));
+                    Tag tag = mTagsDb.createTag(dateTaken.format("%B"), TagType.MONTH);
+                    mTagsDb.setTag(tag, imageUri);
+                    result.tags.add(tag);
+                    tag = mTagsDb.createTag(dateTaken.format("%Y"), TagType.YEAR);
+                    mTagsDb.setTag(tag, imageUri);
+                    result.tags.add(tag);
                 }
             } catch (IOException e) {
                 // TODO Auto-generated catch block
