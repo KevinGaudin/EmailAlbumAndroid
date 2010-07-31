@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent" android:layout_height="fill_parent"
+	android:orientation="vertical" android:id="@+id/EditTagDialog">
+	<RadioGroup android:layout_height="wrap_content"
+		android:id="@+id/TagTypeRadioGroup"
+		android:orientation="horizontal" android:layout_width="fill_parent">
+		<RadioButton android:layout_height="wrap_content"
+			android:id="@+id/RadioUserTag" android:text="Tag" android:drawableLeft="@drawable/ic_tag" android:layout_width="fill_parent" android:layout_weight="1" android:checked="true"></RadioButton>
+		<RadioButton android:layout_height="wrap_content"
+			android:id="@+id/RadioPeopleTag" android:layout_toRightOf="@+id/RadioUserTag"
+			android:drawableLeft="@drawable/ic_people"
+			android:text="People" android:layout_width="fill_parent" android:layout_weight="1"></RadioButton>
+	</RadioGroup>
+	<EditText android:layout_height="wrap_content" android:inputType="text" android:layout_width="fill_parent"
+		android:id="@+id/EditTag" android:layout_below="@+id/RadioUserTag" android:singleLine="true"></EditText>
+
+
+
+</LinearLayout>

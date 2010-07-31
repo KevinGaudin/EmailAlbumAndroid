@@ -61,7 +61,6 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
@@ -73,6 +72,7 @@ import android.view.animation.DecelerateInterpolator;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.RadioGroup;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
 
@@ -81,9 +81,9 @@ import com.kg.emailalbum.mobile.EmailAlbumPreferences;
 import com.kg.emailalbum.mobile.R;
 import com.kg.emailalbum.mobile.animation.Rotate3dAnimation;
 import com.kg.emailalbum.mobile.tags.Tag;
+import com.kg.emailalbum.mobile.tags.Tag.TagType;
 import com.kg.emailalbum.mobile.tags.TagProvider;
 import com.kg.emailalbum.mobile.tags.TagsDbAdapter;
-import com.kg.emailalbum.mobile.tags.Tag.TagType;
 import com.kg.emailalbum.mobile.ui.ActionItem;
 import com.kg.emailalbum.mobile.ui.QuickAction;
 import com.kg.emailalbum.mobile.util.CacheManager;
@@ -712,74 +712,82 @@ public class ShowPics extends Activity implements OnGestureListener,
 
         Button btnAddTag = (Button) mTagsBar.findViewById(R.id.BtnAddTag);
         btnAddTag.setOnClickListener(new OnClickListener() {
-
             @Override
             public void onClick(View v) {
-                addUserTag();
+                addTag(v);
             }
         });
 
     }
 
-    private void addUserTag() {
-        getUserTagPicker().show();
-    }
+    private void addTag(View v) {
+        // getUserTagPicker().show();
+        QuickAction qa = new QuickAction(v);
 
-    private AlertDialog getUserTagPicker() {
-        Set<Tag> tags = mTagsDb.getAllTags(TagType.USER);
-        final String[] dialogItems = new String[tags.size()];
-        int i = 0;
+        ActionItem action = new ActionItem();
+        action.setIcon(getResources().getDrawable(R.drawable.ic_add));
+        action.setTitle(getString(R.string.dialog_btn_new_tag));
+        action.setOnClickListener(new OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                getTagCreator().show();
+            }
+        });
+        qa.addActionItem(action);
+
+        Set<Tag> tags = mTagsDb.getAllTags(TagType.USER, TagType.PEOPLE);
+        tags.removeAll(mItems[curPic].tags);
         for (Tag tag : tags) {
-            dialogItems[i] = tag.label;
-            i++;
+            action = new ActionItem();
+            action.setIcon(tag.type.getDrawable(this));
+            action.setTitle(tag.label);
+            action.setTag(tag);
+            action.setOnClickListener(new OnClickListener() {
+
+                @Override
+                public void onClick(View v) {
+                    Tag tag = (Tag) v.getTag();
+                    setTag(tag);
+                }
+            });
+            qa.addActionItem(action);
         }
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(R.string.dialog_pick_tag)
-                .setPositiveButton(R.string.dialog_btn_new_tag,
-                        new DialogInterface.OnClickListener() {
-
-                            @Override
-                            public void onClick(DialogInterface dialog,
-                                    int which) {
-                                dialog.dismiss();
-                                getTagCreator().show();
-                            }
-                        })
-                .setNegativeButton(android.R.string.cancel,
-                        new DialogInterface.OnClickListener() {
-
-                            @Override
-                            public void onClick(DialogInterface dialog,
-                                    int which) {
-                                dialog.dismiss();
-                            }
-                        })
-                .setItems(dialogItems, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int item) {
-                        setUserTag(dialogItems[item]);
-                        dialog.dismiss();
-                    }
-                });
-        return builder.create();
+        qa.show();
     }
 
     private AlertDialog getTagCreator() {
         if (mTagCreator == null) {
+            ViewGroup root = (ViewGroup) getLayoutInflater().inflate(
+                    R.layout.create_tag, null);
             AlertDialog.Builder bldr = new AlertDialog.Builder(this);
-            final EditText edtTag = new EditText(this);
-            edtTag.setSingleLine();
+            final EditText edtTag = (EditText) root.findViewById(R.id.EditTag);
+            final RadioGroup tagTypeGroup = (RadioGroup) root
+                    .findViewById(R.id.TagTypeRadioGroup);
             bldr.setTitle(R.string.dialog_create_tag)
-                    .setView(edtTag)
+                    .setView(root)
                     .setPositiveButton(android.R.string.ok,
                             new DialogInterface.OnClickListener() {
 
                                 @Override
                                 public void onClick(DialogInterface dialog,
                                         int which) {
-                                    setUserTag(edtTag.getText().toString()
-                                            .trim());
+                                    TagType type = null;
+                                    switch (tagTypeGroup
+                                            .getCheckedRadioButtonId()) {
+                                    case R.id.RadioPeopleTag:
+                                        type = TagType.PEOPLE;
+                                        break;
+                                    case R.id.RadioUserTag:
+                                    default:
+                                        type = TagType.USER;
+                                        break;
+                                    }
+
+                                    setTag(edtTag.getText().toString().trim(),
+                                            type);
                                     edtTag.setText("");
+
                                     dialog.dismiss();
                                 }
                             })
@@ -1098,12 +1106,16 @@ public class ShowPics extends Activity implements OnGestureListener,
         return super.onOptionsItemSelected(item);
     }
 
-    private void setUserTag(String tagName) {
+    private void setTag(String tagName, TagType tagType) {
 
-        Tag tag = TagProvider.getTag(tagName, TagType.USER);
+        Tag tag = TagProvider.getTag(tagName, tagType);
         if (tag == null) {
-            tag = mTagsDb.createTag(tagName, TagType.USER);
+            tag = mTagsDb.createTag(tagName, tagType);
         }
+        setTag(tag);
+    }
+
+    private void setTag(Tag tag) {
         Uri uri = mItems[curPic].uri;
         if (mTagsDb.setTag(tag, uri)) {
             mItems[curPic].tags.add(tag);
@@ -1112,7 +1124,8 @@ public class ShowPics extends Activity implements OnGestureListener,
     }
 
     private void unsetTag(Tag tag) {
-        if (tag != null && (tag.type == TagType.USER || tag.type == TagType.PEOPLE)) {
+        if (tag != null
+                && (tag.type == TagType.USER || tag.type == TagType.PEOPLE)) {
             Uri uri = mItems[curPic].uri;
             if (mTagsDb.unsetTag(tag, uri)) {
                 mItems[curPic].tags.remove(tag);
@@ -1655,30 +1668,198 @@ public class ShowPics extends Activity implements OnGestureListener,
             public void onClick(View v) {
                 QuickAction tagQA = new QuickAction(v);
                 final Tag tag = (Tag) v.getTag();
-                
-                ActionItem action = new ActionItem();
-                action.setIcon(getResources().getDrawable(R.drawable.ic_tag_delete));
-                action.setTitle(getString(R.string.qa_remove_tag));
-                action.setOnClickListener(new OnClickListener() {
-                    
-                    @Override
-                    public void onClick(View v) {
-                        unsetTag(tag);
-                    }
-                });
-                tagQA.addActionItem(action);
 
-                action = new ActionItem();
-                action.setIcon(getResources().getDrawable(R.drawable.ic_tag_edit));
-                action.setTitle(getString(R.string.qa_rename_tag));
-                action.setOnClickListener(new OnClickListener() {
-                    
-                    @Override
-                    public void onClick(View v) {
-                        Toast.makeText(getApplicationContext(), "RENAME", Toast.LENGTH_SHORT).show();
-                    }
-                });
-                tagQA.addActionItem(action);
+                ActionItem action;
+
+                switch (tag.type) {
+                case USER:
+                    action = new ActionItem();
+                    action.setIcon(getResources().getDrawable(
+                            R.drawable.ic_tag_delete));
+                    action.setTitle(getString(R.string.qa_remove_tag));
+                    action.setOnClickListener(new OnClickListener() {
+
+                        @Override
+                        public void onClick(View v) {
+                            unsetTag(tag);
+                        }
+                    });
+                    tagQA.addActionItem(action);
+
+                    action = new ActionItem();
+                    action.setIcon(getResources().getDrawable(
+                            R.drawable.ic_tag_edit));
+                    action.setTitle(getString(R.string.qa_rename_tag));
+                    action.setOnClickListener(new OnClickListener() {
+
+                        @Override
+                        public void onClick(View v) {
+                            Toast.makeText(getApplicationContext(), "RENAME",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                    tagQA.addActionItem(action);
+
+                    action = new ActionItem();
+                    action.setIcon(getResources().getDrawable(
+                            R.drawable.ic_show));
+                    action.setTitle(getString(R.string.qa_show));
+                    action.setOnClickListener(new OnClickListener() {
+
+                        @Override
+                        public void onClick(View v) {
+                            Toast.makeText(getApplicationContext(), "SHOW",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                    tagQA.addActionItem(action);
+
+                    action = new ActionItem();
+                    action.setIcon(getResources().getDrawable(
+                            R.drawable.ic_hide));
+                    action.setTitle(getString(R.string.qa_hide));
+                    action.setOnClickListener(new OnClickListener() {
+
+                        @Override
+                        public void onClick(View v) {
+                            Toast.makeText(getApplicationContext(), "HIDE",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                    tagQA.addActionItem(action);
+
+                    break;
+
+                case PEOPLE:
+                    action = new ActionItem();
+                    action.setIcon(getResources().getDrawable(
+                            R.drawable.ic_people_delete));
+                    action.setTitle(getString(R.string.qa_remove_tag));
+                    action.setOnClickListener(new OnClickListener() {
+
+                        @Override
+                        public void onClick(View v) {
+                            unsetTag(tag);
+                        }
+                    });
+                    tagQA.addActionItem(action);
+
+                    action = new ActionItem();
+                    action.setIcon(getResources().getDrawable(
+                            R.drawable.ic_people_edit));
+                    action.setTitle(getString(R.string.qa_rename_tag));
+                    action.setOnClickListener(new OnClickListener() {
+
+                        @Override
+                        public void onClick(View v) {
+                            Toast.makeText(getApplicationContext(), "RENAME",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                    tagQA.addActionItem(action);
+
+                    action = new ActionItem();
+                    action.setIcon(getResources().getDrawable(
+                            R.drawable.ic_show));
+                    action.setTitle(getString(R.string.qa_show));
+                    action.setOnClickListener(new OnClickListener() {
+
+                        @Override
+                        public void onClick(View v) {
+                            Toast.makeText(getApplicationContext(), "SHOW",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                    tagQA.addActionItem(action);
+
+                    action = new ActionItem();
+                    action.setIcon(getResources().getDrawable(
+                            R.drawable.ic_hide));
+                    action.setTitle(getString(R.string.qa_hide));
+                    action.setOnClickListener(new OnClickListener() {
+
+                        @Override
+                        public void onClick(View v) {
+                            Toast.makeText(getApplicationContext(), "HIDE",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                    tagQA.addActionItem(action);
+                    break;
+                case BUCKET:
+                    action = new ActionItem();
+                    action.setIcon(getResources().getDrawable(
+                            R.drawable.ic_show));
+                    action.setTitle(getString(R.string.qa_show));
+                    action.setOnClickListener(new OnClickListener() {
+
+                        @Override
+                        public void onClick(View v) {
+                            Toast.makeText(getApplicationContext(), "SHOW",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                    tagQA.addActionItem(action);
+
+                    action = new ActionItem();
+                    action.setIcon(getResources().getDrawable(
+                            R.drawable.ic_hide));
+                    action.setTitle(getString(R.string.qa_hide));
+                    action.setOnClickListener(new OnClickListener() {
+
+                        @Override
+                        public void onClick(View v) {
+                            Toast.makeText(getApplicationContext(), "HIDE",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                    tagQA.addActionItem(action);
+
+                    action = new ActionItem();
+                    action.setIcon(getResources().getDrawable(
+                            R.drawable.ic_bucket_hide));
+                    action.setTitle(getString(R.string.qa_always_hide));
+                    action.setOnClickListener(new OnClickListener() {
+
+                        @Override
+                        public void onClick(View v) {
+                            Toast.makeText(getApplicationContext(),
+                                    "ALWAYS HIDE", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                    tagQA.addActionItem(action);
+                    break;
+
+                default:
+                    action = new ActionItem();
+                    action.setIcon(getResources().getDrawable(
+                            R.drawable.ic_show));
+                    action.setTitle(getString(R.string.qa_show));
+                    action.setOnClickListener(new OnClickListener() {
+
+                        @Override
+                        public void onClick(View v) {
+                            Toast.makeText(getApplicationContext(), "SHOW",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                    tagQA.addActionItem(action);
+
+                    action = new ActionItem();
+                    action.setIcon(getResources().getDrawable(
+                            R.drawable.ic_hide));
+                    action.setTitle(getString(R.string.qa_hide));
+                    action.setOnClickListener(new OnClickListener() {
+
+                        @Override
+                        public void onClick(View v) {
+                            Toast.makeText(getApplicationContext(), "HIDE",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                    tagQA.addActionItem(action);
+                    break;
+                }
 
                 tagQA.show();
             }

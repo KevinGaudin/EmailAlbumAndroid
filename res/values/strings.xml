@@ -121,6 +121,10 @@
 	<string name="dialog_create_tag">Enter Tag name</string>
 	<string name="qa_rename_tag">Rename</string>
 	<string name="qa_remove_tag">Remove</string>
+	<string name="qa_always_hide">Always Hide</string>
+	<string name="qa_hide">Exclude from slideshow</string>
+	<string name="qa_show">Add to slideshow</string>
+	
 
 	<string name="number_files_deleted">%1$d file(s) deleted</string>
 	<string name="prefcat_cache">Cache Files</string>

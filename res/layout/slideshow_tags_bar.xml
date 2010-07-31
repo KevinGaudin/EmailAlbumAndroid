@@ -22,10 +22,13 @@
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
 			android:layout_gravity="bottom"
-			android:background="@drawable/tagstrip">
+			android:background="@drawable/tagstrip"
+			android:paddingLeft="5dp">
 			<Button
 				android:id="@+id/BtnAddTag"
-				android:text="+"
+				android:drawableLeft="@drawable/ic_add"
+				android:text=""
+				android:minWidth="20dp"
 				style="@style/Tag"></Button>
 		</LinearLayout>
 		<ImageButton
