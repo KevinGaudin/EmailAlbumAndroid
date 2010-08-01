@@ -88,6 +88,7 @@ import com.kg.emailalbum.mobile.ui.ActionItem;
 import com.kg.emailalbum.mobile.ui.QuickAction;
 import com.kg.emailalbum.mobile.util.CacheManager;
 import com.kg.emailalbum.mobile.util.Compatibility;
+import com.kg.emailalbum.mobile.util.CustomContentResolver;
 import com.kg.emailalbum.mobile.util.ScaleGestureDetector;
 import com.kg.emailalbum.mobile.util.ScaleGestureDetector.OnScaleGestureListener;
 import com.kg.oifilemanager.filemanager.FileManagerProvider;
@@ -1176,7 +1177,11 @@ public class ShowPics extends Activity implements OnGestureListener,
         mTagsDb = new TagsDbAdapter(getApplicationContext()).open();
 
         if (mAlbumUri != null) {
-            if (mAlbumUri.equals(Media.EXTERNAL_CONTENT_URI)) {
+            if (mAlbumUri.equals(Uri.parse("content://TAGS"))) {
+                Tag[] filter = { mTagsDb.getTag("nuit", TagType.USER) };
+                mSlideshowList = new TagFilterSlideshowList(
+                        getApplicationContext(), mTagsDb, MAX_BITMAP_DIM, filter);
+            } else if (mAlbumUri.equals(Media.EXTERNAL_CONTENT_URI)) {
                 mSlideshowList = new GallerySlideshowList(
                         getApplicationContext(), mTagsDb, MAX_BITMAP_DIM);
             } else {
@@ -1471,7 +1476,8 @@ public class ShowPics extends Activity implements OnGestureListener,
         destFile = new File(destDir, fileName.toLowerCase());
 
         OutputStream destFileOS = new FileOutputStream(destFile);
-        InputStream imageIS = mSlideshowList.getOriginalInputStream(mPosition);
+        //InputStream imageIS = mSlideshowList.getOriginalInputStream(mPosition);
+        InputStream imageIS = CustomContentResolver.openInputStream(getApplicationContext(), mItems[curPic].uri);
         byte[] buffer = new byte[2048];
         int len = 0;
         while ((len = imageIS.read(buffer)) >= 0) {

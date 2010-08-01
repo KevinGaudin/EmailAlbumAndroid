@@ -1,13 +1,9 @@
 package com.kg.emailalbum.mobile.tags;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-
-import com.kg.emailalbum.mobile.tags.Tag.TagType;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -17,6 +13,8 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.util.Log;
+
+import com.kg.emailalbum.mobile.tags.Tag.TagType;
 
 public class TagsDbAdapter {
     private static final String DATABASE_NAME = "EmailAlbum";
@@ -224,7 +222,7 @@ public class TagsDbAdapter {
     }
 
     public List<Uri> getUrisFromAllTags(Tag... tags) {
-        ArrayList<Uri> result = new ArrayList<Uri>();
+        List<Uri> result = new ArrayList<Uri>();
         // SELECT b.*
         // FROM tagmap bt, bookmark b, tag t
         // WHERE bt.tag_id = t.tag_id
@@ -232,6 +230,7 @@ public class TagsDbAdapter {
         // AND b.id = bt.bookmark_id
         // GROUP BY b.id
         // HAVING COUNT( b.id )=3
+        String[] proj = { KEY_URI };
         StringBuilder selArgsBldr = new StringBuilder();
         String[] selArgsValues = new String[tags.length];
         for (int i = 0; i < tags.length; i++) {
@@ -241,10 +240,12 @@ public class TagsDbAdapter {
                 selArgsBldr.append(',');
             }
         }
-        String[] proj = { KEY_URI };
+        String having = "COUNT(" + KEY_TAG_ID + ") = " + selArgsValues.length;
+        String groupBy = KEY_URI;
+
         Cursor urisCursor = mDb.query(true, TAG_URI_TABLE_NAME, proj,
                 KEY_TAG_ID + " IN ( " + selArgsBldr.toString() + ")",
-                selArgsValues, null, null, null, null);
+                selArgsValues, groupBy, having, null, null);
         int colNameId = urisCursor.getColumnIndex(KEY_URI);
         if (urisCursor.getCount() > 0) {
             while (urisCursor.moveToNext()) {

@@ -104,34 +104,31 @@ public class GallerySlideshowList extends SlideshowList {
                 Uri imageUri = mUris.get(location);
                 result.bitmap = BitmapLoader.load(mContext, imageUri,
                         mTargetSize, mTargetSize, Config.RGB_565, false);
-                if (mTagsDb != null) {
-                    result.tags = mTagsDb.getTags(imageUri);
-                }
 
                 Bundle metadata = mMetaData.get(imageUri);
 
                 Log.d(LOG_TAG, "METADATA : " + metadata.toString());
 
                 // Add the BUCKET tag
-                result.tags.add(TagProvider.getTag(
-                        metadata.getLong(ImageColumns.BUCKET_ID),
+                Tag bucketTag = mTagsDb.createTag(
                         metadata.getString(ImageColumns.BUCKET_DISPLAY_NAME),
-                        TagType.BUCKET));
+                        TagType.BUCKET);
+                mTagsDb.setTag(bucketTag, imageUri);
 
                 if (!result.isDateTakenSet()) {
                     long dateTakenInMillis = metadata
                             .getLong(ImageColumns.DATE_TAKEN);
                     Time dateTaken = new Time();
                     dateTaken.set(dateTakenInMillis);
-                    Log.d(LOG_TAG, "Now is " + System.currentTimeMillis()
-                            + ", dateTaken is " + dateTakenInMillis);
-                    Tag tag = mTagsDb.createTag(dateTaken.format("%B"), TagType.MONTH);
+                    Tag tag = mTagsDb.createTag(dateTaken.format("%B"),
+                            TagType.MONTH);
                     mTagsDb.setTag(tag, imageUri);
-                    result.tags.add(tag);
-                    tag = mTagsDb.createTag(dateTaken.format("%Y"), TagType.YEAR);
+                    tag = mTagsDb.createTag(dateTaken.format("%Y"),
+                            TagType.YEAR);
                     mTagsDb.setTag(tag, imageUri);
-                    result.tags.add(tag);
                 }
+
+                result.tags = mTagsDb.getTags(imageUri);
             } catch (IOException e) {
                 // TODO Auto-generated catch block
                 Log.e(LOG_TAG, "Error : ", e);

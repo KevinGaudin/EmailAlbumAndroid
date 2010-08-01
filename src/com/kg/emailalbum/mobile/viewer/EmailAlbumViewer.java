@@ -370,7 +370,8 @@ public class EmailAlbumViewer extends ListActivity {
                 String thumbName = msg.getData().getString(
                         KEY_THMBCREAT_THUMB_NAME);
                 setProgress((position + 1) * 10000 / mContentModel.size());
-                Log.d(LOG_TAG, "Received thumbnail update for position : " + position + " uri : " + thumbName);
+                Log.d(LOG_TAG, "Received thumbnail update for position : "
+                        + position + " uri : " + thumbName);
                 mAdapter.updateThumbnail(position, thumbName);
             }
         }
@@ -385,7 +386,10 @@ public class EmailAlbumViewer extends ListActivity {
      */
     private void fillData(boolean clearThumbnails) {
         if (mAlbumFileUri != null) {
-            if (mAlbumFileUri.toString().startsWith(
+            if (mAlbumFileUri.toString().startsWith("content://TAGS")) {
+                Toast.makeText(this, "TO BE IMPLEMENTED", Toast.LENGTH_SHORT).show();
+                finish();
+            } else if (mAlbumFileUri.toString().startsWith(
                     Media.EXTERNAL_CONTENT_URI.toString())) {
                 mContentModel = new GallerySlideshowList(
                         getApplicationContext(), null,

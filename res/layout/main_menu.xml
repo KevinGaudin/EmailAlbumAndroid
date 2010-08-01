@@ -1,55 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-	Copyright 2009, 2010 Kevin Gaudin
-
-	This file is part of EmailAlbum.
-
-	EmailAlbum is free software: you can redistribute it and/or modify
-	it under the terms of the GNU General Public License as published by
-	the Free Software Foundation, either version 3 of the License, or
-	(at your option) any later version.
-
-	EmailAlbum is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	GNU General Public License for more details.
-
-	You should have received a copy of the GNU General Public License
-	along with EmailAlbum.  If not, see <http://www.gnu.org/licenses/>.
- -->
-	<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" 
-		android:orientation="vertical" android:layout_width="fill_parent"
-		android:background="@drawable/blueish_gradient"
-		android:layout_height="fill_parent" android:gravity="center_vertical|center_horizontal|center"
-		android:layout_gravity="center_vertical|center_horizontal|center"
-		android:id="@+id/main_menu_root">
-		<ScrollView android:id="@+id/ScrollView01"
-			android:layout_width="wrap_content" android:layout_height="wrap_content">
-			<LinearLayout android:id="@+id/LinearLayout01"
-				android:layout_width="wrap_content" android:layout_height="wrap_content"
-				android:orientation="vertical" android:layout_gravity="center_vertical|center_horizontal">
-				<Button android:layout_height="wrap_content" android:text="@string/menu_create_album"
-					android:drawableLeft="@android:drawable/ic_menu_add"
-					android:layout_width="fill_parent" android:layout_gravity="center_horizontal"
-					android:id="@+id/BtnCreateAlbum" ></Button>
-				<Button android:layout_height="wrap_content" android:text="@string/menu_load_album"
-					android:drawableLeft="@android:drawable/ic_menu_gallery"
-					android:layout_width="fill_parent" android:layout_gravity="center_horizontal"
-					android:id="@+id/BtnOpenAlbum" android:drawableRight="@drawable/icon_sdcard_small"></Button><Button android:layout_height="wrap_content" android:drawableLeft="@android:drawable/ic_menu_gallery"
-					android:layout_width="fill_parent" android:layout_gravity="center_horizontal"
-					android:id="@+id/BtnOpenGallery" android:text="@string/menu_view_gallery"></Button>
-				<Button android:layout_height="wrap_content" android:text="@string/menu_demo"
-					android:drawableLeft="@android:drawable/ic_menu_more"
-					android:layout_width="fill_parent" android:layout_gravity="center_horizontal"
-					android:id="@+id/BtnDemoAlbum"></Button>
-				<!--<Button android:layout_height="wrap_content" android:text="@string/menu_prefs"
-					android:drawableLeft="@android:drawable/ic_menu_preferences"
-					android:layout_width="fill_parent" android:layout_gravity="center_horizontal"
-					android:id="@+id/BtnPrefs"></Button>
-				--><Button android:layout_height="wrap_content" android:text="@string/menu_about"
-					android:drawableLeft="@android:drawable/ic_menu_help"
-					android:layout_width="fill_parent" android:layout_gravity="center_horizontal"
-					android:id="@+id/BtnAbout"></Button>
-			</LinearLayout>
-		</ScrollView>
-	</LinearLayout>
+<!-- Copyright 2009, 2010 Kevin Gaudin This file is part of EmailAlbum. EmailAlbum 
+	is free software: you can redistribute it and/or modify it under the terms 
+	of the GNU General Public License as published by the Free Software Foundation, 
+	either version 3 of the License, or (at your option) any later version. EmailAlbum 
+	is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; 
+	without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
+	PURPOSE. See the GNU General Public License for more details. You should 
+	have received a copy of the GNU General Public License along with EmailAlbum. 
+	If not, see <http://www.gnu.org/licenses/>. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="vertical" android:layout_width="fill_parent"
+	android:background="@drawable/blueish_gradient" android:layout_height="fill_parent"
+	android:gravity="center_vertical|center_horizontal|center"
+	android:layout_gravity="center_vertical|center_horizontal|center"
+	android:id="@+id/main_menu_root">
+	<ScrollView android:id="@+id/ScrollView01"
+		android:layout_width="wrap_content" android:layout_height="wrap_content">
+		<LinearLayout android:id="@+id/LinearLayout01"
+			android:layout_width="wrap_content" android:layout_height="wrap_content"
+			android:orientation="vertical" android:layout_gravity="center_vertical|center_horizontal">
+			<Button android:layout_height="wrap_content" android:text="@string/menu_create_album"
+				android:drawableLeft="@android:drawable/ic_menu_add"
+				android:layout_width="fill_parent" android:layout_gravity="center_horizontal"
+				android:id="@+id/BtnCreateAlbum"></Button>
+			<Button android:layout_height="wrap_content" android:text="@string/menu_load_album"
+				android:drawableLeft="@android:drawable/ic_menu_gallery"
+				android:layout_width="fill_parent" android:layout_gravity="center_horizontal"
+				android:id="@+id/BtnOpenAlbum" android:drawableRight="@drawable/icon_sdcard_small"></Button>
+			<Button android:layout_height="wrap_content"
+				android:drawableLeft="@android:drawable/ic_menu_gallery"
+				android:layout_width="fill_parent" android:layout_gravity="center_horizontal"
+				android:id="@+id/BtnOpenGallery" android:text="@string/menu_view_gallery"></Button>
+			<Button android:layout_height="wrap_content"
+				android:drawableLeft="@android:drawable/ic_menu_gallery"
+				android:layout_width="fill_parent" android:layout_gravity="center_horizontal"
+				android:id="@+id/BtnOpenTagFilter" android:text="Filter"></Button>
+			<Button android:layout_height="wrap_content" android:text="@string/menu_demo"
+				android:drawableLeft="@android:drawable/ic_menu_more"
+				android:layout_width="fill_parent" android:layout_gravity="center_horizontal"
+				android:id="@+id/BtnDemoAlbum"></Button>
+			<!--<Button android:layout_height="wrap_content" android:text="@string/menu_prefs" 
+				android:drawableLeft="@android:drawable/ic_menu_preferences" android:layout_width="fill_parent" 
+				android:layout_gravity="center_horizontal" android:id="@+id/BtnPrefs"></Button> -->
+			<Button android:layout_height="wrap_content" android:text="@string/menu_about"
+				android:drawableLeft="@android:drawable/ic_menu_help"
+				android:layout_width="fill_parent" android:layout_gravity="center_horizontal"
+				android:id="@+id/BtnAbout"></Button>
+		</LinearLayout>
+	</ScrollView>
+</LinearLayout>

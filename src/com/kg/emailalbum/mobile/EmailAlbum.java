@@ -75,7 +75,22 @@ public class EmailAlbum extends Activity {
             }
 
         });
-        
+
+        // View TagFilter
+        btn = (Button) findViewById(R.id.BtnOpenTagFilter);
+        btn.getBackground().setDither(true);
+        btn.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(getApplicationContext(),
+                        ShowPics.class);
+                i.putExtra("ALBUM", Uri.parse("content://TAGS"));
+                startActivity(i);
+            }
+
+        });
+
         // Create a new album
         btn = (Button) findViewById(R.id.BtnCreateAlbum);
         btn.getBackground().setDither(true);
