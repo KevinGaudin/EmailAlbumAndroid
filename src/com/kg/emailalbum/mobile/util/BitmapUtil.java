@@ -28,7 +28,9 @@ import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.net.Uri;
 import android.provider.MediaStore.Images;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.WindowManager;
 
 /**
  * Provides common tools for manipulating Bitmap objects.
@@ -37,6 +39,7 @@ import android.util.Log;
  * 
  */
 public class BitmapUtil {
+    private static DisplayMetrics mMetrics = null;
     private static final String LOG_TAG = BitmapUtil.class.getSimpleName();
     private static Uri sStorageURI = Images.Media.EXTERNAL_CONTENT_URI;
 
@@ -126,5 +129,17 @@ public class BitmapUtil {
                     + imageFile.toString());
         }
         return uri;
+    }
+
+    /**
+     * @param ctx
+     */
+    public static float getDensity(Context ctx) {
+        if (mMetrics == null) {
+            mMetrics = new DisplayMetrics();
+            ((WindowManager) ctx.getSystemService(Context.WINDOW_SERVICE))
+                    .getDefaultDisplay().getMetrics(mMetrics);
+        }
+        return mMetrics.density;
     }
 }

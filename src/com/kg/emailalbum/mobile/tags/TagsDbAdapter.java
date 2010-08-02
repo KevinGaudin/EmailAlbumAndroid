@@ -221,7 +221,7 @@ public class TagsDbAdapter {
         return tags;
     }
 
-    public List<Uri> getUrisFromAllTags(Tag... tags) {
+    public List<Uri> getUrisFromAllTagFilters(TagFilter... tagFilters) {
         List<Uri> result = new ArrayList<Uri>();
         // SELECT b.*
         // FROM tagmap bt, bookmark b, tag t
@@ -232,11 +232,11 @@ public class TagsDbAdapter {
         // HAVING COUNT( b.id )=3
         String[] proj = { KEY_URI };
         StringBuilder selArgsBldr = new StringBuilder();
-        String[] selArgsValues = new String[tags.length];
-        for (int i = 0; i < tags.length; i++) {
-            selArgsValues[i] = Long.toString(tags[i].id);
+        String[] selArgsValues = new String[tagFilters.length];
+        for (int i = 0; i < tagFilters.length; i++) {
+            selArgsValues[i] = Long.toString(tagFilters[i].tag.id);
             selArgsBldr.append('?');
-            if (i < tags.length - 1) {
+            if (i < tagFilters.length - 1) {
                 selArgsBldr.append(',');
             }
         }

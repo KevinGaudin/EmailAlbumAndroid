@@ -82,6 +82,8 @@ import com.kg.emailalbum.mobile.R;
 import com.kg.emailalbum.mobile.animation.Rotate3dAnimation;
 import com.kg.emailalbum.mobile.tags.Tag;
 import com.kg.emailalbum.mobile.tags.Tag.TagType;
+import com.kg.emailalbum.mobile.tags.TagFilter;
+import com.kg.emailalbum.mobile.tags.TagFilter.TagFilterType;
 import com.kg.emailalbum.mobile.tags.TagProvider;
 import com.kg.emailalbum.mobile.tags.TagsDbAdapter;
 import com.kg.emailalbum.mobile.ui.ActionItem;
@@ -247,7 +249,7 @@ public class ShowPics extends Activity implements OnGestureListener,
     private View mTagsFilterTabClose;
     private AlertDialog mTagCreator = null;
     private Uri mAlbumUri;
-    private Tag[] mTagFilters;
+    private TagFilter[] mTagFilters;
 
     /**
      * Starts the pictures transition animation.
@@ -1324,8 +1326,9 @@ public class ShowPics extends Activity implements OnGestureListener,
      * 
      */
     private void addTagToFilter(Tag tag) {
-        mTagFilters = new Tag[] { tag };
-        addTagToFilterBar(tag);
+        TagFilter tagFilter = new TagFilter(tag, TagFilterType.MANDATORY);
+        mTagFilters = new TagFilter[] { tagFilter };
+        addTagFilterToFilterBar(tagFilter);
     }
 
     /*
@@ -2010,7 +2013,7 @@ public class ShowPics extends Activity implements OnGestureListener,
         mTagsContainer.addView(btnAddTag);
     }
 
-    private void addTagToFilterBar(Tag tag) {
+    private void addTagFilterToFilterBar(TagFilter tagFilter) {
         ViewGroup btnTagFilter = (ViewGroup) getLayoutInflater().inflate(
                 R.layout.slideshow_tag_filter, mTagsFilterContainer, false);
         ImageView imgFilterType = (ImageView) btnTagFilter
@@ -2019,9 +2022,9 @@ public class ShowPics extends Activity implements OnGestureListener,
         Button btnTag = (Button) getLayoutInflater().inflate(
                 R.layout.slideshow_tag, mTagsFilterContainer, false);
 
-        btnTag.setText(tag.label);
-        btnTag.setTag(tag);
-        btnTag.setCompoundDrawables(tag.type.getDrawable(this), null, null,
+        btnTag.setText(tagFilter.tag.label);
+        btnTag.setTag(tagFilter.tag);
+        btnTag.setCompoundDrawables(tagFilter.tag.type.getDrawable(this), null, null,
                 null);
 
         btnTag.setOnClickListener(new OnClickListener() {
@@ -2034,7 +2037,7 @@ public class ShowPics extends Activity implements OnGestureListener,
                 ActionItem action;
 
                 action = new ActionItem();
-                action.setIcon(getResources().getDrawable(R.drawable.ic_show));
+                action.setIcon(TagFilterType.OPTIONAL.getDrawable(ShowPics.this));
                 action.setTitle("Make optional");
                 action.setOnClickListener(new OnClickListener() {
 
@@ -2047,7 +2050,7 @@ public class ShowPics extends Activity implements OnGestureListener,
                 tagFilterQA.addActionItem(action);
 
                 action = new ActionItem();
-                action.setIcon(getResources().getDrawable(R.drawable.ic_hide));
+                action.setIcon(TagFilterType.HIDE.getDrawable(ShowPics.this));
                 action.setTitle(getString(R.string.qa_hide));
                 action.setOnClickListener(new OnClickListener() {
 
@@ -2062,7 +2065,7 @@ public class ShowPics extends Activity implements OnGestureListener,
                 tagFilterQA.show();
             }
         });
-        imgFilterType.setImageResource(R.drawable.ic_add);
+        imgFilterType.setImageDrawable(tagFilter.type.getDrawable(this));
         btnTagFilter.addView(btnTag);
         mTagsFilterContainer.addView(btnTagFilter);
     }

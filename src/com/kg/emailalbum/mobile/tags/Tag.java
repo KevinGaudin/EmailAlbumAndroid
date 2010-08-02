@@ -9,8 +9,9 @@ import android.util.DisplayMetrics;
 import android.view.WindowManager;
 
 import com.kg.emailalbum.mobile.R;
+import com.kg.emailalbum.mobile.util.BitmapUtil;
 
-public class Tag implements Comparable<Object> {
+public class Tag implements Comparable<Tag> {
     public long id;
     public String label;
     public TagType type;
@@ -52,7 +53,8 @@ public class Tag implements Comparable<Object> {
         MONTH {
             @Override
             public Drawable getDrawable(Context ctx) {
-                return initDrawable(ctx, this, R.drawable.ic_calendar_view_month);
+                return initDrawable(ctx, this,
+                        R.drawable.ic_calendar_view_month);
             }
 
             @Override
@@ -63,7 +65,8 @@ public class Tag implements Comparable<Object> {
         YEAR {
             @Override
             public Drawable getDrawable(Context ctx) {
-                return initDrawable(ctx, this, R.drawable.ic_calendar_view_month);
+                return initDrawable(ctx, this,
+                        R.drawable.ic_calendar_view_month);
             }
 
             @Override
@@ -73,7 +76,6 @@ public class Tag implements Comparable<Object> {
         };
 
         private static final int TAG_ICON_SIZE = 16;
-        private static DisplayMetrics mMetrics;
         private static final Map<TagType, Drawable> mDrawables = new HashMap<TagType, Drawable>();
 
         public abstract Drawable getDrawable(Context ctx);
@@ -84,30 +86,19 @@ public class Tag implements Comparable<Object> {
          * @param ctx
          * @return
          */
-        private static Drawable initDrawable(Context ctx, TagType tagType, int drawableId) {
+        private static Drawable initDrawable(Context ctx, TagType tagType,
+                int drawableId) {
             Drawable drawable = mDrawables.get(tagType);
             if (drawable == null) {
-                initMetrics(ctx);
-                drawable = ctx.getResources().getDrawable(
-                        drawableId);
+                drawable = ctx.getResources().getDrawable(drawableId);
                 drawable.setBounds(0, 0,
-                        (int) (TAG_ICON_SIZE * mMetrics.density),
-                        (int) (TAG_ICON_SIZE * mMetrics.density));
+                        (int) (TAG_ICON_SIZE * BitmapUtil.getDensity(ctx)),
+                        (int) (TAG_ICON_SIZE * BitmapUtil.getDensity(ctx)));
                 mDrawables.put(tagType, drawable);
             }
             return drawable;
         }
 
-        /**
-         * @param ctx
-         */
-        private static void initMetrics(Context ctx) {
-            if (mMetrics == null) {
-                mMetrics = new DisplayMetrics();
-                ((WindowManager) ctx.getSystemService(Context.WINDOW_SERVICE))
-                        .getDefaultDisplay().getMetrics(mMetrics);
-            }
-        }
     }
 
     public Tag(long id, String label, TagType type) {
@@ -117,8 +108,7 @@ public class Tag implements Comparable<Object> {
     }
 
     @Override
-    public int compareTo(Object another) {
-        Tag anotherTag = (Tag) another;
+    public int compareTo(Tag anotherTag) {
         if (this.type.getSortOrder() != anotherTag.type.getSortOrder()) {
             return this.type.getSortOrder().compareTo(
                     anotherTag.type.getSortOrder());
@@ -177,5 +167,4 @@ public class Tag implements Comparable<Object> {
             return false;
         return true;
     }
-
 }

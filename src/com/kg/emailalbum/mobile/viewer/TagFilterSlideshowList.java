@@ -17,6 +17,7 @@ import android.util.Log;
 
 import com.kg.emailalbum.mobile.tags.Tag;
 import com.kg.emailalbum.mobile.tags.Tag.TagType;
+import com.kg.emailalbum.mobile.tags.TagFilter;
 import com.kg.emailalbum.mobile.tags.TagProvider;
 import com.kg.emailalbum.mobile.tags.TagsDbAdapter;
 import com.kg.emailalbum.mobile.util.BitmapLoader;
@@ -30,13 +31,13 @@ public class TagFilterSlideshowList extends SlideshowList {
     private List<Uri> mUris;
 
     public TagFilterSlideshowList(Context context, TagsDbAdapter tagsDb,
-            int targetSize, Tag[] tags) {
+            int targetSize, TagFilter[] mTagFilters) {
         mContext = context;
         mTagsDb = tagsDb;
         mTargetSize = targetSize;
 
         
-        mUris = mTagsDb.getUrisFromAllTags(tags);
+        mUris = mTagsDb.getUrisFromAllTagFilters(mTagFilters);
         
 
     }
