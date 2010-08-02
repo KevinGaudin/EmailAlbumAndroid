@@ -247,6 +247,7 @@ public class ShowPics extends Activity implements OnGestureListener,
     private View mTagsFilterTabClose;
     private AlertDialog mTagCreator = null;
     private Uri mAlbumUri;
+    private Tag[] mTagFilters;
 
     /**
      * Starts the pictures transition animation.
@@ -736,7 +737,8 @@ public class ShowPics extends Activity implements OnGestureListener,
 
     private void initTagsFilterBar() {
         mTagsFilterBar = findViewById(R.id.TagsFilterBar);
-        mTagsFilterContainer = (ViewGroup) mTagsFilterBar.findViewById(R.id.TagsFilterContainer);
+        mTagsFilterContainer = (ViewGroup) mTagsFilterBar
+                .findViewById(R.id.TagsFilterContainer);
         mTagsFilterBar.setVisibility(View.GONE);
         mTagsFilterTabOpen = findViewById(R.id.TagsFilterTabOpen);
         final Animation animOpenTagsFilterBar = AnimationUtils.loadAnimation(
@@ -801,7 +803,8 @@ public class ShowPics extends Activity implements OnGestureListener,
             }
         });
 
-        Button btnAddTag = (Button) mTagsFilterBar.findViewById(R.id.BtnAddTagFilter);
+        Button btnAddTag = (Button) mTagsFilterBar
+                .findViewById(R.id.BtnAddTagFilter);
         btnAddTag.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -809,7 +812,7 @@ public class ShowPics extends Activity implements OnGestureListener,
             }
         });
     }
-    
+
     private void addTag(View v) {
         // getUserTagPicker().show();
         QuickAction qa = new QuickAction(v);
@@ -852,7 +855,8 @@ public class ShowPics extends Activity implements OnGestureListener,
 
         ActionItem action = new ActionItem();
 
-        Set<Tag> tags = mTagsDb.getAllTags(TagType.USER, TagType.PEOPLE, TagType.MONTH, TagType.YEAR);
+        Set<Tag> tags = mTagsDb.getAllTags(TagType.USER, TagType.PEOPLE,
+                TagType.MONTH, TagType.YEAR);
         for (Tag tag : tags) {
             action = new ActionItem();
             action.setIcon(tag.type.getDrawable(this));
@@ -863,15 +867,17 @@ public class ShowPics extends Activity implements OnGestureListener,
                 @Override
                 public void onClick(View v) {
                     Tag tag = (Tag) v.getTag();
-//                    addTagToFilter(tag);
-                    Toast.makeText(getApplicationContext(), "Add tag to filter : " + tag.toString(), Toast.LENGTH_SHORT).show();
+                    // addTagToFilter(tag);
+                    Toast.makeText(getApplicationContext(),
+                            "Add tag to filter : " + tag.toString(),
+                            Toast.LENGTH_SHORT).show();
                 }
             });
             qa.addActionItem(action);
         }
         qa.show();
     }
-    
+
     private AlertDialog getTagCreator() {
         if (mTagCreator == null) {
             ViewGroup root = (ViewGroup) getLayoutInflater().inflate(
@@ -1293,9 +1299,10 @@ public class ShowPics extends Activity implements OnGestureListener,
 
         if (mAlbumUri != null) {
             if (mAlbumUri.equals(Uri.parse("content://TAGS"))) {
-                Tag[] filter = { mTagsDb.getTag("nuit", TagType.USER) };
+                addTagToFilter(mTagsDb.getTag("nuit", TagType.USER));
                 mSlideshowList = new TagFilterSlideshowList(
-                        getApplicationContext(), mTagsDb, MAX_BITMAP_DIM, filter);
+                        getApplicationContext(), mTagsDb, MAX_BITMAP_DIM,
+                        mTagFilters);
             } else if (mAlbumUri.equals(Media.EXTERNAL_CONTENT_URI)) {
                 mSlideshowList = new GallerySlideshowList(
                         getApplicationContext(), mTagsDb, MAX_BITMAP_DIM);
@@ -1311,6 +1318,14 @@ public class ShowPics extends Activity implements OnGestureListener,
         }
 
         showPicture();
+    }
+
+    /**
+     * 
+     */
+    private void addTagToFilter(Tag tag) {
+        mTagFilters = new Tag[] { tag };
+        addTagToFilterBar(tag);
     }
 
     /*
@@ -1592,7 +1607,8 @@ public class ShowPics extends Activity implements OnGestureListener,
 
         OutputStream destFileOS = new FileOutputStream(destFile);
 
-        InputStream imageIS = CustomContentResolver.openInputStream(getApplicationContext(), mItems[curPic].uri);
+        InputStream imageIS = CustomContentResolver.openInputStream(
+                getApplicationContext(), mItems[curPic].uri);
         byte[] buffer = new byte[2048];
         int len = 0;
         while ((len = imageIS.read(buffer)) >= 0) {
@@ -1992,6 +2008,69 @@ public class ShowPics extends Activity implements OnGestureListener,
         View btnAddTag = mTagsContainer.getChildAt(0);
         mTagsContainer.removeAllViews();
         mTagsContainer.addView(btnAddTag);
+    }
+
+    private void addTagToFilterBar(Tag tag) {
+        ViewGroup btnTagFilter = (ViewGroup) getLayoutInflater().inflate(
+                R.layout.slideshow_tag_filter, mTagsFilterContainer, false);
+        ImageView imgFilterType = (ImageView) btnTagFilter
+                .findViewById(R.id.ImgFilterType);
+
+        Button btnTag = (Button) getLayoutInflater().inflate(
+                R.layout.slideshow_tag, mTagsFilterContainer, false);
+
+        btnTag.setText(tag.label);
+        btnTag.setTag(tag);
+        btnTag.setCompoundDrawables(tag.type.getDrawable(this), null, null,
+                null);
+
+        btnTag.setOnClickListener(new OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                QuickAction tagFilterQA = new QuickAction(v);
+                final Tag tag = (Tag) v.getTag();
+
+                ActionItem action;
+
+                action = new ActionItem();
+                action.setIcon(getResources().getDrawable(R.drawable.ic_show));
+                action.setTitle("Make optional");
+                action.setOnClickListener(new OnClickListener() {
+
+                    @Override
+                    public void onClick(View v) {
+                        Toast.makeText(getApplicationContext(), "MAKE OPTIONAL",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                });
+                tagFilterQA.addActionItem(action);
+
+                action = new ActionItem();
+                action.setIcon(getResources().getDrawable(R.drawable.ic_hide));
+                action.setTitle(getString(R.string.qa_hide));
+                action.setOnClickListener(new OnClickListener() {
+
+                    @Override
+                    public void onClick(View v) {
+                        Toast.makeText(getApplicationContext(), "HIDE",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                });
+                tagFilterQA.addActionItem(action);
+
+                tagFilterQA.show();
+            }
+        });
+        imgFilterType.setImageResource(R.drawable.ic_add);
+        btnTagFilter.addView(btnTag);
+        mTagsFilterContainer.addView(btnTagFilter);
+    }
+
+    private void emptyTagsFilterBar() {
+        View btnAddTagFilter = mTagsFilterContainer.getChildAt(0);
+        mTagsFilterContainer.removeAllViews();
+        mTagsFilterContainer.addView(btnAddTagFilter);
     }
 
     /**
