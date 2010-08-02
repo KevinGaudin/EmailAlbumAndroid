@@ -83,15 +83,6 @@ public class ArchiveSlideshowList extends SlideshowList {
     }
 
     @Override
-    public InputStream getOriginalInputStream(int position) throws IOException {
-        if (mArchive != null) {
-            return ZipUtil.getInputStream(mArchive, mArchive
-                    .getEntry(mItemNames.get(position)));
-        }
-        return null;
-    }
-
-    @Override
     public Uri getAlbumUri() {
         return Uri.parse(mArchive.getName());
     }

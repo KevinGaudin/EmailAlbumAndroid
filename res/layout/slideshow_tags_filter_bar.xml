@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android">
+<ImageButton
+    android:id="@+id/TagsFilterTabOpen"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@drawable/tagtab"
+    android:layout_gravity="top|left">
+</ImageButton>
+<HorizontalScrollView 
+	android:layout_width="fill_parent"
+	android:layout_height="wrap_content"
+	android:layout_gravity="top">
+	<LinearLayout
+		android:id="@+id/TagsFilterBar"
+		android:layout_width="fill_parent"
+		android:layout_height="wrap_content"
+		android:layout_gravity="top">
+		<LinearLayout 
+			android:id="@+id/TagsFilterContainer"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_gravity="top"
+			android:background="@drawable/tagstrip"
+			android:paddingLeft="5dp">
+			<Button
+				android:id="@+id/BtnAddTagFilter"
+				android:drawableLeft="@drawable/ic_add"
+				android:text=""
+				android:minWidth="20dp"
+				style="@style/Tag"></Button>
+		</LinearLayout>
+		<ImageButton
+		    android:id="@+id/TagsFilterTabClose"
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:background="@drawable/tagtab"
+		    android:layout_gravity="bottom|right">
+		</ImageButton>
+	</LinearLayout>
+</HorizontalScrollView>
+</merge>

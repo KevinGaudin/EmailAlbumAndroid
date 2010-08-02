@@ -29,5 +29,6 @@
 		<include layout="@layout/slideshow_flipper_views"/>
 	</com.kg.emailalbum.mobile.util.MyViewFlipper>
 	<include layout="@layout/slideshow_tags_bar" />
+	<include layout="@layout/slideshow_tags_filter_bar"/>
 	<include layout="@layout/slideshow_zoom_indicator"/>
 </FrameLayout>

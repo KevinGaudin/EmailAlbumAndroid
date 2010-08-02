@@ -29,5 +29,6 @@
 		<include layout="@layout/slideshow_flipper_views"/>
 	</ViewFlipper>
 	<include layout="@layout/slideshow_tags_bar"/>
+	<include layout="@layout/slideshow_tags_filter_bar"/>
 	<include layout="@layout/slideshow_zoom_indicator"/>
 </FrameLayout>

@@ -87,11 +87,6 @@ public class GallerySlideshowList extends SlideshowList {
         return Media.EXTERNAL_CONTENT_URI;
     }
 
-    @Override
-    public InputStream getOriginalInputStream(int position) throws IOException {
-        mContext.getContentResolver().openInputStream(mUris.get(position));
-        return null;
-    }
 
     @Override
     public SlideshowItem get(int location) {

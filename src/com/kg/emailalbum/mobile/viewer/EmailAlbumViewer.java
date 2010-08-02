@@ -66,6 +66,7 @@ import com.kg.emailalbum.mobile.R;
 import com.kg.emailalbum.mobile.util.BitmapLoader;
 import com.kg.emailalbum.mobile.util.CacheManager;
 import com.kg.emailalbum.mobile.util.Compatibility;
+import com.kg.emailalbum.mobile.util.CustomContentResolver;
 import com.kg.emailalbum.mobile.util.IntentHelper;
 import com.kg.oifilemanager.filemanager.FileManagerProvider;
 import com.kg.oifilemanager.filemanager.util.FileUtils;
@@ -848,7 +849,7 @@ public class EmailAlbumViewer extends ListActivity {
 
         // Raw copy of the file
         OutputStream destFileOS = new FileOutputStream(destFile);
-        InputStream imageIS = mContentModel.getOriginalInputStream(position);
+        InputStream imageIS = CustomContentResolver.openInputStream(getApplicationContext(), imgModel.uri);
 
         byte[] buffer = new byte[2048];
         int len = 0;

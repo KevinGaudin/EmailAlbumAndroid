@@ -41,14 +41,6 @@ public class TagFilterSlideshowList extends SlideshowList {
 
     }
 
-    
-    
-    @Override
-    public InputStream getOriginalInputStream(int position) throws IOException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
     @Override
     public Uri getAlbumUri() {
         // TODO Auto-generated method stub
