@@ -23,23 +23,21 @@ import com.kg.emailalbum.mobile.tags.TagsDbAdapter;
 import com.kg.emailalbum.mobile.util.BitmapLoader;
 
 public class TagFilterSlideshowList extends SlideshowList {
-    private static final String LOG_TAG = TagFilterSlideshowList.class.getSimpleName();
+    private static final String LOG_TAG = TagFilterSlideshowList.class
+            .getSimpleName();
     private Context mContext;
     private TagsDbAdapter mTagsDb;
     private int mTargetSize;
-    
+    private TagFilter[] mTagFilters;
+
     private List<Uri> mUris;
 
     public TagFilterSlideshowList(Context context, TagsDbAdapter tagsDb,
-            int targetSize, TagFilter[] mTagFilters) {
+            int targetSize, TagFilter[] tagFilters) {
         mContext = context;
         mTagsDb = tagsDb;
         mTargetSize = targetSize;
-
-        
-        mUris = mTagsDb.getUrisFromAllTagFilters(mTagFilters);
-        
-
+        setFilters(tagFilters);
     }
 
     @Override
@@ -50,23 +48,26 @@ public class TagFilterSlideshowList extends SlideshowList {
 
     @Override
     public SlideshowItem get(int location) {
-        SlideshowItem result = new SlideshowItem();
-        result.uri = mUris.get(location);
-        result.name = result.uri.toString();
-        result.caption = "";
-        if (mTargetSize > 0) {
-            try {
-                Uri imageUri = mUris.get(location);
-                result.bitmap = BitmapLoader.load(mContext, imageUri,
-                        mTargetSize, mTargetSize, Config.RGB_565, false);
-                if (mTagsDb != null) {
-                    result.tags = mTagsDb.getTags(imageUri);
-                }
+        SlideshowItem result = null;
+        if (mUris.size() > 0) {
+            result = new SlideshowItem();
+            result.uri = mUris.get(location);
+            result.name = result.uri.toString();
+            result.caption = "";
+            if (mTargetSize > 0) {
+                try {
+                    Uri imageUri = mUris.get(location);
+                    result.bitmap = BitmapLoader.load(mContext, imageUri,
+                            mTargetSize, mTargetSize, Config.RGB_565, false);
+                    if (mTagsDb != null) {
+                        result.tags = mTagsDb.getTags(imageUri);
+                    }
 
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                Log.e(LOG_TAG, "Error : ", e);
-                ErrorReporter.getInstance().handleException(e);
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    Log.e(LOG_TAG, "Error : ", e);
+                    ErrorReporter.getInstance().handleException(e);
+                }
             }
         }
         return result;
@@ -75,6 +76,12 @@ public class TagFilterSlideshowList extends SlideshowList {
     @Override
     public int size() {
         return mUris.size();
+    }
+
+    @Override
+    public void setFilters(TagFilter[] tagFilters) {
+        mTagFilters = tagFilters;
+        mUris = mTagsDb.getUrisFromAllTagFilters(mTagFilters);
     }
 
 }

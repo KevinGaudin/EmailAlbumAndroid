@@ -13,6 +13,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.kg.emailalbum.mobile.tags.TagFilter;
 import com.kg.emailalbum.mobile.tags.TagsDbAdapter;
 import com.kg.emailalbum.mobile.util.BitmapLoader;
 import com.kg.emailalbum.mobile.util.ZipUtil;
@@ -85,5 +86,11 @@ public class ArchiveSlideshowList extends SlideshowList {
     @Override
     public Uri getAlbumUri() {
         return Uri.parse(mArchive.getName());
+    }
+
+    @Override
+    public void setFilters(TagFilter[] array) {
+        // TODO Auto-generated method stub
+        
     }
 }

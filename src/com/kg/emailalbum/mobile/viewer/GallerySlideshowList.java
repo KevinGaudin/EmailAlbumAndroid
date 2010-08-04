@@ -21,6 +21,7 @@ import android.text.format.Time;
 import android.util.Log;
 
 import com.kg.emailalbum.mobile.tags.Tag;
+import com.kg.emailalbum.mobile.tags.TagFilter;
 import com.kg.emailalbum.mobile.tags.TagProvider;
 import com.kg.emailalbum.mobile.tags.TagsDbAdapter;
 import com.kg.emailalbum.mobile.tags.Tag.TagType;
@@ -121,6 +122,8 @@ public class GallerySlideshowList extends SlideshowList {
                     tag = mTagsDb.createTag(dateTaken.format("%Y"),
                             TagType.YEAR);
                     mTagsDb.setTag(tag, imageUri);
+                    tag = mTagsDb.createTag(Long.toString(dateTakenInMillis), TagType.TIMESTAMP);
+                    mTagsDb.setTag(tag, imageUri);
                 }
 
                 result.tags = mTagsDb.getTags(imageUri);
@@ -136,6 +139,12 @@ public class GallerySlideshowList extends SlideshowList {
     @Override
     public int size() {
         return mUris.size();
+    }
+
+    @Override
+    public void setFilters(TagFilter[] array) {
+        // TODO Auto-generated method stub
+        
     }
 
 }

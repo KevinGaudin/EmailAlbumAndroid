@@ -231,20 +231,29 @@ public class TagsDbAdapter {
         // GROUP BY b.id
         // HAVING COUNT( b.id )=3
         String[] proj = { KEY_URI };
+        String where = null;
         StringBuilder selArgsBldr = new StringBuilder();
-        String[] selArgsValues = new String[tagFilters.length];
-        for (int i = 0; i < tagFilters.length; i++) {
-            selArgsValues[i] = Long.toString(tagFilters[i].tag.id);
-            selArgsBldr.append('?');
-            if (i < tagFilters.length - 1) {
-                selArgsBldr.append(',');
+        String[] selArgsValues = null;
+        String having = null;
+        if (tagFilters != null && tagFilters.length > 0) {
+            selArgsValues = new String[tagFilters.length];
+            for (int i = 0; i < tagFilters.length; i++) {
+                selArgsValues[i] = Long.toString(tagFilters[i].tag.id);
+                selArgsBldr.append('?');
+                if (i < tagFilters.length - 1) {
+                    selArgsBldr.append(',');
+                }
             }
+            where = KEY_TAG_ID + " IN ( " + selArgsBldr.toString() + ")";
+//            having = "COUNT(" + KEY_TAG_ID + ") = " + selArgsValues.length;
         }
-        String having = "COUNT(" + KEY_TAG_ID + ") = " + selArgsValues.length;
         String groupBy = KEY_URI;
 
-        Cursor urisCursor = mDb.query(true, TAG_URI_TABLE_NAME, proj,
-                KEY_TAG_ID + " IN ( " + selArgsBldr.toString() + ")",
+        Log.d(LOG_TAG, "Executing query : SELECT " + proj + " FROM "
+                + TAG_URI_TABLE_NAME + " WHERE " + where + " GROUP BY "
+                + groupBy + " HAVING " + having);
+
+        Cursor urisCursor = mDb.query(true, TAG_URI_TABLE_NAME, proj, where,
                 selArgsValues, groupBy, having, null, null);
         int colNameId = urisCursor.getColumnIndex(KEY_URI);
         if (urisCursor.getCount() > 0) {
@@ -256,7 +265,6 @@ public class TagsDbAdapter {
 
         return result;
     }
-
     // public long getTagId(String tagName) {
     // return getAllTags().get(tagName);
     // }

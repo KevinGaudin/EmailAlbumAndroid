@@ -124,6 +124,9 @@
 	<string name="qa_always_hide">Always Hide</string>
 	<string name="qa_hide">Exclude from slideshow</string>
 	<string name="qa_show">Add to slideshow</string>
+	<string name="qa_remove_from_filter">Remove from filter</string>
+	<string name="qa_make_mandatory">Make mandatory</string>
+	<string name="qa_make_optional">Make optional</string>
 	
 
 	<string name="number_files_deleted">%1$d file(s) deleted</string>

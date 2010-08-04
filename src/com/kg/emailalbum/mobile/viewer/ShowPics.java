@@ -25,6 +25,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import org.acra.ErrorReporter;
@@ -249,7 +251,7 @@ public class ShowPics extends Activity implements OnGestureListener,
     private View mTagsFilterTabClose;
     private AlertDialog mTagCreator = null;
     private Uri mAlbumUri;
-    private TagFilter[] mTagFilters;
+    private List<TagFilter> mTagFilters = new ArrayList<TagFilter>();
 
     /**
      * Starts the pictures transition animation.
@@ -852,7 +854,6 @@ public class ShowPics extends Activity implements OnGestureListener,
     }
 
     private void addTagFilter(View v) {
-        // getUserTagPicker().show();
         QuickAction qa = new QuickAction(v);
 
         ActionItem action = new ActionItem();
@@ -869,7 +870,8 @@ public class ShowPics extends Activity implements OnGestureListener,
                 @Override
                 public void onClick(View v) {
                     Tag tag = (Tag) v.getTag();
-                    // addTagToFilter(tag);
+                    TagFilter tagFilter = new TagFilter(tag, TagFilterType.OPTIONAL);
+                    addTagToFilter(tagFilter);
                     Toast.makeText(getApplicationContext(),
                             "Add tag to filter : " + tag.toString(),
                             Toast.LENGTH_SHORT).show();
@@ -1301,10 +1303,9 @@ public class ShowPics extends Activity implements OnGestureListener,
 
         if (mAlbumUri != null) {
             if (mAlbumUri.equals(Uri.parse("content://TAGS"))) {
-                addTagToFilter(mTagsDb.getTag("nuit", TagType.USER));
                 mSlideshowList = new TagFilterSlideshowList(
                         getApplicationContext(), mTagsDb, MAX_BITMAP_DIM,
-                        mTagFilters);
+                        mTagFilters.toArray(new TagFilter[mTagFilters.size()]));
             } else if (mAlbumUri.equals(Media.EXTERNAL_CONTENT_URI)) {
                 mSlideshowList = new GallerySlideshowList(
                         getApplicationContext(), mTagsDb, MAX_BITMAP_DIM);
@@ -1325,12 +1326,22 @@ public class ShowPics extends Activity implements OnGestureListener,
     /**
      * 
      */
-    private void addTagToFilter(Tag tag) {
-        TagFilter tagFilter = new TagFilter(tag, TagFilterType.MANDATORY);
-        mTagFilters = new TagFilter[] { tagFilter };
+    private void addTagToFilter(TagFilter tagFilter) {
+        mTagFilters.add(tagFilter);
         addTagFilterToFilterBar(tagFilter);
+        mSlideshowList.setFilters(mTagFilters.toArray(new TagFilter[mTagFilters.size()]));
+        mPosition=0;
+        showPicture();
     }
-
+    
+    private void removeTagFromFilter(TagFilter tagFilter) {
+        mTagFilters.remove(tagFilter);
+        removeTagFromFilterBar(tagFilter);
+        mSlideshowList.setFilters(mTagFilters.toArray(new TagFilter[mTagFilters.size()]));
+        mPosition=0;
+        showPicture();
+    }
+    
     /*
      * (non-Javadoc)
      * 
@@ -2013,52 +2024,86 @@ public class ShowPics extends Activity implements OnGestureListener,
         mTagsContainer.addView(btnAddTag);
     }
 
-    private void addTagFilterToFilterBar(TagFilter tagFilter) {
+    private void addTagFilterToFilterBar(final TagFilter tagFilter) {
         ViewGroup btnTagFilter = (ViewGroup) getLayoutInflater().inflate(
                 R.layout.slideshow_tag_filter, mTagsFilterContainer, false);
         ImageView imgFilterType = (ImageView) btnTagFilter
                 .findViewById(R.id.ImgFilterType);
-
+        btnTagFilter.setTag(tagFilter);
         Button btnTag = (Button) getLayoutInflater().inflate(
                 R.layout.slideshow_tag, mTagsFilterContainer, false);
 
         btnTag.setText(tagFilter.tag.label);
-        btnTag.setTag(tagFilter.tag);
-        btnTag.setCompoundDrawables(tagFilter.tag.type.getDrawable(this), null, null,
-                null);
+        btnTag.setCompoundDrawables(tagFilter.tag.type.getDrawable(this), null,
+                null, null);
 
         btnTag.setOnClickListener(new OnClickListener() {
 
             @Override
             public void onClick(View v) {
                 QuickAction tagFilterQA = new QuickAction(v);
-                final Tag tag = (Tag) v.getTag();
 
                 ActionItem action;
 
-                action = new ActionItem();
-                action.setIcon(TagFilterType.OPTIONAL.getDrawable(ShowPics.this));
-                action.setTitle("Make optional");
-                action.setOnClickListener(new OnClickListener() {
+                if (tagFilter.type != TagFilterType.MANDATORY) {
+                    action = new ActionItem();
+                    action.setIcon(TagFilterType.MANDATORY
+                            .getDrawable(ShowPics.this));
+                    action.setTitle(getString(R.string.qa_make_mandatory));
+                    action.setOnClickListener(new OnClickListener() {
 
-                    @Override
-                    public void onClick(View v) {
-                        Toast.makeText(getApplicationContext(), "MAKE OPTIONAL",
-                                Toast.LENGTH_SHORT).show();
-                    }
-                });
-                tagFilterQA.addActionItem(action);
+                        @Override
+                        public void onClick(View v) {
+                            Toast.makeText(getApplicationContext(),
+                                    "MAKE MANDATORY", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                    tagFilterQA.addActionItem(action);
+                }
+
+                if (tagFilter.type != TagFilterType.OPTIONAL) {
+                    action = new ActionItem();
+                    action.setIcon(TagFilterType.OPTIONAL
+                            .getDrawable(ShowPics.this));
+                    action.setTitle(getString(R.string.qa_make_optional));
+                    action.setOnClickListener(new OnClickListener() {
+
+                        @Override
+                        public void onClick(View v) {
+                            Toast.makeText(getApplicationContext(),
+                                    "MAKE OPTIONAL", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                    tagFilterQA.addActionItem(action);
+                }
+
+                if (tagFilter.type != TagFilterType.HIDE) {
+                    action = new ActionItem();
+                    action.setIcon(TagFilterType.HIDE
+                            .getDrawable(ShowPics.this));
+                    action.setTitle(getString(R.string.qa_hide));
+                    action.setOnClickListener(new OnClickListener() {
+
+                        @Override
+                        public void onClick(View v) {
+                            Toast.makeText(getApplicationContext(), "HIDE",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                    tagFilterQA.addActionItem(action);
+                }
 
                 action = new ActionItem();
                 action.setIcon(TagFilterType.HIDE.getDrawable(ShowPics.this));
-                action.setTitle(getString(R.string.qa_hide));
+                action.setTitle(getString(R.string.qa_remove_from_filter));
                 action.setOnClickListener(new OnClickListener() {
 
                     @Override
                     public void onClick(View v) {
-                        Toast.makeText(getApplicationContext(), "HIDE",
-                                Toast.LENGTH_SHORT).show();
+                        removeTagFromFilter(tagFilter);
                     }
+
+
                 });
                 tagFilterQA.addActionItem(action);
 
@@ -2068,6 +2113,10 @@ public class ShowPics extends Activity implements OnGestureListener,
         imgFilterType.setImageDrawable(tagFilter.type.getDrawable(this));
         btnTagFilter.addView(btnTag);
         mTagsFilterContainer.addView(btnTagFilter);
+    }
+    
+    private void removeTagFromFilterBar(TagFilter tagFilter) {
+        mTagsFilterContainer.removeView(mTagsFilterContainer.findViewWithTag(tagFilter));
     }
 
     private void emptyTagsFilterBar() {

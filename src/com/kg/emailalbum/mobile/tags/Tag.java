@@ -1,12 +1,11 @@
 package com.kg.emailalbum.mobile.tags;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
-import android.util.DisplayMetrics;
-import android.view.WindowManager;
 
 import com.kg.emailalbum.mobile.R;
 import com.kg.emailalbum.mobile.util.BitmapUtil;
@@ -72,6 +71,28 @@ public class Tag implements Comparable<Tag> {
             @Override
             public Integer getSortOrder() {
                 return 4;
+            }
+        },
+        TIMESTAMP {
+            @Override
+            public Drawable getDrawable(Context ctx) {
+                return null;
+            }
+
+            @Override
+            public Integer getSortOrder() {
+                return 99;
+            }
+        },
+        NAME {
+            @Override
+            public Drawable getDrawable(Context ctx) {
+                return null;
+            }
+
+            @Override
+            public Integer getSortOrder() {
+                return 99;
             }
         };
 
@@ -167,4 +188,5 @@ public class Tag implements Comparable<Tag> {
             return false;
         return true;
     }
+    
 }
