@@ -83,6 +83,11 @@ public class Tag implements Comparable<Tag> {
             public Integer getSortOrder() {
                 return 99;
             }
+            
+            @Override
+            public boolean showToUser() {
+                return false;
+            }
         },
         NAME {
             @Override
@@ -93,6 +98,11 @@ public class Tag implements Comparable<Tag> {
             @Override
             public Integer getSortOrder() {
                 return 99;
+            }
+
+            @Override
+            public boolean showToUser() {
+                return false;
             }
         };
 
@@ -118,6 +128,10 @@ public class Tag implements Comparable<Tag> {
                 mDrawables.put(tagType, drawable);
             }
             return drawable;
+        }
+
+        public boolean showToUser() {
+            return true;
         }
 
     }

@@ -28,14 +28,16 @@ public class SlideshowItem {
             return "";
     }
 
-    public boolean isDateTakenSet() {
+    public boolean hasTagOfType(TagType tagType) {
         for (Tag tag : tags) {
-            if (tag.type == TagType.TIMESTAMP) {
+            if (tag.type == tagType) {
                 return true;
             }
         }
         return false;
     }
+    
+    
 
     public Long getTimestamp() {
         if (mTimestamp < 0) {

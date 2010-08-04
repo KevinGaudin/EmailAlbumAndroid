@@ -35,7 +35,8 @@ public class TagsDbAdapter {
     private static final String KEY_URI = "uri";
     private static final String TAG_URI_TABLE_CREATE = "CREATE TABLE "
             + TAG_URI_TABLE_NAME + " (" + KEY_TAG_ID + " INTEGER NOT NULL, "
-            + KEY_URI + " TEXT " + ");";
+            + KEY_URI + " TEXT NOT NULL, CONSTRAINT UNI_TAG_URI UNIQUE ("
+            + KEY_TAG_ID + ", " + KEY_URI + "));";
 
     private static final String LOG_TAG = TagsDbAdapter.class.getSimpleName();
 
@@ -244,7 +245,7 @@ public class TagsDbAdapter {
                     selArgsBldr.append(',');
                 }
             }
-            where = KEY_TAG_ID + " IN ( " + selArgsBldr.toString() + ")";
+            where = KEY_TAG_ID + " IN (" + selArgsBldr.toString() + ")";
 //            having = "COUNT(" + KEY_TAG_ID + ") = " + selArgsValues.length;
         }
         String groupBy = KEY_URI;

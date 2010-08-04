@@ -88,7 +88,6 @@ public class GallerySlideshowList extends SlideshowList {
         return Media.EXTERNAL_CONTENT_URI;
     }
 
-
     @Override
     public SlideshowItem get(int location) {
         SlideshowItem result = new SlideshowItem();
@@ -106,12 +105,17 @@ public class GallerySlideshowList extends SlideshowList {
                 Log.d(LOG_TAG, "METADATA : " + metadata.toString());
 
                 // Add the BUCKET tag
-                Tag bucketTag = mTagsDb.createTag(
-                        metadata.getString(ImageColumns.BUCKET_DISPLAY_NAME),
-                        TagType.BUCKET);
-                mTagsDb.setTag(bucketTag, imageUri);
+                result.tags = mTagsDb.getTags(imageUri);
+                boolean updatedTags = false;
+                if (!result.hasTagOfType(TagType.BUCKET)) {
+                    Tag bucketTag = mTagsDb.createTag(metadata
+                            .getString(ImageColumns.BUCKET_DISPLAY_NAME),
+                            TagType.BUCKET);
+                    mTagsDb.setTag(bucketTag, imageUri);
+                    updatedTags = true;
+                }
 
-                if (!result.isDateTakenSet()) {
+                if (!result.hasTagOfType(TagType.TIMESTAMP)) {
                     long dateTakenInMillis = metadata
                             .getLong(ImageColumns.DATE_TAKEN);
                     Time dateTaken = new Time();
@@ -122,11 +126,16 @@ public class GallerySlideshowList extends SlideshowList {
                     tag = mTagsDb.createTag(dateTaken.format("%Y"),
                             TagType.YEAR);
                     mTagsDb.setTag(tag, imageUri);
-                    tag = mTagsDb.createTag(Long.toString(dateTakenInMillis), TagType.TIMESTAMP);
+                    tag = mTagsDb.createTag(Long.toString(dateTakenInMillis),
+                            TagType.TIMESTAMP);
                     mTagsDb.setTag(tag, imageUri);
+                    updatedTags = true;
+                }
+                
+                if(updatedTags) {
+                    result.tags = mTagsDb.getTags(imageUri);
                 }
 
-                result.tags = mTagsDb.getTags(imageUri);
             } catch (IOException e) {
                 // TODO Auto-generated catch block
                 Log.e(LOG_TAG, "Error : ", e);
@@ -144,7 +153,7 @@ public class GallerySlideshowList extends SlideshowList {
     @Override
     public void setFilters(TagFilter[] array) {
         // TODO Auto-generated method stub
-        
+
     }
 
 }
