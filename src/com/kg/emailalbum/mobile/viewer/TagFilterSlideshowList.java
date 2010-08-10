@@ -29,15 +29,14 @@ public class TagFilterSlideshowList extends SlideshowList {
     @Override
     public Uri getAlbumUri() {
         // TODO Auto-generated method stub
+        // should return an uri pointing to a Slideshow configured with the
+        // current filtering/sorting parameters. Could be like :
+        // content://com.kg.emailalbum.filtered/?tags=tag1+!tag2+-tag3&orderby=TIMESTAMP&reverse=true
         return null;
     }
 
     @Override
     public SlideshowItem get(int location) {
-        // TODO : in order to allow sorting by different tag values, we have to
-        // handle a cache of SlideshowItems, not only Uris. These SlideshowItems
-        // will
-        // be given their bitmap at the latest possible instant.
         SlideshowItem result = null;
         if (mItems.size() > 0) {
             result = mItems.get(location);
@@ -64,12 +63,14 @@ public class TagFilterSlideshowList extends SlideshowList {
             }
             // TODO: change .name to .getName() returning content of tag NAME
             newItem.name = uri.toString();
-            // TODO: change .name to .getName() returning content of tag
+            // TODO: change .caption to .getCaption() returning content of tag
             // DESCRIPTION
             newItem.caption = "";
             mItems.add(newItem);
         }
-        setComparator(Collections.reverseOrder(SlideshowItem.getComparator(TagType.TIMESTAMP)));
+        // TODO: implement user defined comparator
+        setComparator(Collections.reverseOrder(SlideshowItem
+                .getComparator(TagType.TIMESTAMP)));
     }
 
     public void setComparator(Comparator<SlideshowItem> comparator) {

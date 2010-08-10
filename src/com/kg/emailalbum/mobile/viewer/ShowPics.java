@@ -874,13 +874,27 @@ public class ShowPics extends Activity implements OnGestureListener,
                     TagFilter tagFilter = new TagFilter(tag,
                             TagFilterType.OPTIONAL);
                     addTagToFilter(tagFilter);
-                    Toast.makeText(getApplicationContext(),
-                            "Add tag to filter : " + tag.toString(),
-                            Toast.LENGTH_SHORT).show();
                 }
             });
             qa.addActionItem(action);
         }
+
+        // Add a clear filter QA.
+        if (tags.size() > 0) {
+
+            action = new ActionItem();
+            action.setIcon(getResources().getDrawable(R.drawable.delete));
+            action.setTitle(getString(R.string.qa_clear_filter));
+            action.setOnClickListener(new OnClickListener() {
+
+                @Override
+                public void onClick(View v) {
+                    clearFilter();
+                }
+            });
+            qa.addActionItem(action);
+        }
+
         qa.show();
     }
 
@@ -1340,6 +1354,16 @@ public class ShowPics extends Activity implements OnGestureListener,
         removeTagFromFilterBar(tagFilter);
         mSlideshowList.setFilters(mTagFilters.toArray(new TagFilter[mTagFilters
                 .size()]));
+        mPosition = 0;
+        mOldPosition = -1;
+        showPicture();
+    }
+    
+    private void clearFilter() {
+        mTagFilters.clear();
+        emptyTagsFilterBar();
+        mSlideshowList.setFilters(mTagFilters.toArray(new TagFilter[mTagFilters
+                                                                    .size()]));
         mPosition = 0;
         mOldPosition = -1;
         showPicture();
