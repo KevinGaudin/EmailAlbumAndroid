@@ -1,22 +1,27 @@
 package com.kg.emailalbum.mobile.viewer;
 
+import java.io.IOException;
+import java.lang.ref.SoftReference;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
 import android.net.Uri;
 
 import com.kg.emailalbum.mobile.tags.Tag;
 import com.kg.emailalbum.mobile.tags.Tag.TagType;
+import com.kg.emailalbum.mobile.util.BitmapLoader;
 
 public class SlideshowItem {
     public String name;
     public Uri uri;
     public String caption;
-    public Bitmap bitmap;
+    private SoftReference<Bitmap> bitmapRef;
     public Set<Tag> tags = new TreeSet<Tag>();
     public Long mTimestamp = new Long(-1);
     public final static Map<TagType, Comparator<SlideshowItem>> mComparators = new HashMap<TagType, Comparator<SlideshowItem>>(); 
@@ -59,5 +64,13 @@ public class SlideshowItem {
         return result;
     }
 
-
+    public Bitmap getBitmap(Context context, int maxWidth, int maxHeight) throws IOException {
+        Bitmap result = bitmapRef == null ? null : bitmapRef.get();
+        if(result == null) {
+            result = BitmapLoader.load(context, uri,
+                    maxWidth, maxHeight, Config.RGB_565, false);
+            bitmapRef = new SoftReference<Bitmap>(result);
+        }
+        return result;
+    }
 }

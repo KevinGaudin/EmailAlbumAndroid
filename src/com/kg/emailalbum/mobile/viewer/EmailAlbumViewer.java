@@ -47,12 +47,12 @@ import android.os.Message;
 import android.provider.MediaStore.Images.Media;
 import android.util.Log;
 import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
@@ -388,14 +388,13 @@ public class EmailAlbumViewer extends ListActivity {
     private void fillData(boolean clearThumbnails) {
         if (mAlbumFileUri != null) {
             if (mAlbumFileUri.toString().startsWith("content://TAGS")) {
-                Toast.makeText(this, "TO BE IMPLEMENTED", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "TO BE IMPLEMENTED", Toast.LENGTH_SHORT)
+                        .show();
                 finish();
             } else if (mAlbumFileUri.toString().startsWith(
                     Media.EXTERNAL_CONTENT_URI.toString())) {
                 mContentModel = new GallerySlideshowList(
-                        getApplicationContext(), null,
-                        ThumbnailsCreator
-                                .getThumbWidth(getApplicationContext()));
+                        getApplicationContext(), null);
                 setTitle("Gallery");
 
                 registerForContextMenu(getListView());
@@ -418,8 +417,8 @@ public class EmailAlbumViewer extends ListActivity {
                             new Exception("No archive file."));
                 } else {
                     try {
-                        mContentModel = new ArchiveSlideshowList(context, null,
-                                mAlbumFileUri, 0);
+                        mContentModel = new ArchiveSlideshowList(null,
+                                mAlbumFileUri);
 
                         setTitle(mAlbumFileUri.getLastPathSegment());
 
@@ -849,7 +848,8 @@ public class EmailAlbumViewer extends ListActivity {
 
         // Raw copy of the file
         OutputStream destFileOS = new FileOutputStream(destFile);
-        InputStream imageIS = CustomContentResolver.openInputStream(getApplicationContext(), imgModel.uri);
+        InputStream imageIS = CustomContentResolver.openInputStream(
+                getApplicationContext(), imgModel.uri);
 
         byte[] buffer = new byte[2048];
         int len = 0;

@@ -1305,16 +1305,13 @@ public class ShowPics extends Activity implements OnGestureListener,
 
         if (mAlbumUri != null) {
             if (mAlbumUri.equals(Uri.parse("content://TAGS"))) {
-                mSlideshowList = new TagFilterSlideshowList(
-                        getApplicationContext(), mTagsDb, MAX_BITMAP_DIM,
+                mSlideshowList = new TagFilterSlideshowList(mTagsDb,
                         mTagFilters.toArray(new TagFilter[mTagFilters.size()]));
             } else if (mAlbumUri.equals(Media.EXTERNAL_CONTENT_URI)) {
                 mSlideshowList = new GallerySlideshowList(
-                        getApplicationContext(), mTagsDb, MAX_BITMAP_DIM);
+                        getApplicationContext(), mTagsDb);
             } else {
-                mSlideshowList = new ArchiveSlideshowList(
-                        getApplicationContext(), mTagsDb, mAlbumUri,
-                        MAX_BITMAP_DIM);
+                mSlideshowList = new ArchiveSlideshowList(mTagsDb, mAlbumUri);
             }
         } else {
             ErrorReporter.getInstance().handleException(
@@ -1519,7 +1516,8 @@ public class ShowPics extends Activity implements OnGestureListener,
                     // }
                     // Preload next picture
                     mItems[nextPic] = loadPicture(mPosition + 1);
-                    mImgViews[nextPic].setImageBitmap(mItems[nextPic].bitmap);
+                    mImgViews[nextPic].setImageBitmap(mItems[nextPic]
+                            .getBitmap(this, MAX_BITMAP_DIM, MAX_BITMAP_DIM));
                 } else if (mSlideshowLoop) {
                     // prepare for looping
                     // if (mImgViews[nextPic].getDrawable() != null) {
@@ -1532,7 +1530,8 @@ public class ShowPics extends Activity implements OnGestureListener,
                     // We are at the end of the slideshow, just before looping.
                     // Preload the first picture to prepare looping.
                     mItems[nextPic] = loadPicture(0);
-                    mImgViews[nextPic].setImageBitmap(mItems[nextPic].bitmap);
+                    mImgViews[nextPic].setImageBitmap(mItems[nextPic]
+                            .getBitmap(this, MAX_BITMAP_DIM, MAX_BITMAP_DIM));
                 }
             } else if (mOldPosition > mPosition) {
                 // Gone backward
@@ -1552,7 +1551,8 @@ public class ShowPics extends Activity implements OnGestureListener,
                     // }
                     // Preload previous picture.
                     mItems[prevPic] = loadPicture(mPosition - 1);
-                    mImgViews[prevPic].setImageBitmap(mItems[prevPic].bitmap);
+                    mImgViews[prevPic].setImageBitmap(mItems[prevPic]
+                            .getBitmap(this, MAX_BITMAP_DIM, MAX_BITMAP_DIM));
                 }
             }
         } catch (Exception e) {
@@ -1724,13 +1724,16 @@ public class ShowPics extends Activity implements OnGestureListener,
                     mItems[nextPic] = data[1];
                     mItems[prevPic] = data[2];
                     if (data[0] != null) {
-                        mImgViews[curPic].setImageBitmap(data[0].bitmap);
+                        mImgViews[curPic].setImageBitmap(data[0].getBitmap(
+                                this, MAX_BITMAP_DIM, MAX_BITMAP_DIM));
                     }
                     if (data[1] != null) {
-                        mImgViews[nextPic].setImageBitmap(data[1].bitmap);
+                        mImgViews[nextPic].setImageBitmap(data[1].getBitmap(
+                                this, MAX_BITMAP_DIM, MAX_BITMAP_DIM));
                     }
                     if (data[2] != null) {
-                        mImgViews[prevPic].setImageBitmap(data[2].bitmap);
+                        mImgViews[prevPic].setImageBitmap(data[2].getBitmap(
+                                this, MAX_BITMAP_DIM, MAX_BITMAP_DIM));
                     }
                 } else {
                     // Load first picture
@@ -1745,22 +1748,25 @@ public class ShowPics extends Activity implements OnGestureListener,
 
                     }
                     mItems[curPic] = loadPicture(mPosition);
-                    mImgViews[curPic].setImageBitmap(mItems[curPic].bitmap);
+                    mImgViews[curPic].setImageBitmap(mItems[curPic].getBitmap(
+                            this, MAX_BITMAP_DIM, MAX_BITMAP_DIM));
 
                     // If memory is not a problem, preload pictures
                     if (!mNEMMode) {
                         // Load previous picture
                         if (mPosition > 0) {
                             mItems[prevPic] = loadPicture(mPosition - 1);
-                            mImgViews[prevPic]
-                                    .setImageBitmap(mItems[prevPic].bitmap);
+                            mImgViews[prevPic].setImageBitmap(mItems[prevPic]
+                                    .getBitmap(this, MAX_BITMAP_DIM,
+                                            MAX_BITMAP_DIM));
                         }
 
                         // Load next picture
                         if (mPosition < mSlideshowList.size() - 1) {
                             mItems[nextPic] = loadPicture(mPosition + 1);
-                            mImgViews[nextPic]
-                                    .setImageBitmap(mItems[nextPic].bitmap);
+                            mImgViews[nextPic].setImageBitmap(mItems[nextPic]
+                                    .getBitmap(this, MAX_BITMAP_DIM,
+                                            MAX_BITMAP_DIM));
                         }
                     }
                 }
@@ -1807,7 +1813,7 @@ public class ShowPics extends Activity implements OnGestureListener,
         Set<Tag> tags = mItems[curPic].tags;
         if (tags != null && tags.size() > 0) {
             for (Tag tag : tags) {
-                if(tag.type.showToUser()) {
+                if (tag.type.showToUser()) {
                     addTagToTagsBar(tag);
                 }
             }

@@ -1,42 +1,28 @@
 package com.kg.emailalbum.mobile.viewer;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.LinkedHashSet;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
-import org.acra.ErrorReporter;
-
-import android.content.Context;
-import android.graphics.Bitmap.Config;
 import android.net.Uri;
-import android.os.Bundle;
-import android.provider.MediaStore.Images.ImageColumns;
-import android.text.format.Time;
-import android.util.Log;
 
-import com.kg.emailalbum.mobile.tags.Tag;
 import com.kg.emailalbum.mobile.tags.Tag.TagType;
 import com.kg.emailalbum.mobile.tags.TagFilter;
-import com.kg.emailalbum.mobile.tags.TagProvider;
 import com.kg.emailalbum.mobile.tags.TagsDbAdapter;
-import com.kg.emailalbum.mobile.util.BitmapLoader;
 
 public class TagFilterSlideshowList extends SlideshowList {
     private static final String LOG_TAG = TagFilterSlideshowList.class
             .getSimpleName();
-    private Context mContext;
     private TagsDbAdapter mTagsDb;
-    private int mTargetSize;
     private TagFilter[] mTagFilters;
 
-    private List<Uri> mUris;
+    private List<SlideshowItem> mItems = new ArrayList<SlideshowItem>();
 
-    public TagFilterSlideshowList(Context context, TagsDbAdapter tagsDb,
-            int targetSize, TagFilter[] tagFilters) {
-        mContext = context;
+    private Comparator<SlideshowItem> mComparator;
+
+    public TagFilterSlideshowList(TagsDbAdapter tagsDb, TagFilter[] tagFilters) {
         mTagsDb = tagsDb;
-        mTargetSize = targetSize;
         setFilters(tagFilters);
     }
 
@@ -48,40 +34,47 @@ public class TagFilterSlideshowList extends SlideshowList {
 
     @Override
     public SlideshowItem get(int location) {
+        // TODO : in order to allow sorting by different tag values, we have to
+        // handle a cache of SlideshowItems, not only Uris. These SlideshowItems
+        // will
+        // be given their bitmap at the latest possible instant.
         SlideshowItem result = null;
-        if (mUris.size() > 0) {
-            result = new SlideshowItem();
-            result.uri = mUris.get(location);
-            result.name = result.uri.toString();
-            result.caption = "";
-            if (mTargetSize > 0) {
-                try {
-                    Uri imageUri = mUris.get(location);
-                    result.bitmap = BitmapLoader.load(mContext, imageUri,
-                            mTargetSize, mTargetSize, Config.RGB_565, false);
-                    if (mTagsDb != null) {
-                        result.tags = mTagsDb.getTags(imageUri);
-                    }
-
-                } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    Log.e(LOG_TAG, "Error : ", e);
-                    ErrorReporter.getInstance().handleException(e);
-                }
-            }
+        if (mItems.size() > 0) {
+            result = mItems.get(location);
         }
         return result;
     }
 
     @Override
     public int size() {
-        return mUris.size();
+        return mItems.size();
     }
 
     @Override
     public void setFilters(TagFilter[] tagFilters) {
         mTagFilters = tagFilters;
-        mUris = mTagsDb.getUrisFromAllTagFilters(mTagFilters);
+        List<Uri> uris = mTagsDb.getUrisFromAllTagFilters(mTagFilters);
+        mItems.clear();
+        SlideshowItem newItem;
+        for (Uri uri : uris) {
+            newItem = new SlideshowItem();
+            newItem.uri = uri;
+            if (mTagsDb != null) {
+                newItem.tags = mTagsDb.getTags(uri);
+            }
+            // TODO: change .name to .getName() returning content of tag NAME
+            newItem.name = uri.toString();
+            // TODO: change .name to .getName() returning content of tag
+            // DESCRIPTION
+            newItem.caption = "";
+            mItems.add(newItem);
+        }
+        setComparator(Collections.reverseOrder(SlideshowItem.getComparator(TagType.TIMESTAMP)));
+    }
+
+    public void setComparator(Comparator<SlideshowItem> comparator) {
+        mComparator = comparator;
+        Collections.sort(mItems, mComparator);
     }
 
 }
