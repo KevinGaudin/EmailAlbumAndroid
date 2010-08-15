@@ -20,9 +20,11 @@ package com.kg.emailalbum.mobile.creator;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -62,7 +64,6 @@ import android.widget.Toast;
 
 import com.kg.emailalbum.mobile.R;
 import com.kg.emailalbum.mobile.util.BitmapLoader;
-import com.kg.emailalbum.mobile.util.NewLRUCache;
 
 /**
  * Allows the user to select multiple pictures from the Media Library. This
@@ -194,7 +195,7 @@ public class SelectPictures extends Activity {
         /**
          * We store Bitmaps Uris of Thumbnails in this cache.
          */
-        private NewLRUCache<Uri, Uri> mThumbsUris = new NewLRUCache<Uri, Uri>();
+        private Map<Uri, Uri> mThumbsUris = new HashMap<Uri, Uri>();
 
         /**
          * Create a new adapter with the given context and UI handler. The owner
@@ -231,7 +232,7 @@ public class SelectPictures extends Activity {
                     mImagesUris.add(uri);
                     if (thumbUri != null) {
                         // Store the thumbnail in cache
-                        mThumbsUris.cacheEntry(uri, thumbUri);
+                        mThumbsUris.put(uri, thumbUri);
                     }
                 }
             } else {
@@ -356,7 +357,7 @@ public class SelectPictures extends Activity {
             vh.checkableImage.setTag(imageUri);
 
             // Try to retrieve the thumbnail from cache
-            Uri thumbUri = mThumbsUris.getEntry(imageUri);
+            Uri thumbUri = mThumbsUris.get(imageUri);
             if (thumbUri != null) {
                 try {
                     Bitmap thumb = BitmapLoader.load(mContext, thumbUri, null,
@@ -449,7 +450,7 @@ public class SelectPictures extends Activity {
          */
         public void updateCache(Uri uri, Uri thumbUri) {
             if (uri != null && thumbUri != null) {
-                mThumbsUris.cacheEntry(uri, thumbUri);
+                mThumbsUris.put(uri, thumbUri);
                 mPendingThumbnailRequests.remove(uri);
                 notifyDataSetChanged();
             }
