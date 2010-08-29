@@ -23,7 +23,7 @@ import com.kg.oifilemanager.filemanager.util.MimeTypes;
 
 public class FileManagerProvider extends ContentProvider {
 
-    private static final String TAG = "FileManagerProvider";
+    private static final String LOG_TAG = "FileManagerProvider";
     public static final String AUTHORITY = "com.kg.emailalbum.share";
     public static final String CONTENT_URI_STRING = ContentResolver.SCHEME_CONTENT
             + "://" + AUTHORITY;
@@ -48,11 +48,11 @@ public class FileManagerProvider extends ContentProvider {
         try {
             mMimeTypes = mtp.fromXmlResource(in);
         } catch (XmlPullParserException e) {
-            Log.e(TAG, "PreselectedChannelsActivity: XmlPullParserException", e);
+            Log.e(LOG_TAG, "PreselectedChannelsActivity: XmlPullParserException", e);
             throw new RuntimeException(
                     "PreselectedChannelsActivity: XmlPullParserException");
         } catch (IOException e) {
-            Log.e(TAG, "PreselectedChannelsActivity: IOException", e);
+            Log.e(LOG_TAG, "PreselectedChannelsActivity: IOException", e);
             throw new RuntimeException(
                     "PreselectedChannelsActivity: IOException");
         }
@@ -98,10 +98,16 @@ public class FileManagerProvider extends ContentProvider {
             if (mode.equalsIgnoreCase("rw"))
                 m = ParcelFileDescriptor.MODE_READ_WRITE;
 
+            Log.d(LOG_TAG, "Trying to open file : " + uri.toString().substring(
+                    CONTENT_URI_STRING.length()));
             File f = new File(uri.toString().substring(
                     CONTENT_URI_STRING.length()));
-            ParcelFileDescriptor pfd = ParcelFileDescriptor.open(f, m);
-            return pfd;
+            try {
+                ParcelFileDescriptor pfd = ParcelFileDescriptor.open(f, m);
+                return pfd;
+            } catch(IOException e) {
+                return null;
+            }
         } else {
             throw new RuntimeException("Unsupported uri");
         }
