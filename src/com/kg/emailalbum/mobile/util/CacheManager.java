@@ -19,9 +19,11 @@
 package com.kg.emailalbum.mobile.util;
 
 import java.io.File;
+import java.io.IOException;
 
 import android.content.Context;
 import android.os.Environment;
+import android.util.Log;
 
 /**
  * Provider for the application cache directories. If an external storage is
@@ -76,6 +78,14 @@ public class CacheManager {
         // exist.
         if (!result.exists()) {
             result.mkdirs();
+        }
+        
+        File noMedia = new File(result, ".nomedia");
+        try {
+            noMedia.createNewFile();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            Log.e(LOG_TAG, "Error : ", e);
         }
 
         // Log.i(LOG_TAG, "Using dir " + result + " for cache");

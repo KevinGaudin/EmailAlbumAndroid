@@ -37,6 +37,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -78,6 +79,8 @@ import com.kg.emailalbum.mobile.util.BitmapLoader;
  * @author Kevin Gaudin
  */
 public class SelectPictures extends Activity {
+    
+    public static Bitmap ROBOT;
 
     /**
      * A specific adapter for this list based activity.
@@ -117,7 +120,7 @@ public class SelectPictures extends Activity {
             protected void onPostExecute(Uri result) {
                 super.onPostExecute(result);
                 // Give the retrieved thumbnail to the adapter...
-                mImageAdapter.updateCache(mUri, result);
+                mImageAdapter.updateThumbUri(mUri, result);
                 // then process any other pending thumbnail request.
                 if (!mPendingThumbnailRequests.isEmpty()) {
                     mThmGetter = new ThumbnailGetter();
@@ -362,6 +365,9 @@ public class SelectPictures extends Activity {
                 try {
                     Bitmap thumb = BitmapLoader.load(mContext, thumbUri, null,
                             null);
+                    if(thumb == null) {
+                        thumb = ROBOT;
+                    }
                     vh.checkableImage.setImageBitmap(thumb);
                 } catch (IOException e) {
                     Log.e(LOG_TAG, "Error : ", e);
@@ -441,14 +447,14 @@ public class SelectPictures extends Activity {
         }
 
         /**
-         * Update the thumbnail for an item.
+         * Update the thumbnail Uri for an item.
          * 
          * @param uri
          *            The Uri of the item.
          * @param thumbUri
          *            The Bitmap containing the thumbnail.
          */
-        public void updateCache(Uri uri, Uri thumbUri) {
+        public void updateThumbUri(Uri uri, Uri thumbUri) {
             if (uri != null && thumbUri != null) {
                 mThumbsUris.put(uri, thumbUri);
                 mPendingThumbnailRequests.remove(uri);
@@ -644,6 +650,7 @@ public class SelectPictures extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        ROBOT = BitmapFactory.decodeResource(SelectPictures.this.getResources(), R.drawable.robot_error);
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setTitle(R.string.btn_pick_pictures);
         setResult(RESULT_CANCELED);
@@ -902,7 +909,9 @@ public class SelectPictures extends Activity {
             protected void onPostExecute(Bitmap result) {
                 mPreviewPic = result;
                 removeDialog(DIALOG_WAIT_PREVIEW);
-                showDialog(DIALOG_IMAGE_PREVIEW);
+                if(mPreviewPic != null) {
+                    showDialog(DIALOG_IMAGE_PREVIEW);
+                }
             }
 
         };

@@ -140,7 +140,6 @@ public class ThumbnailsCreator extends Thread {
 
                         thumbOS.flush();
                         thumbOS.close();
-                        thumb.recycle();
                     } else {
                         Log.d("ThumbnailsCreator", "Read Bitmap is null !");
                         sendError(new IOException(

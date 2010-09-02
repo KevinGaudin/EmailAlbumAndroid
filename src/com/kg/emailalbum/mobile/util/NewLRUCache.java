@@ -2,6 +2,7 @@ package com.kg.emailalbum.mobile.util;
 
 /**
  * Copyright(c) 2008 Nicolas Martignole – Le Touilleur Express
+ * Modified by Kevin Gaudin: renamed methods with get / put to allow easy switching with Map implementations/
  * http://touilleur-express.fr
  * Distributed under Creative Commons License 2.0
  * See http://creativecommons.org/licenses/by-sa/2.0/fr/deed.fr
@@ -84,7 +85,7 @@ public class NewLRUCache<K, V> {
      * @param entry
      *            is the object to put into the cache.
      */
-    public void cacheEntry(K key, V entry) {
+    public void put(K key, V entry) {
         if (key == null)
             return;
         if (entry == null)
@@ -103,7 +104,7 @@ public class NewLRUCache<K, V> {
      *            is the key to lookup
      * @return the associated object or null if it was not found.
      */
-    public V getEntry(K key) {
+    public V get(K key) {
         if (key == null) {
             return null;
         }

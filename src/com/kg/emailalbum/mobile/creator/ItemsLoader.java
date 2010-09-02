@@ -96,7 +96,6 @@ public class ItemsLoader extends Thread {
                         bmp.compress(CompressFormat.JPEG, THUMBNAILS_QUALITY,
                                 out);
                         out.close();
-                        bmp.recycle();
                     }
                 }
                 result = FileManagerProvider.getContentUri(tmpFile);

@@ -45,6 +45,7 @@ import android.graphics.PointF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.PowerManager;
@@ -544,9 +545,43 @@ public class ShowPics extends Activity implements OnGestureListener,
     /**
      * Loads one picture.
      */
-    private SlideshowItem loadPicture(int position) {
-        SlideshowItem result = mSlideshowList.get(position);
-        return result;
+    private void loadPicture(int position, int destination) {
+        mItems[destination] = mSlideshowList.get(position);
+    }
+
+    private void asyncLoadPicture(int position, int destination) {
+        AsyncTask<Integer, Integer, Boolean> picLoader = new AsyncTask<Integer, Integer, Boolean>() {
+
+            int destination;
+
+            @Override
+            protected Boolean doInBackground(Integer... args) {
+                int position = args[0];
+                destination = args[1];
+                loadPicture(position, destination);
+                return true;
+            }
+
+            /*
+             * (non-Javadoc)
+             * 
+             * @see android.os.AsyncTask#onPostExecute(java.lang.Object)
+             */
+            @Override
+            protected void onPostExecute(Boolean result) {
+                super.onPostExecute(result);
+                try {
+                    mImgViews[destination].setImageBitmap(mItems[destination]
+                            .getBitmap(getApplicationContext(), MAX_BITMAP_DIM,
+                                    MAX_BITMAP_DIM));
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    Log.e(LOG_TAG, "Error : ", e);
+                }
+            }
+
+        };
+        picLoader.execute(position, destination);
     }
 
     /*
@@ -996,11 +1031,7 @@ public class ShowPics extends Activity implements OnGestureListener,
                 if (isFinishing()) {
                     Drawable toRecycle = view.getDrawable();
                     if (toRecycle != null) {
-                        Bitmap bmpToRecycle = ((BitmapDrawable) toRecycle)
-                                .getBitmap();
-                        if (bmpToRecycle != null) {
-                            bmpToRecycle.recycle();
-                        }
+                        toRecycle.setCallback(null);
                     }
                 }
             }
@@ -1358,12 +1389,12 @@ public class ShowPics extends Activity implements OnGestureListener,
         mOldPosition = -1;
         showPicture();
     }
-    
+
     private void clearFilter() {
         mTagFilters.clear();
         emptyTagsFilterBar();
         mSlideshowList.setFilters(mTagFilters.toArray(new TagFilter[mTagFilters
-                                                                    .size()]));
+                .size()]));
         mPosition = 0;
         mOldPosition = -1;
         showPicture();
@@ -1529,33 +1560,27 @@ public class ShowPics extends Activity implements OnGestureListener,
                 curPic = (curPic + 1) % 3;
                 nextPic = (nextPic + 1) % 3;
                 if (mPosition + 1 < mSlideshowList.size()) {
-                    // if (mImgViews[nextPic].getDrawable() != null) {
-                    // if (((BitmapDrawable) mImgViews[nextPic].getDrawable())
-                    // .getBitmap() != null) {
-                    // // nextPic currently contains the picture previous
-                    // // to the previous picture. Discard it.
-                    // ((BitmapDrawable) mImgViews[nextPic].getDrawable())
-                    // .getBitmap().recycle();
-                    // }
-                    // }
+                    if (mImgViews[nextPic].getDrawable() != null) {
+                        if (((BitmapDrawable) mImgViews[nextPic].getDrawable())
+                                .getBitmap() != null) {
+                            // nextPic currently contains the picture previous
+                            // to the previous picture. Discard it.
+                            mImgViews[nextPic].getDrawable().setCallback(null);
+                        }
+                    }
                     // Preload next picture
-                    mItems[nextPic] = loadPicture(mPosition + 1);
-                    mImgViews[nextPic].setImageBitmap(mItems[nextPic]
-                            .getBitmap(this, MAX_BITMAP_DIM, MAX_BITMAP_DIM));
+                    asyncLoadPicture(mPosition + 1, nextPic);
                 } else if (mSlideshowLoop) {
                     // prepare for looping
-                    // if (mImgViews[nextPic].getDrawable() != null) {
-                    // if (((BitmapDrawable) mImgViews[nextPic].getDrawable())
-                    // .getBitmap() != null) {
-                    // ((BitmapDrawable) mImgViews[nextPic].getDrawable())
-                    // .getBitmap().recycle();
-                    // }
-                    // }
+                    if (mImgViews[nextPic].getDrawable() != null) {
+                        if (((BitmapDrawable) mImgViews[nextPic].getDrawable())
+                                .getBitmap() != null) {
+                            mImgViews[nextPic].getDrawable().setCallback(null);
+                        }
+                    }
                     // We are at the end of the slideshow, just before looping.
                     // Preload the first picture to prepare looping.
-                    mItems[nextPic] = loadPicture(0);
-                    mImgViews[nextPic].setImageBitmap(mItems[nextPic]
-                            .getBitmap(this, MAX_BITMAP_DIM, MAX_BITMAP_DIM));
+                    asyncLoadPicture(0, nextPic);
                 }
             } else if (mOldPosition > mPosition) {
                 // Gone backward
@@ -1563,20 +1588,17 @@ public class ShowPics extends Activity implements OnGestureListener,
                 curPic = (curPic == 0) ? 2 : curPic - 1;
                 nextPic = (nextPic == 0) ? 2 : nextPic - 1;
                 if (mPosition - 1 >= 0) {
-                    // if (mImgViews[prevPic].getDrawable() != null) {
-                    // if (((BitmapDrawable) mImgViews[prevPic].getDrawable())
-                    // .getBitmap() != null) {
-                    // // prevPic now contains the picture next to the next
-                    // // picture.
-                    // // Discard it.
-                    // ((BitmapDrawable) mImgViews[prevPic].getDrawable())
-                    // .getBitmap().recycle();
-                    // }
-                    // }
+                    if (mImgViews[prevPic].getDrawable() != null) {
+                        if (((BitmapDrawable) mImgViews[prevPic].getDrawable())
+                                .getBitmap() != null) {
+                            // prevPic now contains the picture next to the next
+                            // picture.
+                            // Discard it.
+                            mImgViews[prevPic].getDrawable().setCallback(null);
+                        }
+                    }
                     // Preload previous picture.
-                    mItems[prevPic] = loadPicture(mPosition - 1);
-                    mImgViews[prevPic].setImageBitmap(mItems[prevPic]
-                            .getBitmap(this, MAX_BITMAP_DIM, MAX_BITMAP_DIM));
+                    asyncLoadPicture(mPosition - 1, prevPic);
                 }
             }
         } catch (Exception e) {
@@ -1620,7 +1642,6 @@ public class ShowPics extends Activity implements OnGestureListener,
                     Bitmap dst = Bitmap.createBitmap(src, 0, 0, src.getWidth(),
                             src.getHeight(), rotMat, false);
                     mImgViews[curPic].setImageBitmap(dst);
-                    // src.recycle();
                 }
             }
         } catch (OutOfMemoryError e) {
@@ -1723,15 +1744,17 @@ public class ShowPics extends Activity implements OnGestureListener,
      * something more user friendly
      */
     private void showCaption() {
-        String caption = mItems[curPic].caption;
-        if (caption != null && !"".equals(caption.trim())) {
-            if (mLatestCaption != null) {
-                mLatestCaption.cancel();
-            }
+        if (mItems[curPic] != null) {
+            String caption = mItems[curPic].caption;
+            if (caption != null && !"".equals(caption.trim())) {
+                if (mLatestCaption != null) {
+                    mLatestCaption.cancel();
+                }
 
-            mLatestCaption = Toast.makeText(getApplicationContext(), caption,
-                    Toast.LENGTH_LONG);
-            mLatestCaption.show();
+                mLatestCaption = Toast.makeText(getApplicationContext(),
+                        caption, Toast.LENGTH_LONG);
+                mLatestCaption.show();
+            }
         }
     }
 
@@ -1763,34 +1786,22 @@ public class ShowPics extends Activity implements OnGestureListener,
                     // Load first picture
                     if (mImgViews[curPic].getDrawable() != null) {
                         mImgViews[curPic].getDrawable().setCallback(null);
-                        // Bitmap toRecycle = ((BitmapDrawable)
-                        // mImgViews[curPic]
-                        // .getDrawable()).getBitmap();
-                        // if (toRecycle != null) {
-                        // toRecycle.recycle();
-                        // }
-
                     }
-                    mItems[curPic] = loadPicture(mPosition);
+                    loadPicture(mPosition, curPic);
                     mImgViews[curPic].setImageBitmap(mItems[curPic].getBitmap(
-                            this, MAX_BITMAP_DIM, MAX_BITMAP_DIM));
+                            getApplicationContext(), MAX_BITMAP_DIM,
+                            MAX_BITMAP_DIM));
 
                     // If memory is not a problem, preload pictures
                     if (!mNEMMode) {
                         // Load previous picture
                         if (mPosition > 0) {
-                            mItems[prevPic] = loadPicture(mPosition - 1);
-                            mImgViews[prevPic].setImageBitmap(mItems[prevPic]
-                                    .getBitmap(this, MAX_BITMAP_DIM,
-                                            MAX_BITMAP_DIM));
+                            asyncLoadPicture(mPosition - 1, prevPic);
                         }
 
                         // Load next picture
                         if (mPosition < mSlideshowList.size() - 1) {
-                            mItems[nextPic] = loadPicture(mPosition + 1);
-                            mImgViews[nextPic].setImageBitmap(mItems[nextPic]
-                                    .getBitmap(this, MAX_BITMAP_DIM,
-                                            MAX_BITMAP_DIM));
+                            asyncLoadPicture(mPosition + 1, nextPic);
                         }
                     }
                 }

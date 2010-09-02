@@ -29,6 +29,8 @@ import android.view.View;
 import android.widget.Button;
 
 import com.kg.emailalbum.mobile.creator.EmailAlbumEditor;
+import com.kg.emailalbum.mobile.tags.MediaStoreCrawler;
+import com.kg.emailalbum.mobile.tags.TagsDbAdapter;
 import com.kg.emailalbum.mobile.viewer.EmailAlbumViewer;
 import com.kg.emailalbum.mobile.viewer.ShowPics;
 
@@ -144,8 +146,14 @@ public class EmailAlbum extends Activity {
         setContentView(R.layout.main_menu);
         findViewById(R.id.main_menu_root).getBackground().setDither(true);
         initMainMenu();
+//        updateDb();
     }
     
+    private void updateDb() {
+        MediaStoreCrawler crawler = new MediaStoreCrawler(this);
+        crawler.execute((Integer[])null);
+    }
+
     /*
      * (non-Javadoc)
      * @see android.app.Activity#onCreateOptionsMenu(android.view.Menu)
